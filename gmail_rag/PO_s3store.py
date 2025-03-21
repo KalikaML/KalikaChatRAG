@@ -5,9 +5,9 @@ import os
 import logging
 import io
 import tempfile
+import pandas as pd
 from email.header import decode_header
 import toml
-from PyPDF2 import PdfReader, errors
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import CharacterTextSplitter
@@ -16,8 +16,8 @@ from langchain.text_splitter import CharacterTextSplitter
 SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
 IMAP_SERVER = "imap.gmail.com"
 S3_BUCKET = "kalika-rag"
-PO_DUMP_FOLDER = "PO_Dump/"  # Changed folder name
-S3_FAISS_INDEX_PATH = "faiss_indexes/po_faiss_index/"  # Changed index path
+PO_DUMP_FOLDER = "PO_Dump/"
+S3_FAISS_INDEX_PATH = "faiss_indexes/po_faiss_index/"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 # Load secrets from secrets.toml
@@ -26,7 +26,7 @@ secrets = toml.load(SECRETS_FILE_PATH)
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]
 )
 
@@ -46,37 +46,28 @@ s3_client = boto3.client(
 # Initialize embeddings model
 embeddings = HuggingFaceEmbeddings(
     model_name=EMBEDDING_MODEL,
-    model_kwargs={'device': 'cpu'},
-    encode_kwargs={'normalize_embeddings': False}
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": False}
 )
-
 
 def clean_filename(filename):
     """Sanitize filename while preserving original extension if valid."""
     try:
+        print("filename:",filename)
         decoded_name = decode_header(filename)[0][0]
         if isinstance(decoded_name, bytes):
-            filename = decoded_name.decode(errors='ignore')
+            filename = decoded_name.decode(errors="ignore")
         else:
             filename = str(decoded_name)
     except:
-        filename = "po_document"
+        print("in except filename:", filename)
+        filename = "po_dump"
 
     # Split filename and extension
     name, ext = os.path.splitext(filename)
-    cleaned_name = "".join(c if c.isalnum() or c in ('_', '-') else '_' for c in name)
+    cleaned_name = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in name)
 
-    # Preserve extension only if it's .pdf
-    return f"{cleaned_name}.pdf" if ext.lower() == '.pdf' else cleaned_name
-
-
-def is_valid_pdf(content):
-    """Verify if content is a valid PDF."""
-    try:
-        PdfReader(io.BytesIO(content))
-        return True
-    except (errors.PdfReadError, ValueError, TypeError):
-        return False
+    return f"{cleaned_name}{ext}"  # Keep the original extension
 
 
 def file_exists_in_s3(bucket, key):
@@ -85,20 +76,20 @@ def file_exists_in_s3(bucket, key):
         s3_client.head_object(Bucket=bucket, Key=key)
         return True
     except s3_client.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == '404':
+        if e.response["Error"]["Code"] == "404":
             return False
         logging.error(f"S3 check error: {e}")
         return False
 
 
-def upload_to_s3(file_content, bucket, key):
+def upload_to_s3(file_content, bucket, key, content_type):
     """Upload file content directly to S3."""
     try:
         s3_client.put_object(
             Bucket=bucket,
             Key=key,
             Body=file_content,
-            ContentType='application/pdf'
+            ContentType=content_type
         )
         logging.info(f"Uploaded to S3: {key}")
         return True
@@ -107,19 +98,14 @@ def upload_to_s3(file_content, bucket, key):
         return False
 
 
-def process_pdf_content(file_content):
-    """Extract and chunk text from valid PDF bytes."""
+def process_excel_content(file_content):
+    """Extract and chunk text from an Excel file."""
     text = ""
     try:
-        if not is_valid_pdf(file_content):
-            raise errors.PdfReadError("Invalid PDF structure")
-
-        pdf_file = io.BytesIO(file_content)
-        reader = PdfReader(pdf_file)
-        for page in reader.pages:
-            text += page.extract_text() or ""
+        df = pd.read_excel(io.BytesIO(file_content))
+        text = df.to_string(index=False)  # Convert DataFrame to string
     except Exception as e:
-        logging.error(f"PDF processing error: {str(e)}")
+        logging.error(f"Excel processing error: {str(e)}")
         return []
 
     text_splitter = CharacterTextSplitter(
@@ -132,42 +118,34 @@ def process_pdf_content(file_content):
 
 
 def create_faiss_index():
-    """Create and upload FAISS index for PO Dumps with proper error handling."""
+    """Create and upload FAISS index for PO Dumps."""
     try:
         documents = []
-        paginator = s3_client.get_paginator('list_objects_v2')
-        pages = paginator.paginate(Bucket=S3_BUCKET, Prefix=PO_DUMP_FOLDER)  # Corrected folder
+        paginator = s3_client.get_paginator("list_objects_v2")
+        pages = paginator.paginate(Bucket=S3_BUCKET, Prefix=PO_DUMP_FOLDER)
 
         for page in pages:
-            for obj in page.get('Contents', []):
-                if obj['Key'].lower().endswith('.pdf'):
+            for obj in page.get("Contents", []):
+                if obj["Key"].lower().endswith((".xlsx", ".xls")):
                     try:
-                        response = s3_client.get_object(Bucket=S3_BUCKET, Key=obj['Key'])
-                        file_content = response['Body'].read()
+                        response = s3_client.get_object(Bucket=S3_BUCKET, Key=obj["Key"])
+                        file_content = response["Body"].read()
 
-                        if not is_valid_pdf(file_content):
-                            logging.warning(f"Skipping invalid PDF: {obj['Key']}")
-                            continue
-
-                        chunks = process_pdf_content(file_content)
+                        chunks = process_excel_content(file_content)
                         if chunks:
                             documents.extend(chunks)
                     except Exception as e:
                         logging.error(f"Error processing {obj['Key']}: {str(e)}")
 
         if not documents:
-            logging.warning("No valid PDF documents found to index")
+            logging.warning("No valid Excel documents found to index")
             return
 
-        # Create temporary directory for FAISS files
         with tempfile.TemporaryDirectory() as temp_dir:
             index_path = os.path.join(temp_dir, "po_faiss_index")
-
-            # Create and save FAISS index
             vector_store = FAISS.from_texts(documents, embeddings)
             vector_store.save_local(index_path)
 
-            # Upload index files
             for file_name in ["index.faiss", "index.pkl"]:
                 local_path = os.path.join(index_path, file_name)
                 s3_key = f"{S3_FAISS_INDEX_PATH}{file_name}"
@@ -187,13 +165,12 @@ def create_faiss_index():
 
 
 def process_po_emails():
-    """Process PO Order emails and upload Excel attachments directly to S3."""
+    """Process PO Order emails and upload Excel attachments to S3."""
     try:
         with imaplib.IMAP4_SSL(IMAP_SERVER) as mail:
             mail.login(EMAIL_ACCOUNT, EMAIL_PASSWORD)
             logging.info("Successfully authenticated with email server")
 
-            # Select inbox and search for emails
             mail.select("inbox")
             status, email_ids = mail.search(None, '(SUBJECT "PO Order")')
 
@@ -202,7 +179,7 @@ def process_po_emails():
                 return
 
             processed_files = 0
-            for e_id in email_ids[0].split()[-10:]:  # Process last 10 emails
+            for e_id in email_ids[0].split()[-40:]:  # Process last 10 emails
                 try:
                     status, msg_data = mail.fetch(e_id, "(RFC822)")
                     if status != "OK":
@@ -212,31 +189,29 @@ def process_po_emails():
                         if isinstance(response_part, tuple):
                             msg = email.message_from_bytes(response_part[1])
                             for part in msg.walk():
-                                if part.get_content_maintype() == 'multipart':
+                                if part.get_content_maintype() == "multipart":
                                     continue
 
-                                if part.get_filename() and part.get_content_type() == 'application/pdf':
+                                if part.get_filename() and part.get_content_type() in ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]:
                                     filename = clean_filename(part.get_filename())
+                                    print("final file::", filename)
                                     file_content = part.get_payload(decode=True)
 
                                     if not file_content:
                                         logging.warning(f"Skipping empty attachment: {filename}")
                                         continue
 
-                                    if not is_valid_pdf(file_content):
-                                        logging.warning(f"Skipping invalid PDF: {filename}")
-                                        continue
-
-                                    key = f"{PO_DUMP_FOLDER}{filename}"  # Corrected folder
+                                    key = f"{PO_DUMP_FOLDER}{filename}"
                                     if not file_exists_in_s3(S3_BUCKET, key):
-                                        if upload_to_s3(file_content, S3_BUCKET, key):
+                                        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" if filename.endswith(".xlsx") else "application/vnd.ms-excel"
+                                        if upload_to_s3(file_content, S3_BUCKET, key, content_type):
                                             processed_files += 1
                                     else:
                                         logging.info(f"Skipping existing file: {key}")
                 except Exception as e:
                     logging.error(f"Error processing email {e_id}: {str(e)}")
 
-            logging.info(f"Processing complete. Uploaded {processed_files} new valid PDFs.")
+            logging.info(f"Processing complete. Uploaded {processed_files} new Excel files.")
 
     except Exception as e:
         logging.error(f"Email processing failed: {str(e)}")
@@ -246,4 +221,5 @@ def process_po_emails():
 if __name__ == "__main__":
     process_po_emails()
     create_faiss_index()
+
 
