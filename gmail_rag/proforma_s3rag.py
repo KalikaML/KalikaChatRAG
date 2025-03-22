@@ -82,3 +82,4 @@ query = st.text_input("Enter your query:")
 if query:
     answer = query_proforma_rag(query)
     st.write("Answer:", answer)
+
