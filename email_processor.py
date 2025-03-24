@@ -7,11 +7,11 @@ import toml
 import streamlit as st
 
 # Configuration
-SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
+#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
 IMAP_SERVER = "imap.gmail.com"
 
 # Load secrets
-secrets = toml.load(SECRETS_FILE_PATH)
+#secrets = toml.load(SECRETS_FILE_PATH)
 
 # Set up logging
 logging.basicConfig(

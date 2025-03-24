@@ -9,8 +9,8 @@ from langchain.llms import HuggingFaceHub
 from faiss_manager import get_faiss_index, update_faiss_index_from_emails, fetch_faiss_index_from_s3
 
 # Load secrets from secrets.toml
-SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
-secrets = toml.load(SECRETS_FILE_PATH)
+#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
+#secrets = toml.load(SECRETS_FILE_PATH)
 HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
 
 # Scheduler setup

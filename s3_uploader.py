@@ -14,7 +14,7 @@ S3_BUCKET = "kalika-rag"
 S3_FOLDER = "proforma_invoice/"
 
 # Load secrets
-secrets = toml.load(SECRETS_FILE_PATH)
+#secrets = toml.load(SECRETS_FILE_PATH)
 
 # Initialize S3 client
 s3_client = boto3.client(

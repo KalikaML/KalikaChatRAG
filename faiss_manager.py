@@ -13,7 +13,7 @@ from s3_uploader import upload_to_s3
 import streamlit as st
 
 # Configuration
-SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
+#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
 S3_BUCKET = "kalika-rag"
 S3_FAISS_INDEX_PATH = "faiss_indexes/proforma_faiss_index"
 LOCAL_FAISS_DIR = "local_faiss_index"
@@ -21,7 +21,7 @@ LOCAL_FAISS_INDEX_PATH = os.path.join(LOCAL_FAISS_DIR, "proforma_faiss_index")
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 # Load secrets
-secrets = toml.load(SECRETS_FILE_PATH)
+#secrets = toml.load(SECRETS_FILE_PATH)
 
 # Initialize S3 client
 s3_client = boto3.client(
