@@ -4,6 +4,7 @@ import os
 import logging
 from email.header import decode_header
 import toml
+import streamlit as st
 
 # Configuration
 SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
@@ -38,7 +39,7 @@ def fetch_proforma_emails():
     pdf_files = []
     try:
         with imaplib.IMAP4_SSL(IMAP_SERVER) as mail:
-            mail.login(secrets["gmail_uname"], secrets["gmail_pwd"])
+            mail.login(st.secrets["gmail_uname"], st.secrets["gmail_pwd"])
             logging.info("Email authentication successful")
             mail.select("inbox")
             status, email_ids = mail.search(None, '(SUBJECT "Proforma Invoice")')

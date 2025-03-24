@@ -10,6 +10,7 @@ from PyPDF2 import PdfReader, errors
 import io
 from email_processor import fetch_proforma_emails
 from s3_uploader import upload_to_s3
+import streamlit as st
 
 # Configuration
 SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
@@ -25,8 +26,8 @@ secrets = toml.load(SECRETS_FILE_PATH)
 # Initialize S3 client
 s3_client = boto3.client(
     "s3",
-    aws_access_key_id=secrets["access_key_id"],
-    aws_secret_access_key=secrets["secret_access_key"],
+    aws_access_key_id=st.secrets["access_key_id"],
+    aws_secret_access_key=st.secrets["secret_access_key"],
 )
 
 # Set up logging
