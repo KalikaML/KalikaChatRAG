@@ -5,3 +5,4 @@ pdfplumber
 langchain
 langchain_community
 sentence-transformers
+schedule
