@@ -7,3 +7,4 @@ langchain_community
 sentence-transformers
 PyPDF2
 schedule
+langchain_huggingface
