@@ -4,7 +4,6 @@ import time
 import threading
 import toml
 import os
-import bhavin
 from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFaceHub
 from faiss_manager import get_faiss_index, update_faiss_index_from_emails, fetch_faiss_index_from_s3
