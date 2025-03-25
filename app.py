@@ -16,7 +16,7 @@ HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
 # Scheduler setup
 def schedule_faiss_update():
     """Schedule FAISS index update every 24 hours."""
-    schedule.every(24).hours.do(update_faiss_index_from_emails)
+    schedule.every().day.at("19:35").do(update_faiss_index_from_emails)
 
     def run_scheduler():
         while True:
