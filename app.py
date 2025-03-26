@@ -119,7 +119,6 @@ st.write(f"Total Number of Files Indexed: {total_files}")
 # Display count of new files added during last scheduler update
 st.write(f"New Files Added During Last Update: {new_files_count}")
 '''
-
 import streamlit as st
 import schedule
 import time
@@ -132,9 +131,9 @@ from faiss_manager import get_faiss_index, update_faiss_index_from_emails, fetch
 from langchain.prompts import PromptTemplate
 
 # Load secrets from secrets.toml
-#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
-#secrets = toml.load(SECRETS_FILE_PATH)
-HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
+SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
+secrets = toml.load(SECRETS_FILE_PATH)
+HUGGINGFACE_API_TOKEN = secrets["api_token"]
 
 # Global variable to track new files added during updates
 new_files_count = 0
@@ -196,7 +195,9 @@ def query_proforma_rag(query):
     prompt_template = """Use the following pieces of context to answer the question at the end.
     If you don't know the answer, just say that you do not know, don't try to make up an answer.
 
+    {context}
 
+    Question: {question}
     Answer:"""
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
