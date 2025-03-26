@@ -11,6 +11,8 @@ import io
 from email_processor import fetch_proforma_emails
 from s3_uploader import upload_to_s3
 import streamlit as st
+from langchain.text_splitter import RecursiveCharacterTextSplitter # Or whatever
+import pickle
 
 # Configuration
 #SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
@@ -130,7 +132,7 @@ def initialize_faiss_index_from_local(temp_dir=None):
         logging.error(f"Error loading FAISS index: {e}")
         faiss_index = None
 
-def update_faiss_index_from_emails():
+'''def update_faiss_index_from_emails():
     """Fetch emails, upload PDFs to S3, and update the local FAISS index."""
     global faiss_index, indexed_files, faiss_source
     try:
@@ -171,6 +173,65 @@ def update_faiss_index_from_emails():
             logging.info("No new documents to add to FAISS index.")
     except Exception as e:
         logging.error(f"FAISS index update failed: {str(e)}")
+'''
+
+
+def update_faiss_index_from_emails():
+    """
+    Updates the FAISS index by fetching new proforma invoice emails,
+    uploading them to S3, and indexing them.
+    Returns the count of new files added and their names.
+    """
+    from email_processor import fetch_proforma_emails
+    from s3_uploader import upload_to_s3
+
+    new_files_count = 0
+    new_file_names = []
+    all_documents = []  # To store all documents for indexing
+
+    # 1. Fetch new proforma invoice emails
+    pdf_files = fetch_proforma_emails()
+
+    # 2. Upload new PDFs to S3
+    valid_pdf_files = upload_to_s3(pdf_files)
+
+    # 3. Index new PDFs and update FAISS index
+    if valid_pdf_files:
+        new_files_count = len(valid_pdf_files)
+        new_file_names = [file[0] for file in valid_pdf_files]  # Extract filenames
+
+        # Load documents and split them
+        for filename, file_content in valid_pdf_files:
+            with open("temp.pdf", "wb") as f:
+                f.write(file_content)  # Temporarily write to a file
+            loader = PyPDFLoader("temp.pdf")
+            documents = loader.load()
+            all_documents.extend(documents)  # Add to the list of all documents
+
+        # Split the documents into chunks
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+        texts = text_splitter.split_documents(all_documents)
+
+        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+        # If the index already exists, load it and add new documents
+        try:
+            vector_store = FAISS.load_local("faiss_index", embeddings)  # Assuming your index is saved locally
+            vector_store.add_documents(texts)
+            print("Existing index found, adding new documents.")
+        except:
+            # If the index does not exist, create a new one
+            vector_store = FAISS.from_documents(texts, embeddings)
+            print("No existing index found, creating a new one.")
+
+        # Save the updated FAISS index locally
+        vector_store.save_local("faiss_index")
+
+        print(f"FAISS index updated. {new_files_count} new files added.")
+
+    # Upload the index to s3
+    # upload_faiss_index_to_s3(faiss_index, temp_dir)
+    return new_files_count, new_file_names
 
 def get_faiss_index():
     """Return the current FAISS index, initializing if necessary."""
