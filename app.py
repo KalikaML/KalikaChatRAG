@@ -139,11 +139,9 @@ HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
 new_files_count = 0
 new_file_names = []  # List to store new file names
 
-
 # Scheduler setup
 def schedule_faiss_update():
     """Schedule FAISS index update every 24 hours."""
-
     def update_and_reload_index():
         global new_files_count, new_file_names
         # Update FAISS index from emails and get count and names of new files added
@@ -151,19 +149,15 @@ def schedule_faiss_update():
         # Reload FAISS index locally after update
         fetch_faiss_index_from_s3()
         get_faiss_index()
-
     schedule.every(24).hours.do(update_and_reload_index)
-
 
 def run_scheduler():
     while True:
         schedule.run_pending()
         time.sleep(60)  # Check every minute
 
-
 scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
 scheduler_thread.start()
-
 
 ### UPDATED SECTION: Suggestion Generation ###
 def generate_suggested_questions(new_files):
@@ -175,7 +169,6 @@ def generate_suggested_questions(new_files):
         suggested_questions.append(f"Who is the supplier in {file_name}?")
         suggested_questions.append(f"What is the invoice number in {file_name}?")
     return suggested_questions
-
 
 ### UPDATED SECTION: Professional RAG Query Function ###
 def query_proforma_rag(query):
@@ -192,8 +185,10 @@ def query_proforma_rag(query):
     )
 
     # Custom prompt to return only the answer
-    prompt_template = """Use the following pieces of context to answer the question at the end.
-    If you don't know the answer, just say that you do not know, don't try to make up an answer.
+    prompt_template = """You are an expert Proforma invoice analyst. Use the following pieces of context to answer the question at the end.
+    If you don't know the answer, just say that you do not know, don't try to make up an answer. 
+    Your goal is to provide concise, accurate, and professional answers. You should not include any context or explanation in your responses. 
+    Just output the direct answer.
 
     {context}
 
@@ -212,8 +207,7 @@ def query_proforma_rag(query):
     )
 
     result = chain({"query": query})
-    return result["result"]
-
+    return result["result"].strip()
 
 # Fetch FAISS index from S3 and initialize locally on startup
 fetch_faiss_index_from_s3()
