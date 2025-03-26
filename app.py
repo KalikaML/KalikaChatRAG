@@ -131,9 +131,9 @@ from faiss_manager import get_faiss_index, update_faiss_index_from_emails, fetch
 from langchain.prompts import PromptTemplate
 
 # Load secrets from secrets.toml
-SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
-secrets = toml.load(SECRETS_FILE_PATH)
-HUGGINGFACE_API_TOKEN = secrets["api_token"]
+#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
+#secrets = toml.load(SECRETS_FILE_PATH)
+HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
 
 # Global variable to track new files added during updates
 new_files_count = 0
