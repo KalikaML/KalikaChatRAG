@@ -1,4 +1,4 @@
-'''
+
 import streamlit as st
 import schedule
 import time
@@ -66,8 +66,8 @@ def query_proforma_rag(query):
 
     # Custom prompt to return only the answer
     prompt_template = """You are an expert Proforma invoice analyst. Use the following pieces of context to answer the question at the end.
-    If you don't know the answer, just say that you do not know, don't try to make up an answer.
-    Your goal is to provide concise, accurate, and professional answers. You should not include any context or explanation in your responses.
+    If you don't know the answer, just say that you do not know, don't try to make up an answer. 
+    Your goal is to provide concise, accurate, and professional answers. You should not include any context or explanation in your responses. 
     Just output the direct answer.
 
     {context}
@@ -148,114 +148,3 @@ st.write(f"Total Number of Files Indexed: {total_files}")
 
 # Display count of new files added during last scheduler update
 st.write(f"New Files Added During Last Update: {new_files_count}")
-'''
-import streamlit as st
-import schedule
-import time
-import threading
-import toml
-import os
-import git
-from langchain.chains import RetrievalQA
-from langchain.llms import HuggingFaceHub
-from faiss_manager import get_faiss_index, update_faiss_index, initialize_faiss_index, get_last_updated_file_count, get_new_files_count
-
-# Load secrets from secrets.toml
-#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
-#secrets = toml.load(SECRETS_FILE_PATH)
-HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
-
-# Scheduler setup
-def schedule_faiss_update():
-    """Schedule FAISS index update every 24 hours."""
-    schedule.every(24).hours.do(update_faiss_index)
-
-def run_scheduler():
-    while True:
-        schedule.run_pending()
-        time.sleep(60)  # Check every minute
-
-scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-scheduler_thread.start()
-
-def query_proforma_rag(query):
-    """Query the RAG model using the local FAISS index."""
-    vector_store = get_faiss_index()
-    if not vector_store:
-        return "FAISS index not available. Please wait for initialization or the next scheduled update.", "Unknown"
-
-    retriever = vector_store.as_retriever()
-    llm = HuggingFaceHub(
-        repo_id="HuggingFaceH4/zephyr-7b-beta",
-        model_kwargs={"max_new_tokens": 512},
-        huggingfacehub_api_token=HUGGINGFACE_API_TOKEN
-    )
-
-    chain = RetrievalQA.from_chain_type(llm, retriever=retriever)
-    response = chain.run(query)
-
-    # Get the source file from the retriever (simplified assumption: first retrieved doc)
-    sources = retriever.get_relevant_documents(query)
-    source_file = sources[0].metadata.get("source", "Unknown") if sources else "Unknown"
-    return response, source_file
-
-# Initialize FAISS index on startup
-initialize_faiss_index()
-get_faiss_index()
-
-# Start the scheduler
-schedule_faiss_update()
-
-# Streamlit UI Setup
-st.title("Chatbot for Proforma Invoice Analysis")
-
-# Sidebar for Status and Information
-with st.sidebar:
-    st.header("Proforma Invoice Status")
-    #total_files = get_s3_file_count()
-    #st.write(f"Total Proforma Files in S3: {total_files}")
-
-    last_updated_count = get_last_updated_file_count()
-    st.write(f"FAISS Index Last Updated with: {last_updated_count} files")
-
-    new_file_count = get_new_files_count()
-    st.write(f"Number of New Files: {new_file_count}")
-
-    # if total_files > last_updated_count:
-    #     st.warning("New Proforma files detected! The FAISS index might be outdated.")
-    #     if st.button("Update FAISS Index"):
-    #         update_faiss_index_from_emails()
-    #         st.success("FAISS Index is being updated. Please refresh after a while.")
-    # else:
-    #     st.success("FAISS Index is up to date!")
-
-# Chat Section
-st.header("Chat with the Bot")
-
-# Initialize chat history in session state if it doesn't exist
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
-
-# Chat Section
-st.header("Chat with the Bot")
-
-# Display chat messages (user and bot interactions)
-for message in st.session_state.messages:
-    if message["role"] == "user":
-        st.chat_message("user").write(message["content"])
-    elif message["role"] == "bot":
-        st.chat_message("bot").write(message["content"])
-
-# User input for chat interaction
-if user_query := st.chat_input("Type your question here..."):
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": user_query})
-
-    # Get bot response using query_proforma_rag function
-    bot_response, _ = query_proforma_rag(user_query) # Ignore source_file
-
-    # Add bot response to chat history
-    st.session_state.messages.append({"role": "bot", "content": bot_response})
-
-    # Display bot response immediately in the chat interface without context
-    st.chat_message("bot").write(bot_response)

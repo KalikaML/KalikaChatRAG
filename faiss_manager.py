@@ -1,4 +1,4 @@
-'''import os
+import os
 import logging
 import boto3
 import toml
@@ -132,6 +132,50 @@ def initialize_faiss_index_from_local(temp_dir=None):
         logging.error(f"Error loading FAISS index: {e}")
         faiss_index = None
 
+'''def update_faiss_index_from_emails():
+    """Fetch emails, upload PDFs to S3, and update the local FAISS index."""
+    global faiss_index, indexed_files, faiss_source
+    try:
+        pdf_files = fetch_proforma_emails()
+        if not pdf_files:
+            logging.info("No new PDFs to process.")
+            return
+
+        valid_pdfs = upload_to_s3(pdf_files)
+        if not valid_pdfs:
+            logging.info("No new valid PDFs to index.")
+            return
+
+        new_documents = []
+        for filename, file_content in valid_pdfs:
+            if filename not in indexed_files:
+                chunks = process_pdf_content(file_content, filename)
+                if chunks:
+                    new_documents.extend([chunk["text"] for chunk in chunks])
+                    indexed_files.add(filename)
+
+        if new_documents:
+            os.makedirs(LOCAL_FAISS_INDEX_PATH, exist_ok=True)
+            if faiss_index is None:
+                initialize_faiss_index_from_local()
+            
+            if faiss_index is None:
+                faiss_index = FAISS.from_texts(new_documents, embeddings)
+                faiss_source = "Local (created from emails)"
+            else:
+                new_vector_store = FAISS.from_texts(new_documents, embeddings)
+                faiss_index.merge_from(new_vector_store)
+                faiss_source = "Local (updated from emails)"
+            
+            faiss_index.save_local(LOCAL_FAISS_INDEX_PATH)
+            logging.info(f"FAISS index updated with {len(new_documents)} new chunks.")
+        else:
+            logging.info("No new documents to add to FAISS index.")
+    except Exception as e:
+        logging.error(f"FAISS index update failed: {str(e)}")
+'''
+
+
 def update_faiss_index_from_emails():
     """
     Updates the FAISS index by fetching new proforma invoice emails,
@@ -202,158 +246,4 @@ def get_faiss_stats():
     return {
         "indexed_files": len(indexed_files),
         "faiss_source": faiss_source
-    }'''
-import os
-import logging
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import CharacterTextSplitter
-from PyPDF2 import PdfReader, errors
-import io
-from s3_uploader import upload_to_s3, download_faiss_index_from_s3, get_s3_file_count
-
-# Configuration
-LOCAL_FAISS_DIR = "local_faiss_index"
-LOCAL_FAISS_INDEX_PATH = os.path.join(LOCAL_FAISS_DIR, "proforma_faiss_index")
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-
-# Initialize embeddings
-embeddings = HuggingFaceEmbeddings(
-    model_name=EMBEDDING_MODEL,
-    model_kwargs={'device': 'cpu'},
-    encode_kwargs={'normalize_embeddings': False}
-)
-
-# Global FAISS index
-faiss_index = None
-last_updated_file_count = 0  # Track the number of files when the index was last updated
-new_files_count = 0
-
-def process_pdf_content(file_content):
-    """Extract and chunk text from valid PDF bytes."""
-    text = ""
-    try:
-        pdf_file = io.BytesIO(file_content)
-        reader = PdfReader(pdf_file)
-        for page in reader.pages:
-            text += page.extract_text() or ""
-    except Exception as e:
-        logging.error(f"PDF processing error: {str(e)}")
-        return []
-
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len
-    )
-    return text_splitter.split_text(text)
-
-def initialize_faiss_index():
-    """Initialize or load the FAISS index locally from S3 if available."""
-    global faiss_index, last_updated_file_count
-    try:
-        # Download FAISS index from S3
-        if download_faiss_index_from_s3(LOCAL_FAISS_INDEX_PATH):
-            logging.info("FAISS index downloaded from S3.")
-            faiss_index = FAISS.load_local(LOCAL_FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
-            logging.info("FAISS index loaded from local.")
-
-            # Set last updated file count based on S3 file count
-            last_updated_file_count = get_s3_file_count()
-            logging.info(f"Initial S3 file count: {last_updated_file_count}")
-        else:
-            logging.warning("No FAISS index found in S3. It will be created on the next update.")
-            faiss_index = None
-            last_updated_file_count = 0
-
-    except Exception as e:
-        logging.error(f"Error initializing FAISS index: {e}")
-        faiss_index = None
-        last_updated_file_count = 0
-
-def update_faiss_index():
-    """Check for new files in S3 and update the FAISS index."""
-    global faiss_index, last_updated_file_count, new_files_count
-    from s3_uploader import get_s3_file_count  # Import here to avoid circular dependency
-    from email_processor import fetch_proforma_emails
-
-    try:
-        # Get the current file count in S3
-        current_file_count = get_s3_file_count()
-        logging.info(f"Current S3 file count: {current_file_count}")
-
-        # Compare with the last updated file count
-        if current_file_count > last_updated_file_count:
-            new_files_count = current_file_count - last_updated_file_count
-            logging.info(f"New files found: {new_files_count}")
-
-            # Fetch PDFs from emails
-            pdf_files = fetch_proforma_emails()
-            # Upload new PDFs to S3 and get valid PDFs for indexing
-            # You might need to adjust this part based on your logic for determining "new" files
-            valid_pdfs = upload_to_s3(pdf_files)
-
-            # Extract text and create documents
-            texts = []
-            for filename, file_content in valid_pdfs:
-                pdf_texts = process_pdf_content(file_content)
-                texts.extend(pdf_texts)
-
-            if not texts:
-                logging.info("No new content to index.")
-                return 0  # Return 0 if no updates were made
-
-            # Create a new FAISS index or update the existing one
-            if faiss_index is None:
-                logging.info("Creating new FAISS index.")
-                faiss_index = FAISS.from_texts(texts, embeddings)
-            else:
-                logging.info("Updating existing FAISS index.")
-                new_faiss = FAISS.from_texts(texts, embeddings)
-                faiss_index.merge_from(new_faiss)
-
-            # Save the updated FAISS index locally
-            os.makedirs(LOCAL_FAISS_DIR, exist_ok=True)
-            faiss_index.save_local(LOCAL_FAISS_INDEX_PATH)
-            logging.info(f"FAISS index updated and saved to {LOCAL_FAISS_INDEX_PATH}")
-
-            # Upload the updated FAISS index to S3
-            if upload_faiss_index_to_s3(LOCAL_FAISS_INDEX_PATH):
-                logging.info("FAISS index uploaded to S3.")
-            else:
-                logging.error("Failed to upload FAISS index to S3.")
-
-            # Update the last updated file count
-            last_updated_file_count = current_file_count
-
-            return new_files_count  # Return the number of new files indexed
-
-        else:
-            logging.info("No new files found in S3.")
-            return 0  # Return 0 if no updates were made
-
-    except Exception as e:
-        logging.error(f"FAISS index update failed: {e}")
-        return 0
-
-def get_faiss_index():
-    """Return the current FAISS index."""
-    global faiss_index
-    return faiss_index
-
-def get_last_updated_file_count():
-    """Return the number of files when the FAISS index was last updated."""
-    global last_updated_file_count
-    return last_updated_file_count
-
-def get_new_files_count():
-    global new_files_count
-    return new_files_count
+    }
