@@ -1,232 +1,125 @@
-'''import streamlit as st
-import schedule
-import time
-import threading
-import toml
-import os
-from langchain.chains import RetrievalQA
-from langchain.llms import HuggingFaceHub
-from faiss_manager import get_faiss_index, update_faiss_index_from_emails, fetch_faiss_index_from_s3, get_faiss_stats
-from s3_uploader import get_s3_file_count
-
-# Load secrets from secrets.toml
-#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
-#secrets = toml.load(SECRETS_FILE_PATH)
-HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
-
-# Initialize session state
-if 'history' not in st.session_state:
-    st.session_state['history'] = []
-if 'faiss_index' not in st.session_state:
-    st.session_state['faiss_index'] = None
-if 's3_file_count' not in st.session_state:
-    st.session_state['s3_file_count'] = 0
-if 'newly_indexed_files' not in st.session_state:
-    st.session_state['newly_indexed_files'] = []
-
-# Function to update FAISS index and S3 count
-def update_faiss_and_s3_count():
-    st.session_state['newly_indexed_files'] = update_faiss_index_from_emails()
-    st.session_state['s3_file_count'] = get_s3_file_count()
-    st.session_state['faiss_index'] = get_faiss_index()
-
-# Scheduler setup
-def schedule_faiss_update():
-    """Schedule FAISS index update every 24 hours."""
-    schedule.every(24).hours.do(update_faiss_and_s3_count)
-
-def run_scheduler():
-    while True:
-        schedule.run_pending()
-        time.sleep(60)  # Check every minute
-
-# Load FAISS index on startup
-with st.spinner("Loading FAISS index..."):
-    if not st.session_state['faiss_index']:
-        fetch_faiss_index_from_s3()
-        st.session_state['faiss_index'] = get_faiss_index()
-
-# Sidebar for history
-with st.sidebar:
-    st.header("Query History")
-    for query, answer in reversed(st.session_state['history']):  # Reverse for chronological order
-        st.markdown(f"**Q:** {query}")
-        st.markdown(f"**A:** {answer}")
-        st.write("---")
-
-# Main app
-st.title("Proforma Invoice RAG")
-
-# S3 file count display
-st.write(f"Total Proforma Invoices in S3: {st.session_state['s3_file_count']}")
-
-# Display newly indexed files
-if st.session_state['newly_indexed_files']:
-    st.success(f"Newly indexed files: {', '.join(st.session_state['newly_indexed_files'])}")
-
-# FAISS update scheduler button
-if st.button("Update FAISS Index"):
-    with st.spinner("Updating FAISS index..."):
-        update_faiss_and_s3_count()
-        st.success("FAISS index updated!")
-
-# Query input
-query = st.text_input("Enter your query:")
-
-# Question suggestions
-if query:
-    suggested_questions = [
-        f"Tell me about {query}?",
-        f"Explain {query} in detail?",
-        f"What are the key aspects of {query}?",
-        f"Give me a summary of {query}."
-    ]
-    st.write("Suggested questions:")
-    for suggestion in suggested_questions:
-        st.markdown(f"- {suggestion}")
-
-if query:
-    vector_store = get_faiss_index()
-
-    if not vector_store:
-        st.warning("FAISS index not available. Please wait for initialization or the next scheduled update.")
-    else:
-        retriever = vector_store.as_retriever()
-        llm = HuggingFaceHub(
-            repo_id="HuggingFaceH4/zephyr-7b-beta",
-            model_kwargs={"max_new_tokens": 512},
-            huggingfacehub_api_token=HUGGINGFACE_API_TOKEN
-        )
-        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
-        answer = qa.run(query)
-        st.write("Answer:", answer)
-
-        # Update history
-        st.session_state['history'].append((query, answer))
-
-# Start scheduler in a separate thread
-scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-scheduler_thread.start()
-'''
-
 import streamlit as st
 import schedule
 import time
 import threading
-import toml
-import os
 from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFaceHub
 from faiss_manager import get_faiss_index, update_faiss_index_from_emails, fetch_faiss_index_from_s3
 from s3_uploader import get_s3_file_count
-from langchain_core.prompts import PromptTemplate
 
-# Load secrets from secrets.toml
-#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
-#secrets = toml.load(SECRETS_FILE_PATH)
-HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
+# Access secrets from Streamlit Cloud environment via st.secrets
+HUGGINGFACE_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
 
-# Initialize session state
-if 'history' not in st.session_state:
-    st.session_state['history'] = []
-if 'faiss_index' not in st.session_state:
-    st.session_state['faiss_index'] = None
-if 's3_file_count' not in st.session_state:
-    st.session_state['s3_file_count'] = 0
-if 'newly_indexed_files' not in st.session_state:
-    st.session_state['newly_indexed_files'] = []
+# Initialize file counts in session state
+if 'total_files' not in st.session_state:
+    st.session_state.total_files = get_s3_file_count()  # Initial count from S3 bucket
+if 'new_files' not in st.session_state:
+    st.session_state.new_files = 0  # Track new files added during update
+if 'last_update_message' not in st.session_state:
+    st.session_state.last_update_message = "Waiting for first update..."
 
-# Function to update FAISS index and S3 count
-def update_faiss_and_s3_count():
-    st.session_state['newly_indexed_files'] = update_faiss_index_from_emails()
-    st.session_state['s3_file_count'] = get_s3_file_count()
-    st.session_state['faiss_index'] = get_faiss_index()
 
-# Load FAISS index on startup
-with st.spinner("Loading FAISS index..."):
-    if not st.session_state['faiss_index']:
-        fetch_faiss_index_from_s3()
-        st.session_state['faiss_index'] = get_faiss_index()
-
-# Scheduler setup
+# Scheduler setup to update FAISS index and file counts periodically
 def schedule_faiss_update():
     """Schedule FAISS index update every 24 hours."""
-    update_faiss_and_s3_count()  # Directly call update function
-    st.write("FAISS index updated in background")
+    schedule.every(24).hours.do(faiss_update_job)
+
+
+def faiss_update_job():
+    """Job to update FAISS index and track new files."""
+    initial_count = get_s3_file_count()
+    update_faiss_index_from_emails()
+    final_count = get_s3_file_count()
+
+    # Calculate new files added during the update process
+    new_files = final_count - initial_count
+
+    # Update session state values for UI display
+    st.session_state.new_files = new_files
+    st.session_state.total_files = final_count  # Update total count after adding new files
+
+    # Set last update message for user feedback
+    st.session_state.last_update_message = f"Updated! {new_files} new files added. Total files: {final_count}"
+
+    # Force Streamlit app to re-render with updated values
+    st.experimental_rerun()
+
 
 def run_scheduler():
+    """Run scheduler in a separate thread."""
     while True:
         schedule.run_pending()
         time.sleep(60)  # Check every minute
 
-# Start scheduler in a separate thread
-schedule.every(24).hours.do(schedule_faiss_update)  # Set the schedule
+
 scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-scheduler_thread.start()
 
-# Sidebar for history
-with st.sidebar:
-    st.header("Query History")
-    for query, answer in reversed(st.session_state['history']):  # Reverse for chronological order
-        st.markdown(f"**Q:** {query}")
-        st.markdown(f"**A:** {answer}")
-        st.write("---")
 
-# Main app
-st.title("Proforma Invoice RAG")
-
-# Show total number of proformas in S3
-st.write(f"Total Proforma Invoices in S3: {st.session_state['s3_file_count']}")
-
-# Display newly indexed files
-if st.session_state['newly_indexed_files']:
-    st.success(f"Newly indexed files: {', '.join(st.session_state['newly_indexed_files'])}")
-
-# Query input
-query = st.text_input("Enter your query:")
-
-# Question suggestions
-if query:
-    suggested_questions = [
-        f"Tell me about {query}?",
-        f"Explain {query} in detail?",
-        f"What are the key aspects of {query}?",
-        f"Give me a summary of {query}."
-    ]
-    st.write("Suggested questions:")
-    for suggestion in suggested_questions:
-        st.markdown(f"- {suggestion}")
-
-if query:
+def query_proforma_rag(query):
+    """Query the RAG model using the local FAISS index."""
     vector_store = get_faiss_index()
 
     if not vector_store:
-        st.warning("FAISS index not available. Please wait for initialization or the next scheduled update.")
-    else:
-        # Perform similarity search to get relevant context
-        search_results = vector_store.similarity_search(query, k=3)  # Adjust k as needed
-        context = "\n".join([doc.page_content for doc in search_results])
+        return "FAISS index not available. Please wait for initialization or the next scheduled update.", "Unknown"
 
-        # Define a prompt with context
-        prompt_template = """Use the following context to answer the question at the end.
-        Context: {context}
-        Question: {question}
-        Answer:"""
-        PROMPT = PromptTemplate(
-            template=prompt_template, input_variables=["context", "question"]
-        )
-        chain_type_kwargs = {"prompt": PROMPT}
+    retriever = vector_store.as_retriever()
 
-        retriever = vector_store.as_retriever()
-        llm = HuggingFaceHub(
-            repo_id="HuggingFaceH4/zephyr-7b-beta",
-            model_kwargs={"max_new_tokens": 512},
-            huggingfacehub_api_token=HUGGINGFACE_API_TOKEN
-        )
-        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, chain_type_kwargs=chain_type_kwargs)
-        answer = qa.run({"query": query, "context": context})  # Pass both query and context
+    llm = HuggingFaceHub(
+        repo_id="HuggingFaceH4/zephyr-7b-beta",
+        model_kwargs={"max_new_tokens": 512},
+        huggingfacehub_api_token=HUGGINGFACE_API_TOKEN,
+    )
 
-        st.write("Answer:", answer)
+    chain = RetrievalQA.from_chain_type(llm, retriever=retriever)
 
-        # Update history
-        st.session_state['history'].append((query, answer))
+    response = chain.run(query)
+
+    sources = retriever.get_relevant_documents(query)
+
+    source_file = sources[0].metadata.get("source", "Unknown") if sources else "Unknown"
+
+    return response, source_file
+
+
+# Fetch FAISS index from S3 on startup and initialize locally if needed
+if fetch_faiss_index_from_s3():
+    print("Successfully loaded FAISS index from S3.")
+else:
+    print("Failed to load FAISS index from S3. Will attempt to create it from new emails.")
+
+# Start scheduler thread for periodic updates of FAISS index and file counts
+schedule_faiss_update()
+scheduler_thread.start()
+
+# Streamlit UI Setup for Chatbot and Statistics Display
+st.title("Chatbot for Proforma Invoice Analysis")
+
+# Sidebar Section: File Statistics Display
+st.sidebar.header("Proforma Invoice Statistics")
+st.sidebar.metric("Total Proforma Files in S3", st.session_state.total_files)
+st.sidebar.write(st.session_state.last_update_message)
+
+# Chat Section: User Interaction with Chatbot
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
+
+st.header("Chat with the Bot")
+
+for message in st.session_state.messages:
+    if message["role"] == "user":
+        st.chat_message("user").write(message["content"])
+
+    elif message["role"] == "bot":
+        st.chat_message("bot").write(message["content"])
+
+if user_query := st.chat_input("Type your question here..."):
+    # Add user query to chat history and process it using RAG model query function.
+
+    st.session_state.messages.append({"role": "user", "content": user_query})
+
+    bot_response, _ = query_proforma_rag(user_query)
+
+    # Add bot response to chat history and display it.
+
+    st.session_state.messages.append({"role": "bot", "content": bot_response})
+
