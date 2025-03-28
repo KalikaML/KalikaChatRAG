@@ -170,3 +170,44 @@ def get_s3_file_count():
     except Exception as e:
         logging.error(f"Error counting S3 files: {e}")
         return 0
+
+def download_faiss_index_from_s3(local_faiss_path):
+    """Download the FAISS index from S3."""
+    faiss_index_key = os.path.join(S3_FOLDER, "proforma_faiss_index/index.faiss")
+    faiss_pkl_key = os.path.join(S3_FOLDER, "proforma_faiss_index/index.pkl")
+
+    try:
+        # Ensure the local directory exists
+        os.makedirs(os.path.dirname(local_faiss_path), exist_ok=True)
+
+        # Download index.faiss
+        s3_client.download_file(S3_BUCKET, faiss_index_key, os.path.join(local_faiss_path, "index.faiss"))
+        logging.info(f"Downloaded index.faiss from S3 to {local_faiss_path}")
+
+        # Download index.pkl
+        s3_client.download_file(S3_BUCKET, faiss_pkl_key, os.path.join(local_faiss_path, "index.pkl"))
+        logging.info(f"Downloaded index.pkl from S3 to {local_faiss_path}")
+
+        return True
+    except Exception as e:
+        logging.error(f"Error downloading FAISS index from S3: {e}")
+        return False
+
+def upload_faiss_index_to_s3(local_faiss_path):
+    """Upload the FAISS index to S3."""
+    faiss_index_key = os.path.join(S3_FOLDER, "proforma_faiss_index/index.faiss")
+    faiss_pkl_key = os.path.join(S3_FOLDER, "proforma_faiss_index/index.pkl")
+
+    try:
+        # Upload index.faiss
+        s3_client.upload_file(os.path.join(local_faiss_path, "index.faiss"), S3_BUCKET, faiss_index_key)
+        logging.info(f"Uploaded index.faiss to S3: {faiss_index_key}")
+
+        # Upload index.pkl
+        s3_client.upload_file(os.path.join(local_faiss_path, "index.pkl"), S3_BUCKET, faiss_pkl_key)
+        logging.info(f"Uploaded index.pkl to S3: {faiss_pkl_key}")
+
+        return True
+    except Exception as e:
+        logging.error(f"Error uploading FAISS index to S3: {e}")
+        return False

@@ -75,7 +75,7 @@ import os
 import logging
 from email.header import decode_header
 import toml
-
+import streamlit as st
 # Configuration
 #SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
 IMAP_SERVER = "imap.gmail.com"

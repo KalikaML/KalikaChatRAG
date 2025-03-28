@@ -203,7 +203,6 @@ def get_faiss_stats():
         "indexed_files": len(indexed_files),
         "faiss_source": faiss_source
     }'''
-
 import os
 import logging
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -211,8 +210,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import CharacterTextSplitter
 from PyPDF2 import PdfReader, errors
 import io
-from email_processor import fetch_proforma_emails
-from s3_uploader import upload_to_s3
+from s3_uploader import upload_to_s3, download_faiss_index_from_s3, get_s3_file_count
 
 # Configuration
 LOCAL_FAISS_DIR = "local_faiss_index"
@@ -236,6 +234,7 @@ embeddings = HuggingFaceEmbeddings(
 # Global FAISS index
 faiss_index = None
 last_updated_file_count = 0  # Track the number of files when the index was last updated
+new_files_count = 0
 
 def process_pdf_content(file_content):
     """Extract and chunk text from valid PDF bytes."""
@@ -258,62 +257,92 @@ def process_pdf_content(file_content):
     return text_splitter.split_text(text)
 
 def initialize_faiss_index():
-    """Initialize or load the FAISS index locally."""
-    global faiss_index
-    try:
-        if os.path.exists(LOCAL_FAISS_INDEX_PATH) and \
-           os.path.isfile(os.path.join(LOCAL_FAISS_INDEX_PATH, "index.faiss")) and \
-           os.path.isfile(os.path.join(LOCAL_FAISS_INDEX_PATH, "index.pkl")):
-            logging.info("Loading existing local FAISS index...")
-            faiss_index = FAISS.load_local(LOCAL_FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
-        else:
-            logging.warning("No local FAISS index found. It will be created on the next update.")
-            faiss_index = None
-    except Exception as e:
-        logging.error(f"Error loading FAISS index: {e}")
-        faiss_index = None
-
-def update_faiss_index_from_emails():
-    """Fetch emails, upload PDFs to S3, and update the local FAISS index."""
+    """Initialize or load the FAISS index locally from S3 if available."""
     global faiss_index, last_updated_file_count
+    try:
+        # Download FAISS index from S3
+        if download_faiss_index_from_s3(LOCAL_FAISS_INDEX_PATH):
+            logging.info("FAISS index downloaded from S3.")
+            faiss_index = FAISS.load_local(LOCAL_FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
+            logging.info("FAISS index loaded from local.")
+
+            # Set last updated file count based on S3 file count
+            last_updated_file_count = get_s3_file_count()
+            logging.info(f"Initial S3 file count: {last_updated_file_count}")
+        else:
+            logging.warning("No FAISS index found in S3. It will be created on the next update.")
+            faiss_index = None
+            last_updated_file_count = 0
+
+    except Exception as e:
+        logging.error(f"Error initializing FAISS index: {e}")
+        faiss_index = None
+        last_updated_file_count = 0
+
+def update_faiss_index():
+    """Check for new files in S3 and update the FAISS index."""
+    global faiss_index, last_updated_file_count, new_files_count
     from s3_uploader import get_s3_file_count  # Import here to avoid circular dependency
+    from email_processor import fetch_proforma_emails
 
     try:
-        # Fetch PDFs from emails
-        pdf_files = fetch_proforma_emails()
+        # Get the current file count in S3
+        current_file_count = get_s3_file_count()
+        logging.info(f"Current S3 file count: {current_file_count}")
 
-        # Upload new PDFs to S3
-        valid_pdfs = upload_to_s3(pdf_files)
+        # Compare with the last updated file count
+        if current_file_count > last_updated_file_count:
+            new_files_count = current_file_count - last_updated_file_count
+            logging.info(f"New files found: {new_files_count}")
 
-        # Extract text and create documents
-        texts = []
-        for filename, file_content in valid_pdfs:
-            pdf_texts = process_pdf_content(file_content)
-            texts.extend(pdf_texts)
+            # Fetch PDFs from emails
+            pdf_files = fetch_proforma_emails()
+            # Upload new PDFs to S3 and get valid PDFs for indexing
+            # You might need to adjust this part based on your logic for determining "new" files
+            valid_pdfs = upload_to_s3(pdf_files)
 
-        if not texts:
-            logging.info("No new content to index.")
-            return
+            # Extract text and create documents
+            texts = []
+            for filename, file_content in valid_pdfs:
+                pdf_texts = process_pdf_content(file_content)
+                texts.extend(pdf_texts)
 
-        # Create a new FAISS index or update the existing one
-        if faiss_index is None:
-            logging.info("Creating new FAISS index.")
-            faiss_index = FAISS.from_texts(texts, embeddings)
+            if not texts:
+                logging.info("No new content to index.")
+                return 0  # Return 0 if no updates were made
+
+            # Create a new FAISS index or update the existing one
+            if faiss_index is None:
+                logging.info("Creating new FAISS index.")
+                faiss_index = FAISS.from_texts(texts, embeddings)
+            else:
+                logging.info("Updating existing FAISS index.")
+                new_faiss = FAISS.from_texts(texts, embeddings)
+                faiss_index.merge_from(new_faiss)
+
+            # Save the updated FAISS index locally
+            os.makedirs(LOCAL_FAISS_DIR, exist_ok=True)
+            faiss_index.save_local(LOCAL_FAISS_INDEX_PATH)
+            logging.info(f"FAISS index updated and saved to {LOCAL_FAISS_INDEX_PATH}")
+
+            # Upload the updated FAISS index to S3
+            if upload_faiss_index_to_s3(LOCAL_FAISS_INDEX_PATH):
+                logging.info("FAISS index uploaded to S3.")
+            else:
+                logging.error("Failed to upload FAISS index to S3.")
+
+            # Update the last updated file count
+            last_updated_file_count = current_file_count
+
+            return new_files_count  # Return the number of new files indexed
+
         else:
-            logging.info("Updating existing FAISS index.")
-            new_faiss = FAISS.from_texts(texts, embeddings)
-            faiss_index.merge_from(new_faiss)
-
-        # Save the updated FAISS index locally
-        os.makedirs(LOCAL_FAISS_DIR, exist_ok=True)
-        faiss_index.save_local(LOCAL_FAISS_INDEX_PATH)
-        logging.info(f"FAISS index updated and saved to {LOCAL_FAISS_INDEX_PATH}")
-
-        # Update the last updated file count
-        last_updated_file_count = get_s3_file_count()
+            logging.info("No new files found in S3.")
+            return 0  # Return 0 if no updates were made
 
     except Exception as e:
         logging.error(f"FAISS index update failed: {e}")
+        return 0
 
 def get_faiss_index():
     """Return the current FAISS index."""
@@ -324,3 +353,7 @@ def get_last_updated_file_count():
     """Return the number of files when the FAISS index was last updated."""
     global last_updated_file_count
     return last_updated_file_count
+
+def get_new_files_count():
+    global new_files_count
+    return new_files_count

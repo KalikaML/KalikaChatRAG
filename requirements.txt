@@ -8,3 +8,7 @@ sentence-transformers
 schedule
 PyPDF2
 langchain_huggingface
+python_dotenv
+toml
+imaplib
+gitpython

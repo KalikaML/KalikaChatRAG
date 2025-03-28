@@ -155,10 +155,10 @@ import time
 import threading
 import toml
 import os
+import git
 from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFaceHub
-from faiss_manager import get_faiss_index, update_faiss_index_from_emails, get_last_updated_file_count
-from s3_uploader import get_s3_file_count
+from faiss_manager import get_faiss_index, update_faiss_index, initialize_faiss_index, get_last_updated_file_count, get_new_files_count
 
 # Load secrets from secrets.toml
 #SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
@@ -168,7 +168,7 @@ HUGGINGFACE_API_TOKEN = st.secrets["api_token"]
 # Scheduler setup
 def schedule_faiss_update():
     """Schedule FAISS index update every 24 hours."""
-    schedule.every(24).hours.do(update_faiss_index_from_emails)
+    schedule.every(24).hours.do(update_faiss_index)
 
 def run_scheduler():
     while True:
@@ -200,6 +200,7 @@ def query_proforma_rag(query):
     return response, source_file
 
 # Initialize FAISS index on startup
+initialize_faiss_index()
 get_faiss_index()
 
 # Start the scheduler
@@ -211,19 +212,22 @@ st.title("Chatbot for Proforma Invoice Analysis")
 # Sidebar for Status and Information
 with st.sidebar:
     st.header("Proforma Invoice Status")
-    total_files = get_s3_file_count()
-    st.write(f"Total Proforma Files in S3: {total_files}")
+    #total_files = get_s3_file_count()
+    #st.write(f"Total Proforma Files in S3: {total_files}")
 
     last_updated_count = get_last_updated_file_count()
     st.write(f"FAISS Index Last Updated with: {last_updated_count} files")
 
-    if total_files > last_updated_count:
-        st.warning("New Proforma files detected! The FAISS index might be outdated.")
-        if st.button("Update FAISS Index"):
-            update_faiss_index_from_emails()
-            st.success("FAISS Index is being updated. Please refresh after a while.")
-    else:
-        st.success("FAISS Index is up to date!")
+    new_file_count = get_new_files_count()
+    st.write(f"Number of New Files: {new_file_count}")
+
+    # if total_files > last_updated_count:
+    #     st.warning("New Proforma files detected! The FAISS index might be outdated.")
+    #     if st.button("Update FAISS Index"):
+    #         update_faiss_index_from_emails()
+    #         st.success("FAISS Index is being updated. Please refresh after a while.")
+    # else:
+    #     st.success("FAISS Index is up to date!")
 
 # Chat Section
 st.header("Chat with the Bot")
@@ -231,6 +235,9 @@ st.header("Chat with the Bot")
 # Initialize chat history in session state if it doesn't exist
 if 'messages' not in st.session_state:
     st.session_state.messages = []
+
+# Chat Section
+st.header("Chat with the Bot")
 
 # Display chat messages (user and bot interactions)
 for message in st.session_state.messages:
@@ -245,7 +252,7 @@ if user_query := st.chat_input("Type your question here..."):
     st.session_state.messages.append({"role": "user", "content": user_query})
 
     # Get bot response using query_proforma_rag function
-    bot_response, _ = query_proforma_rag(user_query)  # Ignore source_file
+    bot_response, _ = query_proforma_rag(user_query) # Ignore source_file
 
     # Add bot response to chat history
     st.session_state.messages.append({"role": "bot", "content": bot_response})
