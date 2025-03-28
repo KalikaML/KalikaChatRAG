@@ -91,6 +91,7 @@ import logging
 import toml
 from PyPDF2 import PdfReader, errors
 import io
+import streamlit as st
 
 # Configuration
 #SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
