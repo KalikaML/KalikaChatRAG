@@ -27,8 +27,8 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 # Initialize S3 client
 s3_client = boto3.client(
     "s3",
-    aws_access_key_id=st.secrets["access_key_id"],
-    aws_secret_access_key=st.secrets["secret_access_key"],
+    aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+    aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
 )
 
 # Set up logging
