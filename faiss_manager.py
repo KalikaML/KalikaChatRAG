@@ -218,7 +218,7 @@ from PyPDF2 import PdfReader, errors
 from email_processor import fetch_proforma_emails
 from s3_uploader import upload_to_s3
 from langchain_core.documents import Document  # Import Document
-
+import streamlit as st
 # Configuration
 #SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
 S3_BUCKET = "kalika-rag"
