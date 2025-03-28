@@ -10,6 +10,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from PyPDF2 import PdfReader, errors
 from email_processor import fetch_proforma_emails
 from s3_uploader import upload_to_s3
+import streamlit as st
 
 # Configuration
 #SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
