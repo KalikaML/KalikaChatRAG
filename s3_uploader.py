@@ -1,5 +1,3 @@
-
-
 import boto3
 import os
 import logging
@@ -7,9 +5,8 @@ import toml
 from PyPDF2 import PdfReader, errors
 import io
 import streamlit as st
-
 # Configuration
-SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
+#SECRETS_FILE_PATH = os.path.join(os.getcwd(), "secrets.toml")
 S3_BUCKET = "kalika-rag"
 S3_FOLDER = "proforma_invoice/"
 
@@ -57,6 +54,7 @@ def upload_to_s3(pdf_files):
             if not is_valid_pdf(file_content):
                 logging.warning(f"Skipping invalid PDF: {filename}")
                 continue
+
             key = f"{S3_FOLDER}{filename}"
             if not file_exists_in_s3(S3_BUCKET, key):
                 s3_client.put_object(
