@@ -1,6 +1,7 @@
 import streamlit as st
 import boto3
 import faiss
+import pickle
 import json
 from io import BytesIO
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -27,38 +28,40 @@ embeddings = HuggingFaceEmbeddings(
 )
 
 
-def load_faiss_index(bucket_name, index_path):
-    """Load FAISS index and metadata from S3 with error handling."""
+def load_faiss_and_metadata(bucket_name, index_path):
+    """Load FAISS index and metadata (pickle) from S3."""
     try:
+        # Load FAISS index file from S3
         index_response = s3.get_object(Bucket=bucket_name, Key=f"{index_path}/index.faiss")
-        docstore_response = s3.get_object(Bucket=bucket_name, Key=f"{index_path}/docstore.json")
+        index_bytes = BytesIO(index_response['Body'].read())
+        faiss_index = faiss.read_index(index_bytes)
+
+        # Load metadata (pickle file) from S3
+        metadata_response = s3.get_object(Bucket=bucket_name, Key=f"{index_path}/index.pkl")
+        metadata_bytes = BytesIO(metadata_response['Body'].read())
+        metadata = pickle.load(metadata_bytes)
+
     except s3.exceptions.NoSuchKey:
         st.error(f"Error: The specified key does not exist in bucket '{bucket_name}' at path '{index_path}'.")
-        return None, None, None
+        return None, None
 
-    index_bytes = BytesIO(index_response['Body'].read())
-    docstore_data = json.loads(docstore_response['Body'].read())
-
-    # Deserialize FAISS index
-    faiss_index = faiss.read_index(index_bytes)
-
-    return faiss_index, docstore_data["docstore"], docstore_data["mapping"]
+    return faiss_index, metadata
 
 
-def query_faiss_index(faiss_index, docstore, query_embedding, k=5):
+def query_faiss_index(faiss_index, metadata, query_embedding, k=5):
     """Query FAISS index to retrieve relevant documents."""
-    if faiss_index is None or docstore is None:
-        st.error("FAISS index or docstore is not loaded.")
+    if faiss_index is None or metadata is None:
+        st.error("FAISS index or metadata is not loaded.")
         return []
 
     distances, indices = faiss_index.search(query_embedding, k)
-    results = [docstore[str(idx)] for idx in indices[0]]
+    results = [metadata[idx] for idx in indices[0]]  # Retrieve documents using indices
     return results
 
 
 def filter_and_format_results(results):
     """Format results for display."""
-    formatted_output = [{"Proforma ID": res["id"], "Date": res["date"], "Details": res["details"]} for res in results]
+    formatted_output = [{"Proforma ID": res.get("id"), "Date": res.get("date"), "Details": res.get("details")} for res in results]
     return formatted_output
 
 
@@ -69,11 +72,11 @@ def get_pdf_count(bucket_name, folder_path):
     return len(pdf_files), pdf_files
 
 
-# Load FAISS index and docstore from S3 bucket dynamically
+# Load FAISS index and metadata from S3 bucket dynamically
 bucket_name = "kalika-rag"
 index_path = "faiss_indexes/proforma_faiss_index"
 folder_path = "proforma_invoice/"
-faiss_index, docstore, mapping = load_faiss_index(bucket_name, index_path)
+faiss_index, metadata = load_faiss_and_metadata(bucket_name, index_path)
 
 # Streamlit app interface
 st.title("Proforma Invoice Chatbot & PDF Monitor")
@@ -85,7 +88,7 @@ if user_query:
     start_time = datetime.now()
 
     query_embedding = embeddings.embed_query(user_query)
-    results = query_faiss_index(faiss_index, docstore, query_embedding)
+    results = query_faiss_index(faiss_index, metadata, query_embedding)
 
     formatted_results = filter_and_format_results(results)
 
