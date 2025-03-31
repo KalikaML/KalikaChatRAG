@@ -8,3 +8,4 @@ sentence-transformers
 schedule
 PyPDF2
 langchain_huggingface
+nest_asyncio
