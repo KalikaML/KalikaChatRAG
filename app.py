@@ -71,7 +71,7 @@ def get_pdf_count(bucket_name, folder_path):
 
 # Load FAISS index and docstore from S3 bucket dynamically
 bucket_name = "kalika-rag"
-index_path = "faiss_indexes/proforma_faiss_index/"
+index_path = "faiss_indexes/proforma_faiss_index"
 folder_path = "proforma_invoice/"
 faiss_index, docstore, mapping = load_faiss_index(bucket_name, index_path)
 
