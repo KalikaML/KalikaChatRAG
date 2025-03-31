@@ -1,99 +1,9 @@
-'''import streamlit as st
-from langchain.chains import RetrievalQA
-from langchain.llms import HuggingFaceHub
-from faiss_manager import get_faiss_index, fetch_faiss_index_from_s3
-
-# Access secrets from Streamlit Cloud
-HUGGINGFACE_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
-
-# Fetch FAISS index from S3 on startup and initialize locally if needed
-if fetch_faiss_index_from_s3():
-    print("Successfully loaded FAISS index from S3.")
-else:
-    print("Failed to load FAISS index from S3.")
-
-# Function to process user queries and generate structured output
-def query_proforma_rag(query):
-    """Query the RAG model using FAISS index and generate structured output."""
-    vector_store = get_faiss_index()
-    if not vector_store:
-        return "FAISS index not available. Please wait for initialization or the next scheduled update.", []
-
-    # Initialize retriever and LLM
-    retriever = vector_store.as_retriever()
-    llm = HuggingFaceHub(
-        repo_id="HuggingFaceH4/zephyr-7b-beta",
-        model_kwargs={"max_new_tokens": 512},
-        huggingfacehub_api_token=HUGGINGFACE_API_TOKEN,
-    )
-
-    # Create RetrievalQA chain
-    chain = RetrievalQA.from_chain_type(llm, retriever=retriever)
-
-    # Run query through the chain
-    response = chain.run(query)
-
-    # Retrieve relevant documents for structuring output
-    sources = retriever.get_relevant_documents(query)
-
-    # Generate structured output
-    structured_output = []
-    for source in sources:
-        structured_output.append({
-            "text": source.page_content,
-            "source": source.metadata.get("source", "Unknown")
-        })
-
-    return response, structured_output
-
-# Streamlit UI Setup
-st.title("Proforma Invoice Query System")
-
-# Sidebar Section: Instructions
-st.sidebar.header("Instructions")
-st.sidebar.write("Enter your query below to fetch relevant information from proforma invoices.")
-
-# Main Section: Query Input and Response Display
-st.header("Query Proforma Invoices")
-
-# Initialize chat history in session state if it doesn't exist
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
-
-# Display chat messages (user and bot interactions)
-for message in st.session_state.messages:
-    if message["role"] == "user":
-        st.chat_message("user").write(message["content"])
-    elif message["role"] == "bot":
-        st.chat_message("bot").write(message["content"])
-
-# User input for chat interaction
-if user_query := st.chat_input("Type your question here..."):
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": user_query})
-
-    # Get bot response and structured output using query_proforma_rag function
-    bot_response, structured_output = query_proforma_rag(user_query)
-
-    # Add bot response to chat history
-    st.session_state.messages.append({"role": "bot", "content": bot_response})
-
-    # Display bot response immediately in the chat interface without context
-    st.chat_message("bot").write(bot_response)
-
-    # Display structured output using Streamlit widgets
-    st.header("Structured Output")
-    for item in structured_output:
-        with st.expander(f"Source: {item['source']}"):
-            st.write(item['text'])'''
-
 import streamlit as st
 import boto3
 import faiss
 import json
 from io import BytesIO
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
+from langchain.embeddings import HuggingFaceEmbeddings
 from datetime import datetime
 
 # Initialize S3 client with credentials from Streamlit secrets
@@ -104,19 +14,13 @@ s3 = boto3.client(
     region_name=st.secrets["AWS_DEFAULT_REGION"]
 )
 
-# Load Hugging Face model and tokenizer for embeddings
-model_name = "HuggingFaceH4/zephyr-7b-beta"
-tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=st.secrets["HUGGINGFACE_ACCESS_TOKEN"])
-model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=st.secrets["HUGGINGFACE_ACCESS_TOKEN"])
-
-
-def get_embeddings(texts):
-    """Generate embeddings using HuggingFaceH4/zephyr-7b-beta."""
-    inputs = tokenizer(texts, return_tensors="pt", padding=True, truncation=True)
-    with torch.no_grad():
-        embeddings = model(**inputs).last_hidden_state.mean(dim=1)
-    return embeddings.numpy()
-
+# Initialize Hugging Face embeddings model
+EMBEDDING_MODEL = "HuggingFaceH4/zephyr-7b-beta"
+embeddings = HuggingFaceEmbeddings(
+    model_name=EMBEDDING_MODEL,
+    model_kwargs={'device': 'cpu'},
+    encode_kwargs={'normalize_embeddings': False}
+)
 
 def load_faiss_index(bucket_name, index_path):
     """Load FAISS index and metadata from S3."""
@@ -131,19 +35,16 @@ def load_faiss_index(bucket_name, index_path):
 
     return faiss_index, docstore_data["docstore"], docstore_data["mapping"]
 
-
 def query_faiss_index(faiss_index, docstore, query_embedding, k=5):
     """Query FAISS index to retrieve relevant documents."""
     distances, indices = faiss_index.search(query_embedding, k)
     results = [docstore[str(idx)] for idx in indices[0]]
     return results
 
-
 def filter_and_format_results(results):
     """Format results for display."""
     formatted_output = [{"Proforma ID": res["id"], "Date": res["date"], "Details": res["details"]} for res in results]
     return formatted_output
-
 
 def get_pdf_count(bucket_name, folder_path):
     """Get the count of PDFs in the S3 folder."""
@@ -151,11 +52,10 @@ def get_pdf_count(bucket_name, folder_path):
     pdf_files = [obj['Key'] for obj in response.get('Contents', []) if obj['Key'].endswith('.pdf')]
     return len(pdf_files), pdf_files
 
-
 # Load FAISS index and docstore from S3 bucket dynamically
 bucket_name = "kalika-rag"
 index_path = "faiss_indexes/proforma_faiss_index"
-folder_path = "proforma_invoice"
+folder_path = "faiss_indexes/proforma_pdfs"
 faiss_index, docstore, mapping = load_faiss_index(bucket_name, index_path)
 
 # Streamlit app interface
@@ -167,7 +67,7 @@ user_query = st.text_input("Enter your query:")
 if user_query:
     start_time = datetime.now()
 
-    query_embedding = get_embeddings([user_query])
+    query_embedding = embeddings.embed_query(user_query)
     results = query_faiss_index(faiss_index, docstore, query_embedding)
 
     formatted_results = filter_and_format_results(results)
