@@ -3,8 +3,12 @@ import boto3
 import faiss
 import json
 from io import BytesIO
-from langchain_huggingface import HuggingFaceEmbeddings  # Updated import for HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from datetime import datetime
+import nest_asyncio
+
+# Apply nest_asyncio patch for event loop issues
+nest_asyncio.apply()
 
 # Initialize S3 client with credentials from Streamlit secrets
 s3 = boto3.client(
@@ -24,9 +28,13 @@ embeddings = HuggingFaceEmbeddings(
 
 
 def load_faiss_index(bucket_name, index_path):
-    """Load FAISS index and metadata from S3."""
-    index_response = s3.get_object(Bucket=bucket_name, Key=f"{index_path}/index.faiss")
-    docstore_response = s3.get_object(Bucket=bucket_name, Key=f"{index_path}/docstore.json")
+    """Load FAISS index and metadata from S3 with error handling."""
+    try:
+        index_response = s3.get_object(Bucket=bucket_name, Key=f"{index_path}/index.faiss")
+        docstore_response = s3.get_object(Bucket=bucket_name, Key=f"{index_path}/docstore.json")
+    except s3.exceptions.NoSuchKey:
+        st.error(f"Error: The specified key does not exist in bucket '{bucket_name}' at path '{index_path}'.")
+        return None, None, None
 
     index_bytes = BytesIO(index_response['Body'].read())
     docstore_data = json.loads(docstore_response['Body'].read())
@@ -39,6 +47,10 @@ def load_faiss_index(bucket_name, index_path):
 
 def query_faiss_index(faiss_index, docstore, query_embedding, k=5):
     """Query FAISS index to retrieve relevant documents."""
+    if faiss_index is None or docstore is None:
+        st.error("FAISS index or docstore is not loaded.")
+        return []
+
     distances, indices = faiss_index.search(query_embedding, k)
     results = [docstore[str(idx)] for idx in indices[0]]
     return results
