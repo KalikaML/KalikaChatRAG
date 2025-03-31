@@ -3,7 +3,7 @@ import boto3
 import faiss
 import json
 from io import BytesIO
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings  # Updated import for HuggingFaceEmbeddings
 from datetime import datetime
 
 # Initialize S3 client with credentials from Streamlit secrets
@@ -15,12 +15,13 @@ s3 = boto3.client(
 )
 
 # Initialize Hugging Face embeddings model
-EMBEDDING_MODEL = "HuggingFaceH4/zephyr-7b-beta"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"  # Use a valid SentenceTransformers model
 embeddings = HuggingFaceEmbeddings(
     model_name=EMBEDDING_MODEL,
     model_kwargs={'device': 'cpu'},
     encode_kwargs={'normalize_embeddings': False}
 )
+
 
 def load_faiss_index(bucket_name, index_path):
     """Load FAISS index and metadata from S3."""
@@ -35,22 +36,26 @@ def load_faiss_index(bucket_name, index_path):
 
     return faiss_index, docstore_data["docstore"], docstore_data["mapping"]
 
+
 def query_faiss_index(faiss_index, docstore, query_embedding, k=5):
     """Query FAISS index to retrieve relevant documents."""
     distances, indices = faiss_index.search(query_embedding, k)
     results = [docstore[str(idx)] for idx in indices[0]]
     return results
 
+
 def filter_and_format_results(results):
     """Format results for display."""
     formatted_output = [{"Proforma ID": res["id"], "Date": res["date"], "Details": res["details"]} for res in results]
     return formatted_output
+
 
 def get_pdf_count(bucket_name, folder_path):
     """Get the count of PDFs in the S3 folder."""
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_path)
     pdf_files = [obj['Key'] for obj in response.get('Contents', []) if obj['Key'].endswith('.pdf')]
     return len(pdf_files), pdf_files
+
 
 # Load FAISS index and docstore from S3 bucket dynamically
 bucket_name = "kalika-rag"
