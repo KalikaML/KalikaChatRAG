@@ -233,17 +233,17 @@ llm = HuggingFaceHub(
     model_kwargs={"temperature": 0.7, "max_length": 512}
 )
 
-# Prompt template for structured response, hiding context
+# Updated prompt template for vendor list extraction
 prompt_template = PromptTemplate(
     input_variables=["documents", "question"],
     template="""
-    You are a helpful assistant. Based on the following information, provide a concise, well-structured answer to the user's question in a bullet-point format. Do not include the information or raw data in your response, only provide the formatted answer.
+    You are a helpful assistant. Based on the following information, extract all unique vendor names and provide them in a concise, bullet-point list. Do not include the raw information or any other details in your response, only the list of vendor names in the specified format.
     Information: {documents}
     Question: {question}
     Answer in the following format:
-    - [Point 1]
-    - [Point 2]
-    - [Point 3]
+    - [Vendor Name 1]
+    - [Vendor Name 2]
+    - [Vendor Name 3]
     """
 )
 
