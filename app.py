@@ -341,28 +341,26 @@ def main():
     st.title("RAG Chatbot")
     st.write("Ask anything based on the selected data source!")
 
-    # Initialize session state for chat history
+    # Initialize session state for chat history and current option
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
     if "current_option" not in st.session_state:
         st.session_state.current_option = None
 
-    # Load FAISS index based on selected option
-    if option != st.session_state.current_option:
+    # Always load the FAISS index and initialize qa_chain if not already set or if option changes
+    if "qa_chain" not in st.session_state or option != st.session_state.current_option:
         st.session_state.current_option = option
         index_path = PROFORMA_INDEX_PATH if option == "Proforma Invoices" else PO_INDEX_PATH
         with st.spinner(f"Loading {option} FAISS index from S3..."):
             vector_store = load_faiss_index_from_s3(index_path)
-            # Search the entire FAISS index
             retriever = vector_store.as_retriever()
-            # Explicitly define the StuffDocumentsChain with required parameters
             st.session_state.qa_chain = RetrievalQA.from_chain_type(
                 llm=llm,
                 chain_type="stuff",
                 retriever=retriever,
                 chain_type_kwargs={
                     "prompt": prompt_template,
-                    "document_variable_name": "documents"  # Match the variable in the prompt
+                    "document_variable_name": "documents"
                 }
             )
 
