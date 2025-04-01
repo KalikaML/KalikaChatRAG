@@ -4,9 +4,10 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from io import BytesIO
+import tempfile
 
 # AWS S3 configuration
-S3_BUCKET = "kalika-rag"  # Replace with your S3 bucket name
+S3_BUCKET = "your-s3-bucket-name"  # Replace with your S3 bucket name
 PO_INDEX_PATH = "faiss_indexes/po_faiss_index/index.faiss"
 PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index.faiss"
 
@@ -31,11 +32,14 @@ def load_faiss_index_from_s3(s3_path):
         response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_path)
         index_bytes = response['Body'].read()
 
-        # Use VectorIOReader to read the index from memory
-        io_reader = faiss.VectorIOReader()
-        faiss.buffer_to_vector(io_reader, index_bytes)
-        index = faiss.read_index(io_reader)
+        # Use a temporary file to load the index (Streamlit Cloud compatible)
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_file.write(index_bytes)
+            tmp_file.flush()
+            index = faiss.read_index(tmp_file.name)
 
+        # Clean up the temporary file
+        os.unlink(tmp_file.name)
         return index
     except Exception as e:
         st.error(f"Error loading FAISS index from S3: {str(e)}")
