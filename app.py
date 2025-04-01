@@ -14,7 +14,7 @@ from langchain_community.llms import HuggingFaceHub
 s3 = boto3.client('s3',
                   aws_access_key_id=st.secrets['AWS_ACCESS_KEY_ID'],
                   aws_secret_access_key=st.secrets['AWS_SECRET_ACCESS_KEY'])
-bucket_name = st.secrets['S3_BUCKET']
+bucket_name = st.secrets['S3_BUCKET_NAME ']
 
 
 @st.cache_resource
