@@ -238,11 +238,12 @@ llm = HuggingFaceHub(
     model_kwargs={"temperature": 0.7, "max_length": 512}
 )
 
-# Prompt template without context, relying on FAISS index retrieval
+# Prompt template that includes documents but only outputs the answer
 prompt_template = PromptTemplate(
-    input_variables=["question"],
+    input_variables=["documents", "question"],
     template="""
-    You are a helpful assistant. Answer the user's question accurately and concisely based on the information available to you.
+    You are a helpful assistant. Based on the following information, answer the user's question accurately and concisely. Do not include the information in your response, only provide the answer.
+    Information: {documents}
     Question: {question}
     Answer:
     """
@@ -352,13 +353,17 @@ def main():
         index_path = PROFORMA_INDEX_PATH if option == "Proforma Invoices" else PO_INDEX_PATH
         with st.spinner(f"Loading {option} FAISS index from S3..."):
             vector_store = load_faiss_index_from_s3(index_path)
-            # Search the entire FAISS index without limiting results
-            retriever = vector_store.as_retriever()  # No 'k' limit, searches all vectors
+            # Search the entire FAISS index
+            retriever = vector_store.as_retriever()
+            # Explicitly define the StuffDocumentsChain with required parameters
             st.session_state.qa_chain = RetrievalQA.from_chain_type(
                 llm=llm,
                 chain_type="stuff",
                 retriever=retriever,
-                chain_type_kwargs={"prompt": prompt_template}
+                chain_type_kwargs={
+                    "prompt": prompt_template,
+                    "document_variable_name": "documents"  # Match the variable in the prompt
+                }
             )
 
     # Chat input
