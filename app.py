@@ -3,21 +3,21 @@ import boto3
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
-from io import BytesIO
 import tempfile
 import os
+import pandas as pd
 
 # AWS S3 configuration
-S3_BUCKET = "kalika-rag"  # Replace with your real bucket name
+S3_BUCKET = st.secrets['S3_BUCKET_NAME '] # Replace with your real bucket name
 PO_INDEX_PATH = "faiss_indexes/po_faiss_index/index.faiss"
 PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index.faiss"
 
-# Initialize S3 client with region (update region_name as needed)
+# Initialize S3 client with region
 s3_client = boto3.client(
     's3',
     aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
     aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
-    region_name="ap-south-1"  # e.g., 'us-east-1'
+    region_name=st.secrets['aws_region']
 )
 
 
@@ -43,18 +43,32 @@ def load_faiss_index_from_s3(s3_path):
         return None
 
 
-# RAG function to generate response
+# RAG function to generate structured response
 def generate_response(query, index, model, document_data):
     try:
         query_embedding = model.encode([query])[0]
-        D, I = index.search(np.array([query_embedding]), k=3)
-        relevant_docs = [document_data[i] for i in I[0]]
-        response = "Based on the query, here's what I found:\n\n"
-        for doc in relevant_docs:
-            response += f"- {doc}\n"
-        return response
+        D, I = index.search(np.array([query_embedding]), k=3)  # Top 3 matches
+
+        # Structured output: list of dictionaries
+        results = []
+        for idx, (distance, doc_idx) in enumerate(zip(D[0], I[0])):
+            if doc_idx < len(document_data):
+                results.append({
+                    "Match Rank": idx + 1,
+                    "Document": document_data[doc_idx],
+                    "Similarity Score": float(1 / (1 + distance))  # Convert distance to similarity
+                })
+            else:
+                results.append({
+                    "Match Rank": idx + 1,
+                    "Document": "No matching document found",
+                    "Similarity Score": float(1 / (1 + distance))
+                })
+
+        return results
     except Exception as e:
-        return f"Error generating response: {str(e)}"
+        st.error(f"Error generating response: {str(e)}")
+        return None
 
 
 # Streamlit app
@@ -68,16 +82,27 @@ def main():
         if not user_query:
             st.warning("Please enter a query!")
             return
+
         s3_path = PROFORMA_INDEX_PATH if query_type == "Proforma Query" else PO_INDEX_PATH
         index_type = "Proforma" if query_type == "Proforma Query" else "PO"
+
         with st.spinner(f"Loading {index_type} index from S3..."):
             index = load_faiss_index_from_s3(s3_path)
+
         if index:
-            document_data = ["Doc1", "Doc2", "Doc3"]  # Replace with actual data
+            # Placeholder document data (replace with actual retrieval logic)
+            document_data = ["Doc1: PO #123 details", "Doc2: Proforma #456 info", "Doc3: PO #789 summary"]
+
             with st.spinner(f"Generating {index_type} response..."):
                 response = generate_response(user_query, index, model, document_data)
-                st.success("Response generated!")
-                st.write(response)
+
+            if response:
+                st.success(f"{index_type} Response Generated!")
+                # Display structured output as a table
+                df = pd.DataFrame(response)
+                st.table(df)
+            else:
+                st.error("Failed to generate response")
         else:
             st.error("Failed to load FAISS index from S3")
 
