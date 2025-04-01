@@ -4,7 +4,6 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from io import BytesIO
-import os
 
 # AWS S3 configuration
 S3_BUCKET = "kalika-rag"  # Replace with your S3 bucket name
@@ -28,10 +27,15 @@ def load_embedding_model():
 # Function to load FAISS index directly from S3 into memory
 def load_faiss_index_from_s3(s3_path):
     try:
+        # Get object from S3
         response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_path)
         index_bytes = response['Body'].read()
-        index_io = BytesIO(index_bytes)
-        index = faiss.read_index(index_io)
+
+        # Use VectorIOReader to read the index from memory
+        io_reader = faiss.VectorIOReader()
+        faiss.buffer_to_vector(io_reader, index_bytes)
+        index = faiss.read_index(io_reader)
+
         return index
     except Exception as e:
         st.error(f"Error loading FAISS index from S3: {str(e)}")
@@ -77,9 +81,7 @@ def main():
             index = load_faiss_index_from_s3(s3_path)
 
         if index:
-            # Placeholder for document data
             document_data = ["Doc1", "Doc2", "Doc3"]  # Replace with actual data retrieval
-
             with st.spinner(f"Generating {index_type} response..."):
                 response = generate_response(user_query, index, model, document_data)
                 st.success("Response generated!")
