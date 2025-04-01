@@ -20,7 +20,6 @@ PROFORMA_FOLDER = "proforma_invoice/"
 PO_FOLDER = "PO_Dump/"
 
 # Load secrets from secrets.toml
-secrets = toml.load(SECRETS_FILE_PATH)
 AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
 AWS_SECRET_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
 HUGGINGFACE_TOKEN = st.secrets["HUGGINGFACE_ACCESS_TOKEN"]
