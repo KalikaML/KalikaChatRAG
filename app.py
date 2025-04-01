@@ -5,18 +5,15 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from io import BytesIO
 import tempfile
+import os
 
 # AWS S3 configuration
-S3_BUCKET = "your-s3-bucket-name"  # Replace with your S3 bucket name
+S3_BUCKET = "kalika-rag"  # Replace with your S3 bucket name
 PO_INDEX_PATH = "faiss_indexes/po_faiss_index/index.faiss"
 PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index.faiss"
 
-# Initialize S3 client using Streamlit secrets
-s3_client = boto3.client(
-    's3',
-    aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
-    aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"]
-)
+# Initialize S3 client (uses IAM role on EC2)
+s3_client = boto3.client('s3')
 
 
 # Initialize sentence transformer model for embeddings
@@ -32,7 +29,7 @@ def load_faiss_index_from_s3(s3_path):
         response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_path)
         index_bytes = response['Body'].read()
 
-        # Use a temporary file to load the index (Streamlit Cloud compatible)
+        # Use a temporary file to load the index
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(index_bytes)
             tmp_file.flush()
@@ -62,7 +59,7 @@ def generate_response(query, index, model, document_data):
 
 # Streamlit app
 def main():
-    st.title("Proforma & PO Query Chatbot (Streamlit Cloud)")
+    st.title("Proforma & PO Query Chatbot (EC2)")
 
     model = load_embedding_model()
 
