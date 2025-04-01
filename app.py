@@ -149,7 +149,7 @@ def main():
 
     # Chat interface
     st.title("RAG Chatbot")
-    st.write("Ask anything based on the selected data source。与
+    st.write("Ask anything based on the selected data source。与")
 
     # Initialize session state
     if "chat_history" not in st.session_state:
