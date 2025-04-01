@@ -3,72 +3,90 @@ import boto3
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
-from botocore.exceptions import ClientError
+from io import BytesIO
+import os
 
-# Initialize Sentence Transformer model for embeddings
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# AWS S3 configuration
+S3_BUCKET = "kalika-rag"  # Replace with your S3 bucket name
+PO_INDEX_PATH = "faiss_indexes/po_faiss_index/index.faiss"
+PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index.faiss"
 
-# Debugging: Show available secrets (remove this after debugging)
-st.write("Available Secrets:", st.secrets)
+# Initialize S3 client using Streamlit secrets
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+    aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"]
+)
 
 
-# Function to load FAISS index from S3 directly into memory
-def load_faiss_index_from_s3(bucket_name, key):
-    # Initialize the S3 client using credentials from Streamlit Secrets
-    s3 = boto3.client(
-        's3',
-        aws_access_key_id=st.secrets["aws_access_key_id"],
-        aws_secret_access_key=st.secrets["aws_secret_access_key"],
-        region_name=st.secrets["aws_region"]
-    )
+# Initialize sentence transformer model for embeddings
+@st.cache_resource
+def load_embedding_model():
+    return SentenceTransformer('all-MiniLM-L6-v2')
+
+
+# Function to load FAISS index directly from S3 into memory
+def load_faiss_index_from_s3(s3_path):
     try:
-        response = s3.get_object(Bucket=bucket_name, Key=key)
-        index_binary = response['Body'].read()
-        index = faiss.deserialize_index(index_binary)  # Deserialize FAISS index into memory
+        response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_path)
+        index_bytes = response['Body'].read()
+        index_io = BytesIO(index_bytes)
+        index = faiss.read_index(index_io)
         return index
-    except ClientError as e:
-        if e.response['Error']['Code'] == 'NoSuchKey':
-            st.error(f"The specified key '{key}' does not exist in bucket '{bucket_name}'.")
-        else:
-            st.error(f"An unexpected error occurred: {e}")
+    except Exception as e:
+        st.error(f"Error loading FAISS index from S3: {str(e)}")
         return None
 
 
-# Paths to FAISS indexes in S3
-bucket_name = "kalika-rag"  # Replace with your actual S3 bucket name
-po_index_key = "faiss_indexes/po_faiss_index/index_file.bin"
-proforma_index_key = "faiss_indexes/proforma_faiss_index/index_file.bin"
+# RAG function to generate response
+def generate_response(query, index, model, document_data):
+    try:
+        query_embedding = model.encode([query])[0]
+        D, I = index.search(np.array([query_embedding]), k=3)
+        relevant_docs = [document_data[i] for i in I[0]]
+        response = "Based on the query, here's what I found:\n\n"
+        for doc in relevant_docs:
+            response += f"- {doc}\n"
+        return response
+    except Exception as e:
+        return f"Error generating response: {str(e)}"
 
 
-# Load FAISS indexes dynamically based on user selection
-def get_faiss_index(query_type):
-    if query_type == "Proforma":
-        return load_faiss_index_from_s3(bucket_name, proforma_index_key)
-    elif query_type == "Purchase Order":
-        return load_faiss_index_from_s3(bucket_name, po_index_key)
+# Streamlit app
+def main():
+    st.title("Proforma & PO Query Chatbot (Streamlit Cloud)")
+
+    model = load_embedding_model()
+
+    query_type = st.selectbox(
+        "Select Query Type",
+        ["Proforma Query", "PO Query"]
+    )
+
+    user_query = st.text_input("Enter your query:")
+
+    if st.button("Submit Query"):
+        if not user_query:
+            st.warning("Please enter a query!")
+            return
+
+        s3_path = PROFORMA_INDEX_PATH if query_type == "Proforma Query" else PO_INDEX_PATH
+        index_type = "Proforma" if query_type == "Proforma Query" else "PO"
+
+        with st.spinner(f"Loading {index_type} index from S3..."):
+            index = load_faiss_index_from_s3(s3_path)
+
+        if index:
+            # Placeholder for document data
+            document_data = ["Doc1", "Doc2", "Doc3"]  # Replace with actual data retrieval
+
+            with st.spinner(f"Generating {index_type} response..."):
+                response = generate_response(user_query, index, model, document_data)
+                st.success("Response generated!")
+                st.write(response)
+        else:
+            st.error("Failed to load FAISS index from S3")
 
 
-# Function to retrieve top k results from the FAISS index
-def retrieve(query, index, k=5):
-    query_embedding = model.encode([query])
-    distances, indices = index.search(np.array(query_embedding).astype('float32'), k)
-    return distances, indices
-
-
-# Streamlit app layout
-st.title("Proforma and PO Query Chatbot")
-
-# Dropdown for query type selection
-query_type = st.selectbox("Select Query Type", ["Proforma", "Purchase Order"])
-
-# Text input for user query
-user_query = st.text_input("Enter your query:")
-if st.button("Submit"):
-    # Load the appropriate FAISS index based on user selection
-    faiss_index = get_faiss_index(query_type)
-
-    if faiss_index:  # Proceed only if the index was loaded successfully
-        distances, indices = retrieve(user_query, faiss_index)
-        st.write(f"Top results for {query_type}:")
-        st.write(f"indices: {indices}")
-        st.write(f"distances: {distances}")
+if __name__ == "__main__":
+    main()
