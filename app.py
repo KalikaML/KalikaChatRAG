@@ -6,25 +6,28 @@ from sentence_transformers import SentenceTransformer
 import tempfile
 import os
 import pandas as pd
+import pickle
 
 # AWS S3 configuration
-S3_BUCKET = st.secrets['S3_BUCKET_NAME'] # Replace with your real bucket name
+S3_BUCKET = "kalika-rag"  # From your scripts
 PO_INDEX_PATH = "faiss_indexes/po_faiss_index/index.faiss"
 PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index.faiss"
+PO_CHUNKS_PATH = "faiss_indexes/po_faiss_index/chunks.pkl"  # Assumed path for PO chunks
+PROFORMA_CHUNKS_PATH = "faiss_indexes/proforma_faiss_index/chunks.pkl"  # Assumed path for Proforma chunks
 
 # Initialize S3 client with region
 s3_client = boto3.client(
     's3',
     aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
     aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
-    region_name=st.secrets['aws_region']
+    region_name=st.secrets['aws_region']  # Replace with your bucket's region, e.g., 'us-east-1'
 )
 
 
 # Initialize sentence transformer model for embeddings
 @st.cache_resource
 def load_embedding_model():
-    return SentenceTransformer('all-MiniLM-L6-v2')
+    return SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 
 # Function to load FAISS index from S3
@@ -43,6 +46,18 @@ def load_faiss_index_from_s3(s3_path):
         return None
 
 
+# Function to load document chunks from S3
+def load_document_chunks_from_s3(chunks_path):
+    try:
+        response = s3_client.get_object(Bucket=S3_BUCKET, Key=chunks_path)
+        chunks_bytes = response['Body'].read()
+        chunks = pickle.loads(chunks_bytes)  # Assuming chunks are pickled
+        return chunks
+    except Exception as e:
+        st.error(f"Error loading document chunks from S3: {str(e)}")
+        return []
+
+
 # RAG function to generate structured response
 def generate_response(query, index, model, document_data):
     try:
@@ -55,16 +70,15 @@ def generate_response(query, index, model, document_data):
             if doc_idx < len(document_data):
                 results.append({
                     "Match Rank": idx + 1,
-                    "Document": document_data[doc_idx],
+                    "Document Chunk": document_data[doc_idx],
                     "Similarity Score": float(1 / (1 + distance))  # Convert distance to similarity
                 })
             else:
                 results.append({
                     "Match Rank": idx + 1,
-                    "Document": "No matching document found",
+                    "Document Chunk": "No matching document found",
                     "Similarity Score": float(1 / (1 + distance))
                 })
-
         return results
     except Exception as e:
         st.error(f"Error generating response: {str(e)}")
@@ -83,22 +97,30 @@ def main():
             st.warning("Please enter a query!")
             return
 
-        s3_path = PROFORMA_INDEX_PATH if query_type == "Proforma Query" else PO_INDEX_PATH
+        # Select paths based on query type
+        s3_index_path = PROFORMA_INDEX_PATH if query_type == "Proforma Query" else PO_INDEX_PATH
+        s3_chunks_path = PROFORMA_CHUNKS_PATH if query_type == "Proforma Query" else PO_CHUNKS_PATH
         index_type = "Proforma" if query_type == "Proforma Query" else "PO"
 
+        # Load FAISS index
         with st.spinner(f"Loading {index_type} index from S3..."):
-            index = load_faiss_index_from_s3(s3_path)
+            index = load_faiss_index_from_s3(s3_index_path)
 
         if index:
-            # Placeholder document data (replace with actual retrieval logic)
-            document_data = ["Doc1: PO #123 details", "Doc2: Proforma #456 info", "Doc3: PO #789 summary"]
+            # Load document chunks
+            with st.spinner(f"Loading {index_type} document chunks from S3..."):
+                document_data = load_document_chunks_from_s3(s3_chunks_path)
 
+            if not document_data:
+                st.error(f"No document chunks found for {index_type}")
+                return
+
+            # Generate and display response
             with st.spinner(f"Generating {index_type} response..."):
                 response = generate_response(user_query, index, model, document_data)
 
             if response:
                 st.success(f"{index_type} Response Generated!")
-                # Display structured output as a table
                 df = pd.DataFrame(response)
                 st.table(df)
             else:
