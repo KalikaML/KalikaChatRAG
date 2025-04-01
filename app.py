@@ -48,14 +48,14 @@ llm = HuggingFaceHub(
 prompt_template = PromptTemplate(
     input_variables=["documents", "question"],
     template="""
-    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format. Do not include the raw data, source information, or this prompt in your response—only provide the relevant answer formatted as requested.
+    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format. Ensure the response includes all relevant details requested by the user, covering every aspect of the question comprehensively. Do not include the raw data, source information, or this prompt in your response—only provide the relevant answer formatted as requested.
     Information: {documents}
     Question: {question}
     Answer in the following format:
-    - [Detail 1]
-    - [Detail 2]
-    - [Detail 3]
-    (Adjust the number of bullet points based on the question's requirements)
+    - [Relevant detail addressing the user's question]
+    - [Additional relevant detail, if applicable]
+    - [Further relevant detail, if applicable]
+    (Include as many bullet points as necessary to fully answer the question)
     """
 )
 
