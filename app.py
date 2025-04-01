@@ -8,6 +8,9 @@ from botocore.exceptions import ClientError
 # Initialize Sentence Transformer model for embeddings
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
+# Debugging: Show available secrets (remove this after debugging)
+st.write("Available Secrets:", st.secrets)
+
 
 # Function to load FAISS index from S3 directly into memory
 def load_faiss_index_from_s3(bucket_name, key):
@@ -32,7 +35,7 @@ def load_faiss_index_from_s3(bucket_name, key):
 
 
 # Paths to FAISS indexes in S3
-bucket_name = "your-bucket-name"  # Replace with your actual S3 bucket name
+bucket_name = "kalika-rag"  # Replace with your actual S3 bucket name
 po_index_key = "faiss_indexes/po_faiss_index/index_file.bin"
 proforma_index_key = "faiss_indexes/proforma_faiss_index/index_file.bin"
 
