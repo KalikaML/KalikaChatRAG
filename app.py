@@ -44,11 +44,11 @@ llm = HuggingFaceHub(
     model_kwargs={"temperature": 0.7, "max_length": 512}
 )
 
-# Updated prompt template for sales team queries
+# Prompt template for sales team queries
 prompt_template = PromptTemplate(
     input_variables=["documents", "question"],
     template="""
-    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format. Do not include the raw data or source information in your response—only provide the relevant answer formatted as requested.
+    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format. Do not include the raw data, source information, or this prompt in your response—only provide the relevant answer formatted as requested.
     Information: {documents}
     Question: {question}
     Answer in the following format:
@@ -149,7 +149,7 @@ def main():
 
     # Chat interface
     st.title("RAG Chatbot")
-    st.write("Ask anything based on the selected data source。与")
+    st.write("Ask anything based on the selected data source.")
 
     # Initialize session state
     if "chat_history" not in st.session_state:
@@ -179,11 +179,12 @@ def main():
     if st.button("Send") and user_input:
         with st.spinner("Generating response..."):
             response = st.session_state.qa_chain.run(user_input)
+            # Append to chat history (latest entry added last)
             st.session_state.chat_history.append(("user", user_input))
             st.session_state.chat_history.append(("bot", response))
 
-    # Display chat history
-    for sender, message in st.session_state.chat_history:
+    # Display chat history with latest at top, oldest at bottom
+    for sender, message in reversed(st.session_state.chat_history):
         if sender == "user":
             st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
         else:
