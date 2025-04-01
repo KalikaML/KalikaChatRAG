@@ -8,7 +8,7 @@ import os
 import pandas as pd
 
 # AWS S3 configuration
-S3_BUCKET = st.secrets['S3_BUCKET_NAME '] # Replace with your real bucket name
+S3_BUCKET = st.secrets['S3_BUCKET_NAME'] # Replace with your real bucket name
 PO_INDEX_PATH = "faiss_indexes/po_faiss_index/index.faiss"
 PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index.faiss"
 
