@@ -11,7 +11,13 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Function to load FAISS index from S3 directly into memory
 def load_faiss_index_from_s3(bucket_name, key):
-    s3 = boto3.client('s3')
+    # Initialize the S3 client using credentials from Streamlit Secrets
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=st.secrets["aws"]["aws_access_key_id"],
+        aws_secret_access_key=st.secrets["aws"]["aws_secret_access_key"],
+        region_name=st.secrets["aws"]["aws_region"]
+    )
     try:
         response = s3.get_object(Bucket=bucket_name, Key=key)
         index_binary = response['Body'].read()
@@ -26,7 +32,7 @@ def load_faiss_index_from_s3(bucket_name, key):
 
 
 # Paths to FAISS indexes in S3
-bucket_name = "kalika-rag"  # Replace with your actual S3 bucket name
+bucket_name = "your-bucket-name"  # Replace with your actual S3 bucket name
 po_index_key = "faiss_indexes/po_faiss_index/index_file.bin"
 proforma_index_key = "faiss_indexes/proforma_faiss_index/index_file.bin"
 
