@@ -76,7 +76,6 @@ Answer:"""
 PROMPT = PromptTemplate(
     template=prompt_template, input_variables=["context", "question"]
 )
-
 llm = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta")
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
