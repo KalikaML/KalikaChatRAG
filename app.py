@@ -233,17 +233,18 @@ llm = HuggingFaceHub(
     model_kwargs={"temperature": 0.7, "max_length": 512}
 )
 
-# Updated prompt template for vendor list extraction
+# Updated prompt template for sales team queries
 prompt_template = PromptTemplate(
     input_variables=["documents", "question"],
     template="""
-    You are a helpful assistant. Based on the following information, extract all unique vendor names and provide them in a concise, bullet-point list. Do not include the raw information or any other details in your response, only the list of vendor names in the specified format.
+    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format. Do not include the raw data or source information in your response—only provide the relevant answer formatted as requested.
     Information: {documents}
     Question: {question}
     Answer in the following format:
-    - [Vendor Name 1]
-    - [Vendor Name 2]
-    - [Vendor Name 3]
+    - [Detail 1]
+    - [Detail 2]
+    - [Detail 3]
+    (Adjust the number of bullet points based on the question's requirements)
     """
 )
 
@@ -337,7 +338,7 @@ def main():
 
     # Chat interface
     st.title("RAG Chatbot")
-    st.write("Ask anything based on the selected data source!")
+    st.write("Ask anything based on the selected data source。与
 
     # Initialize session state
     if "chat_history" not in st.session_state:
