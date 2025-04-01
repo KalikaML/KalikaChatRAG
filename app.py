@@ -1,132 +1,147 @@
 import streamlit as st
 import boto3
-import faiss
-import numpy as np
-from sentence_transformers import SentenceTransformer
-import tempfile
 import os
-import pandas as pd
-import pickle
+import tempfile
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain.prompts import PromptTemplate
+from langchain.chains import RetrievalQA
+from langchain_community.llms import HuggingFaceHub
+import toml
+from datetime import datetime
 
-# AWS S3 configuration
-S3_BUCKET = "kalika-rag"  # From your scripts
-PO_INDEX_PATH = "faiss_indexes/po_faiss_index/index.faiss"
-PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index.faiss"
-PO_CHUNKS_PATH = "faiss_indexes/po_faiss_index/chunks.pkl"  # Assumed path for PO chunks
-PROFORMA_CHUNKS_PATH = "faiss_indexes/proforma_faiss_index/chunks.pkl"  # Assumed path for Proforma chunks
+# Configuration constants
+S3_BUCKET = "kalika-rag"
+PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/"
+PO_INDEX_PATH = "faiss_indexes/po_faiss_index/"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+LLM_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1"  # Replace with your preferred model
+PROFORMA_FOLDER = "proforma_invoice/"
+PO_FOLDER = "PO_Dump/"
 
-# Initialize S3 client with region
+# Load secrets from secrets.toml
+secrets = toml.load(SECRETS_FILE_PATH)
+AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
+HUGGINGFACE_TOKEN = st.secrets["HUGGINGFACE_ACCESS_TOKEN"]
+
+# Initialize S3 client
 s3_client = boto3.client(
-    's3',
-    aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
-    aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
-    region_name=st.secrets['aws_region']  # Replace with your bucket's region, e.g., 'us-east-1'
+    "s3",
+    aws_access_key_id=AWS_ACCESS_KEY,
+    aws_secret_access_key=AWS_SECRET_KEY,
+)
+
+# Initialize embeddings
+embeddings = HuggingFaceEmbeddings(
+    model_name=EMBEDDING_MODEL,
+    model_kwargs={'device': 'cpu'},
+    encode_kwargs={'normalize_embeddings': False}
+)
+
+# Initialize LLM (HuggingFace Hub)
+llm = HuggingFaceHub(
+    repo_id=LLM_MODEL,
+    huggingfacehub_api_token=HUGGINGFACE_TOKEN,
+    model_kwargs={"temperature": 0.7, "max_length": 512}
+)
+
+# Prompt template for RAG
+prompt_template = PromptTemplate(
+    input_variables=["context", "question"],
+    template="""
+    You are a helpful assistant. Use the following context to answer the user's question accurately and concisely.
+    Context: {context}
+    Question: {question}
+    Answer:
+    """
 )
 
 
-# Initialize sentence transformer model for embeddings
-@st.cache_resource
-def load_embedding_model():
-    return SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-
-
 # Function to load FAISS index from S3
-def load_faiss_index_from_s3(s3_path):
-    try:
-        response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_path)
-        index_bytes = response['Body'].read()
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(index_bytes)
-            tmp_file.flush()
-            index = faiss.read_index(tmp_file.name)
-        os.unlink(tmp_file.name)
-        return index
-    except Exception as e:
-        st.error(f"Error loading FAISS index from S3: {str(e)}")
-        return None
+def load_faiss_index_from_s3(index_path):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        for file_name in ["index.faiss", "index.pkl"]:
+            s3_key = f"{index_path}{file_name}"
+            local_path = os.path.join(temp_dir, file_name)
+            s3_client.download_file(S3_BUCKET, s3_key, local_path)
+        vector_store = FAISS.load_local(temp_dir, embeddings, allow_dangerous_deserialization=True)
+    return vector_store
 
 
-# Function to load document chunks from S3
-def load_document_chunks_from_s3(chunks_path):
-    try:
-        response = s3_client.get_object(Bucket=S3_BUCKET, Key=chunks_path)
-        chunks_bytes = response['Body'].read()
-        chunks = pickle.loads(chunks_bytes)  # Assuming chunks are pickled
-        return chunks
-    except Exception as e:
-        st.error(f"Error loading document chunks from S3: {str(e)}")
-        return []
+# Function to count new files in S3 folder
+def count_new_files(folder_prefix):
+    response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=folder_prefix)
+    if 'Contents' not in response:
+        return 0
+    # Count files without '_processed' suffix
+    new_files = sum(1 for obj in response['Contents'] if not obj['Key'].endswith('_processed.pdf'))
+    return new_files
 
 
-# RAG function to generate structured response
-def generate_response(query, index, model, document_data):
-    try:
-        query_embedding = model.encode([query])[0]
-        D, I = index.search(np.array([query_embedding]), k=3)  # Top 3 matches
-
-        # Structured output: list of dictionaries
-        results = []
-        for idx, (distance, doc_idx) in enumerate(zip(D[0], I[0])):
-            if doc_idx < len(document_data):
-                results.append({
-                    "Match Rank": idx + 1,
-                    "Document Chunk": document_data[doc_idx],
-                    "Similarity Score": float(1 / (1 + distance))  # Convert distance to similarity
-                })
-            else:
-                results.append({
-                    "Match Rank": idx + 1,
-                    "Document Chunk": "No matching document found",
-                    "Similarity Score": float(1 / (1 + distance))
-                })
-        return results
-    except Exception as e:
-        st.error(f"Error generating response: {str(e)}")
-        return None
-
-
-# Streamlit app
+# Main Streamlit app
 def main():
-    st.title("Proforma & PO Query Chatbot (Streamlit Cloud)")
-    model = load_embedding_model()
-    query_type = st.selectbox("Select Query Type", ["Proforma Query", "PO Query"])
-    user_query = st.text_input("Enter your query:")
+    st.set_page_config(page_title="RAG Chatbot", layout="wide")
 
-    if st.button("Submit Query"):
-        if not user_query:
-            st.warning("Please enter a query!")
-            return
+    # Custom CSS for professional look
+    st.markdown("""
+        <style>
+        .chat-message { padding: 10px; border-radius: 5px; margin: 5px 0; }
+        .user-message { background-color: #DCF8C6; text-align: right; }
+        .bot-message { background-color: #ECECEC; text-align: left; }
+        .sidebar .sidebar-content { padding: 20px; }
+        </style>
+    """, unsafe_allow_html=True)
 
-        # Select paths based on query type
-        s3_index_path = PROFORMA_INDEX_PATH if query_type == "Proforma Query" else PO_INDEX_PATH
-        s3_chunks_path = PROFORMA_CHUNKS_PATH if query_type == "Proforma Query" else PO_CHUNKS_PATH
-        index_type = "Proforma" if query_type == "Proforma Query" else "PO"
+    # Sidebar for options and stats
+    with st.sidebar:
+        st.title("Chatbot Options")
+        option = st.radio("Select Data Source", ("Proforma Invoices", "Purchase Orders"))
+        st.subheader("New Files Processed")
+        proforma_new = count_new_files(PROFORMA_FOLDER)
+        po_new = count_new_files(PO_FOLDER)
+        st.write(f"Proforma Invoices: {proforma_new} new files")
+        st.write(f"Purchase Orders: {po_new} new files")
+        st.write(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-        # Load FAISS index
-        with st.spinner(f"Loading {index_type} index from S3..."):
-            index = load_faiss_index_from_s3(s3_index_path)
+    # Chat interface
+    st.title("RAG Chatbot")
+    st.write("Ask anything based on the selected data source!")
 
-        if index:
-            # Load document chunks
-            with st.spinner(f"Loading {index_type} document chunks from S3..."):
-                document_data = load_document_chunks_from_s3(s3_chunks_path)
+    # Initialize session state for chat history
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    if "current_option" not in st.session_state:
+        st.session_state.current_option = None
 
-            if not document_data:
-                st.error(f"No document chunks found for {index_type}")
-                return
+    # Load FAISS index based on selected option
+    if option != st.session_state.current_option:
+        st.session_state.current_option = option
+        index_path = PROFORMA_INDEX_PATH if option == "Proforma Invoices" else PO_INDEX_PATH
+        with st.spinner(f"Loading {option} FAISS index from S3..."):
+            vector_store = load_faiss_index_from_s3(index_path)
+            retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+            st.session_state.qa_chain = RetrievalQA.from_chain_type(
+                llm=llm,
+                chain_type="stuff",
+                retriever=retriever,
+                chain_type_kwargs={"prompt": prompt_template}
+            )
 
-            # Generate and display response
-            with st.spinner(f"Generating {index_type} response..."):
-                response = generate_response(user_query, index, model, document_data)
+    # Chat input
+    user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
+    if st.button("Send") and user_input:
+        with st.spinner("Generating response..."):
+            response = st.session_state.qa_chain.run(user_input)
+            st.session_state.chat_history.append(("user", user_input))
+            st.session_state.chat_history.append(("bot", response))
 
-            if response:
-                st.success(f"{index_type} Response Generated!")
-                df = pd.DataFrame(response)
-                st.table(df)
-            else:
-                st.error("Failed to generate response")
+    # Display chat history
+    for sender, message in st.session_state.chat_history:
+        if sender == "user":
+            st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
         else:
-            st.error("Failed to load FAISS index from S3")
+            st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
