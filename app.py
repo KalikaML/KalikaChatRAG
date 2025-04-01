@@ -17,9 +17,9 @@ def load_faiss_index_from_s3(bucket_name, key):
     # Initialize the S3 client using credentials from Streamlit Secrets
     s3 = boto3.client(
         's3',
-        aws_access_key_id=st.secrets["aws"]["aws_access_key_id"],
-        aws_secret_access_key=st.secrets["aws"]["aws_secret_access_key"],
-        region_name=st.secrets["aws"]["aws_region"]
+        aws_access_key_id=st.secrets["aws_access_key_id"],
+        aws_secret_access_key=st.secrets["aws_secret_access_key"],
+        region_name=st.secrets["aws_region"]
     )
     try:
         response = s3.get_object(Bucket=bucket_name, Key=key)
@@ -63,7 +63,6 @@ query_type = st.selectbox("Select Query Type", ["Proforma", "Purchase Order"])
 
 # Text input for user query
 user_query = st.text_input("Enter your query:")
-
 if st.button("Submit"):
     # Load the appropriate FAISS index based on user selection
     faiss_index = get_faiss_index(query_type)
