@@ -192,7 +192,6 @@ def main():
 
 if __name__ == "__main__":
     main()'''
-
 import streamlit as st
 import boto3
 import os
@@ -239,12 +238,11 @@ llm = HuggingFaceHub(
     model_kwargs={"temperature": 0.7, "max_length": 512}
 )
 
-# Prompt template for RAG (hiding context from user)
+# Prompt template without context, relying on FAISS index retrieval
 prompt_template = PromptTemplate(
-    input_variables=["context", "question"],
+    input_variables=["question"],
     template="""
-    You are a helpful assistant. Use the following context to answer the user's question accurately and concisely. Do not include the context in your response, only provide the answer.
-    Context: {context}
+    You are a helpful assistant. Answer the user's question accurately and concisely based on the information available to you.
     Question: {question}
     Answer:
     """
@@ -354,8 +352,8 @@ def main():
         index_path = PROFORMA_INDEX_PATH if option == "Proforma Invoices" else PO_INDEX_PATH
         with st.spinner(f"Loading {option} FAISS index from S3..."):
             vector_store = load_faiss_index_from_s3(index_path)
-            # Remove the 'k' limit to search the entire index
-            retriever = vector_store.as_retriever()  # Default behavior searches all vectors
+            # Search the entire FAISS index without limiting results
+            retriever = vector_store.as_retriever()  # No 'k' limit, searches all vectors
             st.session_state.qa_chain = RetrievalQA.from_chain_type(
                 llm=llm,
                 chain_type="stuff",
