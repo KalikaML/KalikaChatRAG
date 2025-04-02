@@ -89,7 +89,7 @@ gemini_llm = get_llm()
 
 # Enhanced prompt template for sales team queries with document count information
 prompt_template = PromptTemplate(
-    input_variables=["documents", "question", "doc_count", "total_counts"],
+    input_variables=["documents", "question", "doc_count"],
     template="""
     You are an assistant designed to support a sales team. Using the provided information from {doc_count} documents (including proforma invoices and purchase orders), answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
 
@@ -97,9 +97,6 @@ prompt_template = PromptTemplate(
 
     Information from documents: {documents}
     Question: {question}
-
-    Additional system information:
-    {total_counts}
 
     Important: Your response must ONLY include the answer in bullet points. Do NOT include:
     - The documents or source information you used
@@ -159,50 +156,6 @@ def count_new_files(folder_prefix):
     return new_files
 
 
-# New function to count total documents in FAISS indexes
-def count_total_documents():
-    """Count the total number of documents in each FAISS index"""
-    counts = {}
-
-    # Get counts from indexes
-    if "all_indexes" in st.session_state and st.session_state.indexes_loaded:
-        # For Proforma index - get total number of documents
-        proforma_index = st.session_state.all_indexes["Proforma Invoices"]
-        # Use the docstore attribute of FAISS index to get document count
-        if hasattr(proforma_index, 'docstore') and hasattr(proforma_index.docstore, '_dict'):
-            counts["total_proforma_docs"] = len(proforma_index.docstore._dict)
-        else:
-            # Alternative method if the above doesn't work
-            counts["total_proforma_docs"] = len(proforma_index.index_to_docstore_id)
-
-        # For PO index
-        po_index = st.session_state.all_indexes["Purchase Orders"]
-        if hasattr(po_index, 'docstore') and hasattr(po_index.docstore, '_dict'):
-            counts["total_po_docs"] = len(po_index.docstore._dict)
-        else:
-            counts["total_po_docs"] = len(po_index.index_to_docstore_id)
-
-    # Get counts from S3 bucket
-    try:
-        # Count total proforma files (both processed and unprocessed)
-        proforma_response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=PROFORMA_FOLDER)
-        if 'Contents' in proforma_response:
-            counts["total_proforma_files"] = len(proforma_response['Contents'])
-        else:
-            counts["total_proforma_files"] = 0
-
-        # Count total PO files
-        po_response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=PO_FOLDER)
-        if 'Contents' in po_response:
-            counts["total_po_files"] = len(po_response['Contents'])
-        else:
-            counts["total_po_files"] = 0
-    except Exception as e:
-        st.warning(f"Error counting S3 files: {e}")
-
-    return counts
-
-
 # Function to retrieve documents from combined indexes
 def retrieve_from_all_indexes(query, k=10):
     """Retrieve documents from both indexes and combine results"""
@@ -224,32 +177,12 @@ def retrieve_from_all_indexes(query, k=10):
     return all_docs
 
 
-# Function to determine if query is about document counts
-def is_count_query(query):
-    """Check if the query is asking about document counts or statistics"""
-    query = query.lower()
-    count_keywords = [
-        "how many", "count", "total", "number of",
-        "quantity", "statistics", "stats", "volumes",
-        "how much", "proforma", "invoice", "po ", "purchase order"
-    ]
-
-    # Check if any count keywords are in the query
-    has_count_keyword = any(keyword in query for keyword in count_keywords)
-
-    return has_count_keyword
-
-
 # Background thread to periodically refresh file counts
 def background_refresh():
     while True:
         try:
             st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
             st.session_state.po_new = count_new_files(PO_FOLDER)
-
-            # Also update total document counts
-            st.session_state.doc_counts = count_total_documents()
-
             st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             time.sleep(300)  # Refresh every 5 minutes
         except Exception as e:
@@ -351,20 +284,6 @@ def load_css():
             margin-right: 10px;
             border-left: 3px solid #03DAC6;
         }
-        .stats-panel {
-            background-color: #252525;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #555555;
-            margin-top: 15px;
-        }
-        .stats-item {
-            padding: 8px;
-            background-color: #333333;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            border-left: 3px solid #03DAC6;
-        }
         </style>
     """
 
@@ -385,14 +304,18 @@ def main():
         st.session_state.proforma_new = 0
     if "po_new" not in st.session_state:
         st.session_state.po_new = 0
-    if "doc_counts" not in st.session_state:
-        st.session_state.doc_counts = {}
     if "last_updated" not in st.session_state:
         st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if "background_thread_started" not in st.session_state:
         st.session_state.background_thread_started = False
     if "response_length" not in st.session_state:
         st.session_state.response_length = "Auto"  # Default to auto length
+
+    # Start background thread for file count updates
+    if not st.session_state.background_thread_started:
+        thread = threading.Thread(target=background_refresh, daemon=True)
+        thread.start()
+        st.session_state.background_thread_started = True
 
     # Create a two-column layout
     col1, col2 = st.columns([7, 3])
@@ -407,8 +330,6 @@ def main():
             with st.spinner("Loading FAISS indexes..."):
                 st.session_state.all_indexes = get_all_indexes()
                 st.session_state.indexes_loaded = True
-                # Initialize document counts
-                st.session_state.doc_counts = count_total_documents()
 
         # User input area
         user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
@@ -424,7 +345,7 @@ def main():
             )
 
         with input_col2:
-            doc_count = st.slider("Number of documents to retrieve", min_value=3, max_value=50, value=10)
+            doc_count = st.slider("Number of documents to retrieve", min_value=3, max_value=20, value=10)
 
         with input_col3:
             response_length = st.selectbox(
@@ -446,26 +367,16 @@ def main():
             )
 
             try:
-                # Check if this is a count query to potentially increase document retrieval
-                count_query = is_count_query(user_input)
-
-                # If count query, increase document retrieval count
-                retrieval_count = min(50, doc_count * 3) if count_query else doc_count
-
-                # Ensure document counts are up to date
-                if count_query:
-                    st.session_state.doc_counts = count_total_documents()
-
                 # Determine which index to use based on user selection
                 if option == "Combined (Both Sources)":
                     # Use both indexes
-                    documents = retrieve_from_all_indexes(user_input, k=retrieval_count)
+                    documents = retrieve_from_all_indexes(user_input, k=doc_count)
                 elif option == "Proforma Invoices Only":
                     vector_store = st.session_state.all_indexes["Proforma Invoices"]
-                    documents = vector_store.similarity_search(user_input, k=retrieval_count)
+                    documents = vector_store.similarity_search(user_input, k=doc_count)
                 else:  # Purchase Orders Only
                     vector_store = st.session_state.all_indexes["Purchase Orders"]
-                    documents = vector_store.similarity_search(user_input, k=retrieval_count)
+                    documents = vector_store.similarity_search(user_input, k=doc_count)
 
                 st.session_state.context_documents = documents
 
@@ -476,23 +387,11 @@ def main():
                 elif response_length == "Detailed":
                     max_length = 2000  # Longer, more detailed response
 
-                # Format total counts information for the prompt
-                total_counts_info = f"""
-                Total document statistics:
-                - Total Proforma documents in index: {st.session_state.doc_counts.get('total_proforma_docs', 'N/A')}
-                - Total Purchase Order documents in index: {st.session_state.doc_counts.get('total_po_docs', 'N/A')}
-                - Total Proforma files in S3: {st.session_state.doc_counts.get('total_proforma_files', 'N/A')}
-                - Total Purchase Order files in S3: {st.session_state.doc_counts.get('total_po_files', 'N/A')}
-                - New Proforma files: {st.session_state.proforma_new}
-                - New Purchase Order files: {st.session_state.po_new}
-                """
-
                 # Generate response using the documents
                 prompt_instance = prompt_template.format(
                     documents=documents,
                     question=user_input,
-                    doc_count=len(documents),
-                    total_counts=total_counts_info
+                    doc_count=len(documents)
                 )
 
                 response = gemini_llm.generate(prompt_instance, max_length=max_length)
@@ -513,11 +412,7 @@ def main():
                 source_info = source_info.rstrip(", ")
 
                 # Update chat history with bot response including document stats
-                metadata_message = f"Using {len(documents)} documents"
-                if count_query:
-                    metadata_message += f" | Total in system: {st.session_state.doc_counts.get('total_proforma_docs', 0) + st.session_state.doc_counts.get('total_po_docs', 0)}"
-
-                st.session_state.chat_history.append(("bot_metadata", metadata_message))
+                st.session_state.chat_history.append(("bot_metadata", f"Using {len(documents)} documents"))
                 st.session_state.chat_history.append(("bot", response))
 
                 # Clear the placeholder
@@ -575,30 +470,15 @@ def main():
                 unsafe_allow_html=True)
 
         # Options and stats in the right panel below context
-        st.markdown("<h3>System Stats</h3>", unsafe_allow_html=True)
-        st.markdown('<div class="stats-panel">', unsafe_allow_html=True)
-
-        # Display document counts
-        if st.session_state.doc_counts:
-            st.markdown('<div class="stats-item">FAISS Index Documents</div>', unsafe_allow_html=True)
-            st.write(f"• Proforma documents: {st.session_state.doc_counts.get('total_proforma_docs', 'N/A')}")
-            st.write(f"• Purchase Order documents: {st.session_state.doc_counts.get('total_po_docs', 'N/A')}")
-
-            st.markdown('<div class="stats-item">S3 File Counts</div>', unsafe_allow_html=True)
-            st.write(f"• Proforma files: {st.session_state.doc_counts.get('total_proforma_files', 'N/A')}")
-            st.write(f"• Purchase Order files: {st.session_state.doc_counts.get('total_po_files', 'N/A')}")
-
-        st.markdown('<div class="stats-item">New Files</div>', unsafe_allow_html=True)
-        st.write(f"• Proforma Invoices: {st.session_state.proforma_new} new files")
-        st.write(f"• Purchase Orders: {st.session_state.po_new} new files")
-        st.write(f"• Last Updated: {st.session_state.last_updated}")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("<h3>Stats</h3>", unsafe_allow_html=True)
+        st.write(f"Proforma Invoices: {st.session_state.proforma_new} new files")
+        st.write(f"Purchase Orders: {st.session_state.po_new} new files")
+        st.write(f"Last Updated: {st.session_state.last_updated}")
 
         # Add a refresh button for stats
         if st.button("Refresh Stats"):
             st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
             st.session_state.po_new = count_new_files(PO_FOLDER)
-            st.session_state.doc_counts = count_total_documents()
             st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             st.experimental_rerun()
 
