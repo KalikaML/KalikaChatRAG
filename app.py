@@ -51,10 +51,18 @@ gemini_llm = GeminiLLM(api_key=st.secrets["GEMINI_API_KEY"])
 prompt_template = PromptTemplate(
     input_variables=["documents", "question"],
     template="""
-    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format. Ensure the response includes all relevant details requested by the user, covering every aspect of the question comprehensively. Do not include the raw data, source information, or this prompt in your response—only provide the relevant answer formatted as requested.
+    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
+
     Information: {documents}
     Question: {question}
-    Answer in the following format:
+
+    Important: Your response must ONLY include the answer in bullet points. Do NOT include:
+    - The documents or source information you used
+    - Any preamble or introduction to your answer
+    - Any mention of the context you're referencing
+    - This instruction itself
+
+    Respond directly with bullet points:
     - [Relevant detail addressing the user's question]
     - [Additional relevant detail, if applicable]
     - [Further relevant detail, if applicable]
