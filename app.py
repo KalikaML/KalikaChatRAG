@@ -3,6 +3,7 @@ import boto3
 import os
 import tempfile
 from datetime import datetime
+import google.generativeai as genai
 
 # Configuration constants
 S3_BUCKET = "kalika-rag"
@@ -16,6 +17,9 @@ AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
 AWS_SECRET_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
 GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 
+# Configure Gemini API
+genai.configure(api_key=GOOGLE_API_KEY)
+
 # Initialize S3 client
 s3_client = boto3.client(
     "s3",
@@ -23,18 +27,15 @@ s3_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_KEY,
 )
 
-
-# Function to load FAISS index from S3
+# Function to load FAISS index from S3 (placeholder for Gemini integration)
 def load_faiss_index_from_s3(index_path):
     with tempfile.TemporaryDirectory() as temp_dir:
         for file_name in ["index.faiss", "index.pkl"]:
             s3_key = f"{index_path}{file_name}"
             local_path = os.path.join(temp_dir, file_name)
             s3_client.download_file(S3_BUCKET, s3_key, local_path)
-        # FAISS loading logic can be replaced if needed for Gemini integration
         vector_store = None  # Placeholder for Gemini-compatible vector store logic
     return vector_store
-
 
 # Function to count new files in S3 folder
 def count_new_files(folder_prefix):
@@ -44,27 +45,14 @@ def count_new_files(folder_prefix):
     new_files = sum(1 for obj in response['Contents'] if not obj['Key'].endswith('_processed.pdf'))
     return new_files
 
-
 # Function to query Gemini API
 def query_gemini_api(question, documents):
-    import requests
-
-    url = f"https://gemini.googleapis.com/v1/models/gemini-2.0-flash:predict?key={GOOGLE_API_KEY}"
-    payload = {
-        "documents": documents,
-        "question": question,
-        "model": "gemini-2.0-flash",
-        "temperature": 0.7,
-        "max_length": 512,
-    }
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(url, json=payload, headers=headers)
-
-    if response.status_code == 200:
-        return response.json().get("answer", "")
-    else:
-        return f"Error: {response.status_code} - {response.text}"
-
+    try:
+        response = genai.chat(messages=[{"role": "system", "content": f"Documents: {documents}"},
+                                        {"role": "user", "content": question}])
+        return response.get("content", "")
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 # Main Streamlit app
 def main():
@@ -163,7 +151,6 @@ def main():
             st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
         else:
             st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
-
 
 if __name__ == "__main__":
     main()
