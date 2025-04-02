@@ -42,7 +42,7 @@ def get_embeddings():
 embeddings = get_embeddings()
 
 
-# Initialize Gemini LLM with proper API implementation
+# Initialize Gemini LLM with proper API implementation and dynamic response length
 class GeminiLLM:
     def __init__(self, api_key):
         self.api_key = api_key
@@ -51,15 +51,29 @@ class GeminiLLM:
         # Example: from google.generativeai import GenerativeModel
         #          self.model = GenerativeModel("gemini-1.5-pro")
 
-    def generate(self, prompt, temperature=0.7, max_length=512):
+    def generate(self, prompt, temperature=0.7, max_length=None):
+        """
+        Generate response with dynamic length based on user request or content needs
+
+        Args:
+            prompt: The input prompt
+            temperature: Controls randomness (lower = more deterministic)
+            max_length: Maximum token length (None = no limit)
+
+        Returns:
+            Generated text response
+        """
         # Replace with actual implementation
         # Example:
+        # generation_config = {
+        #     "temperature": temperature,
+        # }
+        # if max_length:
+        #     generation_config["max_output_tokens"] = max_length
+        #
         # response = self.model.generate_content(
         #     prompt,
-        #     generation_config={
-        #         "temperature": temperature,
-        #         "max_output_tokens": max_length,
-        #     }
+        #     generation_config=generation_config
         # )
         # return response.text
         return f"Generated response for: {prompt}"  # Placeholder response
@@ -73,13 +87,15 @@ def get_llm():
 
 gemini_llm = get_llm()
 
-# Prompt template for sales team queries
+# Enhanced prompt template for sales team queries with document count information
 prompt_template = PromptTemplate(
-    input_variables=["documents", "question"],
+    input_variables=["documents", "question", "doc_count"],
     template="""
-    You are an assistant designed to support a sales team. Using the provided information from proforma invoices and purchase orders, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
+    You are an assistant designed to support a sales team. Using the provided information from {doc_count} documents (including proforma invoices and purchase orders), answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
 
-    Information: {documents}
+    Make your response as comprehensive as needed to fully address the query - don't artificially limit length.
+
+    Information from documents: {documents}
     Question: {question}
 
     Important: Your response must ONLY include the answer in bullet points. Do NOT include:
@@ -116,8 +132,19 @@ def get_all_indexes():
     po_index = load_faiss_index_from_s3(PO_INDEX_PATH)
     return {
         "Proforma Invoices": proforma_index,
-        "Purchase Orders": po_index
+        "Purchase Orders": po_index,
+        "Combined": None  # Will be created when needed
     }
+
+
+# Function to create a combined index from both sources
+def get_combined_index(proforma_index, po_index):
+    # This is a placeholder implementation
+    # Depending on your FAISS setup, you might need to:
+    # 1. Merge the indexes programmatically, or
+    # 2. Run combined queries against both and merge results
+    # For now, we'll return a simple dict to be used for dual querying
+    return {"proforma": proforma_index, "po": po_index}
 
 
 # Function to count new files in S3 folder
@@ -129,13 +156,38 @@ def count_new_files(folder_prefix):
     return new_files
 
 
+# Function to retrieve documents from combined indexes
+def retrieve_from_all_indexes(query, k=10):
+    """Retrieve documents from both indexes and combine results"""
+    proforma_index = st.session_state.all_indexes["Proforma Invoices"]
+    po_index = st.session_state.all_indexes["Purchase Orders"]
+
+    # Retrieve from both indexes
+    proforma_docs = proforma_index.similarity_search(query, k=k // 2)
+    po_docs = po_index.similarity_search(query, k=k // 2)
+
+    # Combine results
+    all_docs = proforma_docs + po_docs
+
+    # Sort by relevance if there's a relevance score
+    # This is placeholder logic - implement actual relevance sorting based on your needs
+    if hasattr(all_docs[0], 'metadata') and 'score' in all_docs[0].metadata:
+        all_docs.sort(key=lambda x: x.metadata.get('score', 0), reverse=True)
+
+    return all_docs
+
+
 # Background thread to periodically refresh file counts
 def background_refresh():
     while True:
-        st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
-        st.session_state.po_new = count_new_files(PO_FOLDER)
-        st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        time.sleep(300)  # Refresh every 5 minutes
+        try:
+            st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
+            st.session_state.po_new = count_new_files(PO_FOLDER)
+            st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            time.sleep(300)  # Refresh every 5 minutes
+        except Exception as e:
+            print(f"Error in background refresh: {e}")
+            time.sleep(60)  # Retry after a minute if there's an error
 
 
 # Custom styling
@@ -189,6 +241,11 @@ def load_css():
             font-size: 14px;
             border-left: 3px solid #BB86FC;
         }
+        .document-source {
+            font-size: 12px;
+            color: #BB86FC;
+            margin-bottom: 5px;
+        }
         .stTextInput > div > div > input {
             background-color: #333333;
             color: #E0E0E0;
@@ -219,6 +276,14 @@ def load_css():
             text-align: center;
             margin: 20px 0;
         }
+        .doc-stats {
+            background-color: #252525;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+            border-left: 3px solid #03DAC6;
+        }
         </style>
     """
 
@@ -243,6 +308,8 @@ def main():
         st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if "background_thread_started" not in st.session_state:
         st.session_state.background_thread_started = False
+    if "response_length" not in st.session_state:
+        st.session_state.response_length = "Auto"  # Default to auto length
 
     # Start background thread for file count updates
     if not st.session_state.background_thread_started:
@@ -256,7 +323,7 @@ def main():
     # Main chat interface in the left column
     with col1:
         st.title("RAG Chatbot")
-        st.write("Ask anything based on the selected data source.")
+        st.write("Ask anything related to proforma invoices and purchase orders.")
 
         # Load indexes in the background if not already loaded
         if not st.session_state.indexes_loaded:
@@ -264,9 +331,29 @@ def main():
                 st.session_state.all_indexes = get_all_indexes()
                 st.session_state.indexes_loaded = True
 
+        # User input area
         user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
 
-        option = st.session_state.get("current_option", "Proforma Invoices")
+        # Options for query
+        input_col1, input_col2, input_col3 = st.columns([2, 2, 1])
+
+        with input_col1:
+            option = st.selectbox(
+                "Data Source",
+                ["Combined (Both Sources)", "Proforma Invoices Only", "Purchase Orders Only"],
+                index=0
+            )
+
+        with input_col2:
+            doc_count = st.slider("Number of documents to retrieve", min_value=3, max_value=20, value=10)
+
+        with input_col3:
+            response_length = st.selectbox(
+                "Response Length",
+                ["Auto", "Concise", "Detailed"],
+                index=0
+            )
+            st.session_state.response_length = response_length
 
         if st.button("Send") and user_input:
             # Append user question to chat history immediately for better UX
@@ -275,37 +362,81 @@ def main():
             # Create a placeholder for the bot's response
             response_placeholder = st.empty()
             response_placeholder.markdown(
-                '<div class="loading-message">Generating response...</div>',
+                '<div class="loading-message">Retrieving documents and generating response...</div>',
                 unsafe_allow_html=True
             )
 
-            # Get the vector store for the selected data source
-            vector_store = st.session_state.all_indexes[option]
-            retriever = vector_store.as_retriever(search_kwargs={"k": 5})  # Retrieve top 5 most relevant documents
+            try:
+                # Determine which index to use based on user selection
+                if option == "Combined (Both Sources)":
+                    # Use both indexes
+                    documents = retrieve_from_all_indexes(user_input, k=doc_count)
+                elif option == "Proforma Invoices Only":
+                    vector_store = st.session_state.all_indexes["Proforma Invoices"]
+                    documents = vector_store.similarity_search(user_input, k=doc_count)
+                else:  # Purchase Orders Only
+                    vector_store = st.session_state.all_indexes["Purchase Orders"]
+                    documents = vector_store.similarity_search(user_input, k=doc_count)
 
-            # Retrieve documents
-            documents = retriever.retrieve(user_input)
-            st.session_state.context_documents = documents
+                st.session_state.context_documents = documents
 
-            # Generate response using the documents
-            prompt_instance = prompt_template.format(documents=documents, question=user_input)
-            response = gemini_llm.generate(prompt_instance)
+                # Calculate max_length based on selected response length
+                max_length = None  # Default: no limit (Auto)
+                if response_length == "Concise":
+                    max_length = 300  # Shorter response
+                elif response_length == "Detailed":
+                    max_length = 2000  # Longer, more detailed response
 
-            # Update chat history with bot response
-            st.session_state.chat_history.append(("bot", response))
+                # Generate response using the documents
+                prompt_instance = prompt_template.format(
+                    documents=documents,
+                    question=user_input,
+                    doc_count=len(documents)
+                )
 
-            # Clear the placeholder
-            response_placeholder.empty()
+                response = gemini_llm.generate(prompt_instance, max_length=max_length)
 
-            # Force a rerun to update the UI
-            st.experimental_rerun()
+                # Add document source information to the response for context
+                doc_sources = {}
+                for doc in documents:
+                    if hasattr(doc, 'metadata') and 'source' in doc.metadata:
+                        source = doc.metadata['source']
+                        if source in doc_sources:
+                            doc_sources[source] += 1
+                        else:
+                            doc_sources[source] = 1
+
+                source_info = "Based on: "
+                for source, count in doc_sources.items():
+                    source_info += f"{source.split('/')[-1]} ({count}), "
+                source_info = source_info.rstrip(", ")
+
+                # Update chat history with bot response including document stats
+                st.session_state.chat_history.append(("bot_metadata", f"Using {len(documents)} documents"))
+                st.session_state.chat_history.append(("bot", response))
+
+                # Clear the placeholder
+                response_placeholder.empty()
+
+                # Force a rerun to update the UI
+                st.experimental_rerun()
+
+            except Exception as e:
+                error_message = f"Error generating response: {str(e)}"
+                st.session_state.chat_history.append(("error", error_message))
+                response_placeholder.empty()
+                st.experimental_rerun()
 
         # Display chat history
-        for sender, message in reversed(st.session_state.chat_history):
+        for idx, (sender, message) in enumerate(reversed(st.session_state.chat_history)):
             if sender == "user":
                 st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
-            else:
+            elif sender == "bot_metadata":
+                st.markdown(f'<div class="doc-stats">{message}</div>', unsafe_allow_html=True)
+            elif sender == "bot":
                 st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
+            elif sender == "error":
+                st.error(message)
 
     # Right panel for context
     with col2:
@@ -314,10 +445,24 @@ def main():
         # Display the context documents
         if st.session_state.context_documents:
             st.markdown('<div class="context-panel">', unsafe_allow_html=True)
-            st.markdown('<div class="context-title">Source Documents</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="context-title">Source Documents ({len(st.session_state.context_documents)})</div>',
+                unsafe_allow_html=True)
+
             for i, doc in enumerate(st.session_state.context_documents):
-                st.markdown(f'<div class="context-item">Document {i + 1}:<br>{doc.page_content}</div>',
-                            unsafe_allow_html=True)
+                # Determine source type (Proforma or PO)
+                source_type = "Unknown"
+                if hasattr(doc, 'metadata') and 'source' in doc.metadata:
+                    if PROFORMA_FOLDER.lower() in doc.metadata['source'].lower():
+                        source_type = "Proforma"
+                    elif PO_FOLDER.lower() in doc.metadata['source'].lower():
+                        source_type = "PO"
+
+                st.markdown(
+                    f'<div class="document-source">Document {i + 1} - {source_type}</div>' +
+                    f'<div class="context-item">{doc.page_content}</div>',
+                    unsafe_allow_html=True
+                )
             st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.markdown(
@@ -325,10 +470,6 @@ def main():
                 unsafe_allow_html=True)
 
         # Options and stats in the right panel below context
-        st.markdown("<h3>Options</h3>", unsafe_allow_html=True)
-        option = st.radio("Select Data Source", ("Proforma Invoices", "Purchase Orders"))
-        st.session_state.current_option = option
-
         st.markdown("<h3>Stats</h3>", unsafe_allow_html=True)
         st.write(f"Proforma Invoices: {st.session_state.proforma_new} new files")
         st.write(f"Purchase Orders: {st.session_state.po_new} new files")
@@ -339,6 +480,12 @@ def main():
             st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
             st.session_state.po_new = count_new_files(PO_FOLDER)
             st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            st.experimental_rerun()
+
+        # Add a clear chat button
+        if st.button("Clear Chat History"):
+            st.session_state.chat_history = []
+            st.session_state.context_documents = []
             st.experimental_rerun()
 
 
