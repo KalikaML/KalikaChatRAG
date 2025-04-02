@@ -201,10 +201,10 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
-from langchain_community.llms import HuggingFaceHub
+from langchain_community.llms import HuggingFacePipeline
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 from datetime import datetime
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-import huggingface_hub
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, filename="app.log", filemode="a",
@@ -218,15 +218,14 @@ INDEX_PATHS = {
     "Purchase Orders": "faiss_indexes/po_faiss_index/"
 }
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-LLM_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+LLM_MODEL = "google/flan-t5-base"  # Free, open-source model
 PROFORMA_FOLDER = "proforma_invoice/"
 PO_FOLDER = "PO_Dump/"
 
-# Load secrets from secrets.toml
+# Load secrets from secrets.toml (only AWS needed now)
 try:
     AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
     AWS_SECRET_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
-    HUGGINGFACE_TOKEN = st.secrets["HUGGINGFACE_ACCESS_TOKEN"]
 except KeyError as e:
     st.error(f"Missing secret: {e}. Please check your secrets.toml configuration.")
     logger.error(f"Missing secret: {e}")
@@ -256,19 +255,25 @@ except Exception as e:
     logger.error(f"Embeddings initialization failed: {str(e)}")
     st.stop()
 
-# Initialize LLM (HuggingFace Hub)
+# Initialize LLM locally with transformers
 try:
-    llm = HuggingFaceHub(
-        repo_id=LLM_MODEL,
-        huggingfacehub_api_token=HUGGINGFACE_TOKEN,
-        model_kwargs={"temperature": 0.7, "max_length": 512}
+    tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL)
+    model = AutoModelForSeq2SeqLM.from_pretrained(LLM_MODEL)
+    pipe = pipeline(
+        "text2text-generation",
+        model=model,
+        tokenizer=tokenizer,
+        max_length=512,
+        temperature=0.7,
+        device=-1  # CPU; use 0 for GPU if available
     )
+    llm = HuggingFacePipeline(pipeline=pipe)
 except Exception as e:
-    st.error("Failed to initialize LLM. Please check the HuggingFace token or model availability.")
+    st.error("Failed to initialize local LLM. Check model availability or dependencies.")
     logger.error(f"LLM initialization failed: {str(e)}")
     st.stop()
 
-# Prompt template for sales team queries
+# Prompt template
 prompt_template = PromptTemplate(
     input_variables=["documents", "question"],
     template="""
@@ -279,12 +284,11 @@ prompt_template = PromptTemplate(
     - [Relevant detail addressing the user's question]
     - [Additional relevant detail, if applicable]
     - [Further relevant detail, if applicable]
-    (Include as many bullet points as necessary to fully answer the question)
     """
 )
 
 
-# Function to load FAISS index from S3
+# Load FAISS index from S3
 def load_faiss_index_from_s3(index_path):
     try:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -299,31 +303,19 @@ def load_faiss_index_from_s3(index_path):
         raise
 
 
-# Function to count new files in S3 folder
+# Count new files in S3 folder
 def count_new_files(folder_prefix):
     try:
         response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=folder_prefix)
         if 'Contents' not in response:
             return 0
-        new_files = sum(1 for obj in response['Contents'] if not obj['Key'].endswith('_processed.pdf'))
-        return new_files
+        return sum(1 for obj in response['Contents'] if not obj['Key'].endswith('_processed.pdf'))
     except Exception as e:
         logger.error(f"Failed to count new files in S3: {str(e)}")
         return 0
 
 
-# Retry decorator for HuggingFace API calls
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=4, max=10),
-    retry=retry_if_exception_type(huggingface_hub.errors.HfHubHTTPError),
-    before_sleep=lambda retry_state: logger.info(f"Retrying API call, attempt {retry_state.attempt_number}")
-)
-def run_qa_chain(qa_chain, user_input):
-    return qa_chain.run(user_input)
-
-
-# Load all FAISS indexes at startup
+# Load all FAISS indexes
 def load_all_faiss_indexes():
     vector_stores = {}
     for source, path in INDEX_PATHS.items():
@@ -335,66 +327,33 @@ def load_all_faiss_indexes():
     return vector_stores
 
 
+# Truncate documents to avoid exceeding token limits
+def truncate_documents(docs, max_length=400):
+    combined = "\n".join([doc.page_content for doc in docs])
+    return combined[:max_length] if len(combined) > max_length else combined
+
+
 # Main Streamlit app
 def main():
     st.set_page_config(page_title="RAG Chatbot", layout="wide")
 
-    # Custom CSS for black theme (unchanged)
+    # Custom CSS (unchanged)
     st.markdown("""
         <style>
-        .stApp {
-            background-color: #1E1E1E;
-            color: #E0E0E0;
-        }
-        .chat-message {
-            padding: 12px;
-            border-radius: 8px;
-            margin: 8px 0;
-            font-size: 16px;
-        }
-        .user-message {
-            background-color: #2D2D2D;
-            color: #BB86FC;
-            text-align: right;
-            border: 1px solid #BB86FC;
-        }
-        .bot-message {
-            background-color: #333333;
-            color: #E0E0E0;
-            text-align: left;
-            border: 1px solid #03DAC6;
-        }
-        .sidebar .sidebar-content {
-            background-color: #252525;
-            padding: 20px;
-            color: #E0E0E0;
-        }
-        .stTextInput > div > div > input {
-            background-color: #333333;
-            color: #E0E0E0;
-            border: 1px solid #555555;
-            border-radius: 5px;
-        }
-        .stButton > button {
-            background-color: #BB86FC;
-            color: #1E1E1E;
-            border: none;
-            border-radius: 5px;
-        }
-        .stButton > button:hover {
-            background-color: #03DAC6;
-            color: #1E1E1E;
-        }
-        h1, h2, h3 {
-            color: #BB86FC;
-        }
-        .stSpinner > div > div {
-            color: #03DAC6;
-        }
+        .stApp { background-color: #1E1E1E; color: #E0E0E0; }
+        .chat-message { padding: 12px; border-radius: 8px; margin: 8px 0; font-size: 16px; }
+        .user-message { background-color: #2D2D2D; color: #BB86FC; text-align: right; border: 1px solid #BB86FC; }
+        .bot-message { background-color: #333333; color: #E0E0E0; text-align: left; border: 1px solid #03DAC6; }
+        .sidebar .sidebar-content { background-color: #252525; padding: 20px; color: #E0E0E0; }
+        .stTextInput > div > div > input { background-color: #333333; color: #E0E0E0; border: 1px solid #555555; border-radius: 5px; }
+        .stButton > button { background-color: #BB86FC; color: #1E1E1E; border: none; border-radius: 5px; }
+        .stButton > button:hover { background-color: #03DAC6; color: #1E1E1E; }
+        h1, h2, h3 { color: #BB86FC; }
+        .stSpinner > div > div { color: #03DAC6; }
         </style>
     """, unsafe_allow_html=True)
 
-    # Sidebar for stats
+    # Sidebar
     with st.sidebar:
         st.title("Chatbot Stats")
         st.subheader("New Files Processed")
@@ -416,17 +375,13 @@ def main():
             st.session_state.vector_stores = load_all_faiss_indexes()
     if "qa_chain" not in st.session_state:
         try:
-            # Combine all retrievers into a single QA chain
             retrievers = {source: vs.as_retriever(search_kwargs={"k": 4}) for source, vs in
                           st.session_state.vector_stores.items()}
             st.session_state.qa_chain = RetrievalQA.from_chain_type(
                 llm=llm,
                 chain_type="stuff",
-                retriever=None,  # We'll dynamically set documents later
-                chain_type_kwargs={
-                    "prompt": prompt_template,
-                    "document_variable_name": "documents"
-                }
+                retriever=None,
+                chain_type_kwargs={"prompt": prompt_template, "document_variable_name": "documents"}
             )
             st.session_state.retrievers = retrievers
         except Exception as e:
@@ -445,22 +400,18 @@ def main():
                     docs = retriever.get_relevant_documents(user_input)
                     all_docs.extend(docs)
 
-                # Combine document content
-                combined_docs = "\n".join([doc.page_content for doc in all_docs])
+                # Truncate combined documents
+                combined_docs = truncate_documents(all_docs, max_length=400)
 
-                # Run QA chain with combined documents
-                response = st.session_state.qa_chain({"documents": combined_docs, "question": user_input})
+                # Run QA chain
+                response = st.session_state.qa_chain({"documents": combined_docs, "question": user_input})["result"]
                 st.session_state.chat_history.append(("user", user_input))
-                st.session_state.chat_history.append(("bot", response["result"]))
-            except huggingface_hub.errors.HfHubHTTPError as e:
-                st.error(
-                    "Failed to get a response from the LLM. This could be due to API rate limits or model unavailability. Please try again later or contact support.")
-                logger.error(f"HuggingFace API error: {str(e)}")
+                st.session_state.chat_history.append(("bot", response))
             except Exception as e:
-                st.error("An unexpected error occurred while generating the response. Please try again.")
-                logger.error(f"Unexpected error during QA chain run: {str(e)}")
+                st.error("An error occurred while generating the response. Check logs for details.")
+                logger.error(f"Error during QA chain run: {str(e)}")
 
-    # Display chat history with latest at top, oldest at bottom
+    # Display chat history
     for sender, message in reversed(st.session_state.chat_history):
         if sender == "user":
             st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
