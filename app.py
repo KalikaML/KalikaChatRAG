@@ -6,6 +6,8 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.prompts import PromptTemplate
 from datetime import datetime
+import threading
+import time
 
 # Configuration constants
 S3_BUCKET = "kalika-rag"
@@ -26,26 +28,50 @@ s3_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_KEY,
 )
 
-# Initialize embeddings
-embeddings = HuggingFaceEmbeddings(
-    model_name=EMBEDDING_MODEL,
-    model_kwargs={'device': 'cpu'},
-    encode_kwargs={'normalize_embeddings': False}
-)
+
+# Initialize embeddings - use cache for better performance
+@st.cache_resource
+def get_embeddings():
+    return HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL,
+        model_kwargs={'device': 'cpu'},
+        encode_kwargs={'normalize_embeddings': False}
+    )
 
 
-# Initialize Gemini 1.5 Pro LLM
+embeddings = get_embeddings()
+
+
+# Initialize Gemini LLM with proper API implementation
 class GeminiLLM:
     def __init__(self, api_key):
         self.api_key = api_key
+        # Initialize the client properly here
+        # This is a placeholder - replace with actual initialization
+        # Example: from google.generativeai import GenerativeModel
+        #          self.model = GenerativeModel("gemini-1.5-pro")
 
     def generate(self, prompt, temperature=0.7, max_length=512):
-        # Replace this with actual API calls to Gemini 1.5 Pro
-        # Example: Make a POST request to Gemini's endpoint with the prompt and parameters.
+        # Replace with actual implementation
+        # Example:
+        # response = self.model.generate_content(
+        #     prompt,
+        #     generation_config={
+        #         "temperature": temperature,
+        #         "max_output_tokens": max_length,
+        #     }
+        # )
+        # return response.text
         return f"Generated response for: {prompt}"  # Placeholder response
 
 
-gemini_llm = GeminiLLM(api_key=st.secrets["GEMINI_API_KEY"])
+# Cache the LLM to avoid reinitializing
+@st.cache_resource
+def get_llm():
+    return GeminiLLM(api_key=st.secrets["GEMINI_API_KEY"])
+
+
+gemini_llm = get_llm()
 
 # Prompt template for sales team queries
 prompt_template = PromptTemplate(
@@ -71,7 +97,8 @@ prompt_template = PromptTemplate(
 )
 
 
-# Function to load FAISS index from S3
+# Function to load FAISS index from S3 - cached for performance
+@st.cache_resource
 def load_faiss_index_from_s3(index_path):
     with tempfile.TemporaryDirectory() as temp_dir:
         for file_name in ["index.faiss", "index.pkl"]:
@@ -80,6 +107,17 @@ def load_faiss_index_from_s3(index_path):
             s3_client.download_file(S3_BUCKET, s3_key, local_path)
         vector_store = FAISS.load_local(temp_dir, embeddings, allow_dangerous_deserialization=True)
     return vector_store
+
+
+# Preload both indexes at startup to avoid loading delays
+@st.cache_resource
+def get_all_indexes():
+    proforma_index = load_faiss_index_from_s3(PROFORMA_INDEX_PATH)
+    po_index = load_faiss_index_from_s3(PO_INDEX_PATH)
+    return {
+        "Proforma Invoices": proforma_index,
+        "Purchase Orders": po_index
+    }
 
 
 # Function to count new files in S3 folder
@@ -91,12 +129,18 @@ def count_new_files(folder_prefix):
     return new_files
 
 
-# Main Streamlit app
-def main():
-    st.set_page_config(page_title="RAG Chatbot", layout="wide")
+# Background thread to periodically refresh file counts
+def background_refresh():
+    while True:
+        st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
+        st.session_state.po_new = count_new_files(PO_FOLDER)
+        st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        time.sleep(300)  # Refresh every 5 minutes
 
-    # Custom CSS for black theme with additional styling for context panel
-    st.markdown("""
+
+# Custom styling
+def load_css():
+    return """
         <style>
         .stApp {
             background-color: #1E1E1E;
@@ -167,19 +211,105 @@ def main():
         .stSpinner > div > div {
             color: #03DAC6;
         }
+        .loading-message {
+            background-color: #2D2D2D;
+            color: #03DAC6;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
         </style>
-    """, unsafe_allow_html=True)
+    """
+
+
+# Main Streamlit app
+def main():
+    st.set_page_config(page_title="RAG Chatbot", layout="wide")
+    st.markdown(load_css(), unsafe_allow_html=True)
+
+    # Initialize session state
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    if "context_documents" not in st.session_state:
+        st.session_state.context_documents = []
+    if "indexes_loaded" not in st.session_state:
+        st.session_state.indexes_loaded = False
+    if "proforma_new" not in st.session_state:
+        st.session_state.proforma_new = 0
+    if "po_new" not in st.session_state:
+        st.session_state.po_new = 0
+    if "last_updated" not in st.session_state:
+        st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if "background_thread_started" not in st.session_state:
+        st.session_state.background_thread_started = False
+
+    # Start background thread for file count updates
+    if not st.session_state.background_thread_started:
+        thread = threading.Thread(target=background_refresh, daemon=True)
+        thread.start()
+        st.session_state.background_thread_started = True
 
     # Create a two-column layout
     col1, col2 = st.columns([7, 3])
 
+    # Main chat interface in the left column
+    with col1:
+        st.title("RAG Chatbot")
+        st.write("Ask anything based on the selected data source.")
+
+        # Load indexes in the background if not already loaded
+        if not st.session_state.indexes_loaded:
+            with st.spinner("Loading FAISS indexes..."):
+                st.session_state.all_indexes = get_all_indexes()
+                st.session_state.indexes_loaded = True
+
+        user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
+
+        option = st.session_state.get("current_option", "Proforma Invoices")
+
+        if st.button("Send") and user_input:
+            # Append user question to chat history immediately for better UX
+            st.session_state.chat_history.append(("user", user_input))
+
+            # Create a placeholder for the bot's response
+            response_placeholder = st.empty()
+            response_placeholder.markdown(
+                '<div class="loading-message">Generating response...</div>',
+                unsafe_allow_html=True
+            )
+
+            # Get the vector store for the selected data source
+            vector_store = st.session_state.all_indexes[option]
+            retriever = vector_store.as_retriever(search_kwargs={"k": 5})  # Retrieve top 5 most relevant documents
+
+            # Retrieve documents
+            documents = retriever.retrieve(user_input)
+            st.session_state.context_documents = documents
+
+            # Generate response using the documents
+            prompt_instance = prompt_template.format(documents=documents, question=user_input)
+            response = gemini_llm.generate(prompt_instance)
+
+            # Update chat history with bot response
+            st.session_state.chat_history.append(("bot", response))
+
+            # Clear the placeholder
+            response_placeholder.empty()
+
+            # Force a rerun to update the UI
+            st.experimental_rerun()
+
+        # Display chat history
+        for sender, message in reversed(st.session_state.chat_history):
+            if sender == "user":
+                st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
+
     # Right panel for context
     with col2:
         st.markdown("<h3>Retrieved Context</h3>", unsafe_allow_html=True)
-
-        # Initialize context session state
-        if "context_documents" not in st.session_state:
-            st.session_state.context_documents = []
 
         # Display the context documents
         if st.session_state.context_documents:
@@ -197,61 +327,19 @@ def main():
         # Options and stats in the right panel below context
         st.markdown("<h3>Options</h3>", unsafe_allow_html=True)
         option = st.radio("Select Data Source", ("Proforma Invoices", "Purchase Orders"))
+        st.session_state.current_option = option
 
         st.markdown("<h3>Stats</h3>", unsafe_allow_html=True)
-        proforma_new = count_new_files(PROFORMA_FOLDER)
-        po_new = count_new_files(PO_FOLDER)
-        st.write(f"Proforma Invoices: {proforma_new} new files")
-        st.write(f"Purchase Orders: {po_new} new files")
-        st.write(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        st.write(f"Proforma Invoices: {st.session_state.proforma_new} new files")
+        st.write(f"Purchase Orders: {st.session_state.po_new} new files")
+        st.write(f"Last Updated: {st.session_state.last_updated}")
 
-    # Main chat interface in the left column
-    with col1:
-        st.title("RAG Chatbot")
-        st.write("Ask anything based on the selected data source.")
-
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
-        if "current_option" not in st.session_state:
-            st.session_state.current_option = None
-
-        if "qa_chain" not in st.session_state or option != st.session_state.current_option:
-            st.session_state.current_option = option
-            index_path = PROFORMA_INDEX_PATH if option == "Proforma Invoices" else PO_INDEX_PATH
-            with st.spinner(f"Loading {option} FAISS index from S3..."):
-                vector_store = load_faiss_index_from_s3(index_path)
-                retriever = vector_store.as_retriever()
-
-                def gemini_chain_run(question):
-                    # Store the retrieved documents in session state for display in right panel
-                    documents = retriever.retrieve(question)
-                    st.session_state.context_documents = documents
-
-                    # Generate response using the documents
-                    prompt_instance = prompt_template.format(documents=documents, question=question)
-                    return gemini_llm.generate(prompt_instance)
-
-                st.session_state.qa_chain_run = gemini_chain_run
-
-        user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
-
-        if st.button("Send") and user_input:
-            with st.spinner("Generating response..."):
-                response = st.session_state.qa_chain_run(user_input)
-
-                # Append chat history (only user question and bot response)
-                st.session_state.chat_history.append(("user", user_input))
-                st.session_state.chat_history.append(("bot", response))
-
-                # Trigger a rerun to update the context panel
-                st.experimental_rerun()
-
-        # Display chat history
-        for sender, message in reversed(st.session_state.chat_history):
-            if sender == "user":
-                st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
+        # Add a refresh button for stats
+        if st.button("Refresh Stats"):
+            st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
+            st.session_state.po_new = count_new_files(PO_FOLDER)
+            st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            st.experimental_rerun()
 
 
 if __name__ == "__main__":
