@@ -3,8 +3,8 @@ import boto3
 import os
 import tempfile
 from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
 from datetime import datetime
 
 # Configuration constants
@@ -26,7 +26,7 @@ s3_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_KEY,
 )
 
-# Initialize embeddings (unchanged)
+# Initialize embeddings
 embeddings = HuggingFaceEmbeddings(
     model_name=EMBEDDING_MODEL,
     model_kwargs={'device': 'cpu'},
@@ -87,7 +87,7 @@ def count_new_files(folder_prefix):
 def main():
     st.set_page_config(page_title="RAG Chatbot", layout="wide")
 
-    # Custom CSS for black theme (unchanged)
+    # Custom CSS for black theme with additional styling for context panel
     st.markdown("""
         <style>
         .stApp {
@@ -117,6 +117,26 @@ def main():
             padding: 20px;
             color: #E0E0E0;
         }
+        .context-panel {
+            background-color: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #555555;
+            margin-top: 10px;
+        }
+        .context-title {
+            color: #03DAC6;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .context-item {
+            background-color: #333333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            border-left: 3px solid #BB86FC;
+        }
         .stTextInput > div > div > input {
             background-color: #333333;
             color: #E0E0E0;
@@ -142,55 +162,88 @@ def main():
         </style>
     """, unsafe_allow_html=True)
 
-    # Sidebar for options and stats (unchanged)
-    with st.sidebar:
-        st.title("Chatbot Options")
+    # Create a two-column layout
+    col1, col2 = st.columns([7, 3])
+
+    # Right panel for context
+    with col2:
+        st.markdown("<h3>Retrieved Context</h3>", unsafe_allow_html=True)
+
+        # Initialize context session state
+        if "context_documents" not in st.session_state:
+            st.session_state.context_documents = []
+
+        # Display the context documents
+        if st.session_state.context_documents:
+            st.markdown('<div class="context-panel">', unsafe_allow_html=True)
+            st.markdown('<div class="context-title">Source Documents</div>', unsafe_allow_html=True)
+            for i, doc in enumerate(st.session_state.context_documents):
+                st.markdown(f'<div class="context-item">Document {i + 1}:<br>{doc.page_content}</div>',
+                            unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.markdown(
+                '<div class="context-panel">No context retrieved yet. Ask a question to see relevant documents.</div>',
+                unsafe_allow_html=True)
+
+        # Options and stats in the right panel below context
+        st.markdown("<h3>Options</h3>", unsafe_allow_html=True)
         option = st.radio("Select Data Source", ("Proforma Invoices", "Purchase Orders"))
-        st.subheader("New Files Processed")
+
+        st.markdown("<h3>Stats</h3>", unsafe_allow_html=True)
         proforma_new = count_new_files(PROFORMA_FOLDER)
         po_new = count_new_files(PO_FOLDER)
         st.write(f"Proforma Invoices: {proforma_new} new files")
         st.write(f"Purchase Orders: {po_new} new files")
         st.write(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    # Chat interface (unchanged)
-    st.title("RAG Chatbot")
-    st.write("Ask anything based on the selected data source.")
+    # Main chat interface in the left column
+    with col1:
+        st.title("RAG Chatbot")
+        st.write("Ask anything based on the selected data source.")
 
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-    if "current_option" not in st.session_state:
-        st.session_state.current_option = None
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+        if "current_option" not in st.session_state:
+            st.session_state.current_option = None
 
-    if "qa_chain" not in st.session_state or option != st.session_state.current_option:
-        st.session_state.current_option = option
-        index_path = PROFORMA_INDEX_PATH if option == "Proforma Invoices" else PO_INDEX_PATH
-        with st.spinner(f"Loading {option} FAISS index from S3..."):
-            vector_store = load_faiss_index_from_s3(index_path)
-            retriever = vector_store.as_retriever()
+        if "qa_chain" not in st.session_state or option != st.session_state.current_option:
+            st.session_state.current_option = option
+            index_path = PROFORMA_INDEX_PATH if option == "Proforma Invoices" else PO_INDEX_PATH
+            with st.spinner(f"Loading {option} FAISS index from S3..."):
+                vector_store = load_faiss_index_from_s3(index_path)
+                retriever = vector_store.as_retriever()
 
-            def gemini_chain_run(question):
-                documents = retriever.retrieve(question)  # Retrieve documents using FAISS retriever
-                prompt_instance = prompt_template.format(documents=documents, question=question)
-                return gemini_llm.generate(prompt_instance)
+                def gemini_chain_run(question):
+                    # Store the retrieved documents in session state for display in right panel
+                    documents = retriever.retrieve(question)
+                    st.session_state.context_documents = documents
 
-            st.session_state.qa_chain_run = gemini_chain_run
+                    # Generate response using the documents
+                    prompt_instance = prompt_template.format(documents=documents, question=question)
+                    return gemini_llm.generate(prompt_instance)
 
-    user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
+                st.session_state.qa_chain_run = gemini_chain_run
 
-    if st.button("Send") and user_input:
-        with st.spinner("Generating response..."):
-            response = st.session_state.qa_chain_run(user_input)
+        user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
 
-            # Append chat history
-            st.session_state.chat_history.append(("user", user_input))
-            st.session_state.chat_history.append(("bot", response))
+        if st.button("Send") and user_input:
+            with st.spinner("Generating response..."):
+                response = st.session_state.qa_chain_run(user_input)
 
-    for sender, message in reversed(st.session_state.chat_history):
-        if sender == "user":
-            st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
+                # Append chat history (only user question and bot response)
+                st.session_state.chat_history.append(("user", user_input))
+                st.session_state.chat_history.append(("bot", response))
+
+                # Trigger a rerun to update the context panel
+                st.experimental_rerun()
+
+        # Display chat history
+        for sender, message in reversed(st.session_state.chat_history):
+            if sender == "user":
+                st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
