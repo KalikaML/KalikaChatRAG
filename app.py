@@ -1,42 +1,40 @@
-    import streamlit as st
-    import boto3
-    import os
-    import tempfile
-    from langchain_community.vectorstores import FAISS
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-    from langchain.prompts import PromptTemplate
-    from datetime import datetime
-    import threading
-    import time
+import streamlit as st
+import boto3
+import os
+import tempfile
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain.prompts import PromptTemplate
+from datetime import datetime
+import threading
+import time
 
-    # Configuration constants
-    S3_BUCKET = "kalika-rag"
-    PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/"
-    PO_INDEX_PATH = "faiss_indexes/po_faiss_index/"
-    EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-    PROFORMA_FOLDER = "proforma_invoice/"
-    PO_FOLDER = "PO_Dump/"
+# Configuration constants
+S3_BUCKET = "kalika-rag"
+PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/"
+PO_INDEX_PATH = "faiss_indexes/po_faiss_index/"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+PROFORMA_FOLDER = "proforma_invoice/"
+PO_FOLDER = "PO_Dump/"
 
-    # Load secrets from secrets.toml
-    AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
-    AWS_SECRET_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
+# Load secrets from secrets.toml
+AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
 
-    # Initialize S3 client
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=AWS_ACCESS_KEY,
-        aws_secret_access_key=AWS_SECRET_KEY,
-    )
-
-
-    # Initialize embeddings - use cache for better performance
-    @st.cache_resource
-    def get_embeddings():
-        return HuggingFaceEmbeddings(
+# Initialize S3 client
+s3_client = boto3.client(
+   "s3",
+   aws_access_key_id=AWS_ACCESS_KEY,
+   aws_secret_access_key=AWS_SECRET_KEY,
+)
+# Initialize embeddings - use cache for better performance
+@st.cache_resource
+def get_embeddings():
+    return HuggingFaceEmbeddings(
             model_name=EMBEDDING_MODEL,
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': False}
-        )
+)
 
 
     embeddings = get_embeddings()
