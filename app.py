@@ -8,7 +8,6 @@ from langchain.prompts import PromptTemplate
 from datetime import datetime
 import threading
 import time
-import re
 
 # Configuration constants
 S3_BUCKET = "kalika-rag"
@@ -78,16 +77,6 @@ class GeminiLLM:
         # )
         # return response.text
         return f"Generated response for: {prompt}"  # Placeholder response
-
-    def generate_followup_questions(self, prompt):
-        """Generate dynamic follow-up questions based on the prompt."""
-        # Implement logic to generate follow-up questions using an LLM.
-        # This is a placeholder, replace it with your actual implementation.
-        return [
-            "What is the status of the order?",
-            "Can you provide more details on pricing?",
-            "What are the delivery dates?"
-        ]
 
 
 # Cache the LLM to avoid reinitializing
@@ -167,14 +156,6 @@ def count_new_files(folder_prefix):
     return new_files
 
 
-# Function to count total files in S3 folder
-def count_total_files(folder_prefix):
-    response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=folder_prefix)
-    if 'Contents' not in response:
-        return 0
-    return len(response['Contents'])
-
-
 # Function to retrieve documents from combined indexes
 def retrieve_from_all_indexes(query, k=10):
     """Retrieve documents from both indexes and combine results"""
@@ -202,16 +183,12 @@ def background_refresh():
         try:
             st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
             st.session_state.po_new = count_new_files(PO_FOLDER)
-
-            # Update total file counts
-            st.session_state.proforma_total = count_total_files(PROFORMA_FOLDER)
-            st.session_state.po_total = count_total_files(PO_FOLDER)
-
             st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             time.sleep(300)  # Refresh every 5 minutes
         except Exception as e:
             print(f"Error in background refresh: {e}")
             time.sleep(60)  # Retry after a minute if there's an error
+
 
 # Custom styling
 def load_css():
@@ -310,6 +287,7 @@ def load_css():
         </style>
     """
 
+
 # Main Streamlit app
 def main():
     st.set_page_config(page_title="RAG Chatbot", layout="wide")
@@ -326,19 +304,12 @@ def main():
         st.session_state.proforma_new = 0
     if "po_new" not in st.session_state:
         st.session_state.po_new = 0
-    # Initialize total file counts
-    if "proforma_total" not in st.session_state:
-        st.session_state.proforma_total = 0
-    if "po_total" not in st.session_state:
-        st.session_state.po_total = 0
     if "last_updated" not in st.session_state:
         st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if "background_thread_started" not in st.session_state:
         st.session_state.background_thread_started = False
     if "response_length" not in st.session_state:
         st.session_state.response_length = "Auto"  # Default to auto length
-    if "followup_questions" not in st.session_state:
-        st.session_state.followup_questions = []
 
     # Start background thread for file count updates
     if not st.session_state.background_thread_started:
@@ -423,8 +394,7 @@ def main():
                     doc_count=len(documents)
                 )
 
-                response_text = gemini_llm.generate(prompt_instance, max_length=max_length)
-                followup_questions = gemini_llm.generate_followup_questions(user_input)
+                response = gemini_llm.generate(prompt_instance, max_length=max_length)
 
                 # Add document source information to the response for context
                 doc_sources = {}
@@ -443,8 +413,7 @@ def main():
 
                 # Update chat history with bot response including document stats
                 st.session_state.chat_history.append(("bot_metadata", f"Using {len(documents)} documents"))
-                st.session_state.chat_history.append(("bot", response_text))
-                st.session_state.followup_questions = followup_questions  # Store for display
+                st.session_state.chat_history.append(("bot", response))
 
                 # Clear the placeholder
                 response_placeholder.empty()
@@ -454,71 +423,71 @@ def main():
 
             except Exception as e:
                 error_message = f"Error generating response: {str(e)}"
-                st.error(error_message)
+                st.session_state.chat_history.append(("error", error_message))
+                response_placeholder.empty()
+                st.experimental_rerun()
 
         # Display chat history
-        for i, (role, message) in enumerate(st.session_state.chat_history):
-            if role == "user":
+        for idx, (sender, message) in enumerate(reversed(st.session_state.chat_history)):
+            if sender == "user":
                 st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
-            elif role == "bot":
+            elif sender == "bot_metadata":
+                st.markdown(f'<div class="doc-stats">{message}</div>', unsafe_allow_html=True)
+            elif sender == "bot":
                 st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
-            elif role == "bot_metadata":
-                st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
+            elif sender == "error":
+                st.error(message)
 
-        # Display follow-up questions
-        if st.session_state.followup_questions:
-            st.write("Suggested Follow-up Questions:")
-            for question in st.session_state.followup_questions:
-                if st.button(question):
-                    st.session_state.chat_history.append(("user", question))
-                    # Process the follow-up question immediately
-                    documents = retrieve_from_all_indexes(question, k=doc_count)
-                    prompt_instance = prompt_template.format(
-                        documents=documents,
-                        question=question,
-                        doc_count=len(documents)
-                    )
-                    response_text = gemini_llm.generate(prompt_instance)
-                    st.session_state.chat_history.append(("bot", response_text))
-                    st.session_state.followup_questions = gemini_llm.generate_followup_questions(question)
-                    st.experimental_rerun()  # Rerun to update the UI
-
-    # Context panel in the right column
+    # Right panel for context
     with col2:
-        st.sidebar.header("Context Panel")
-        st.sidebar.markdown(f"""
-            <div class="context-panel">
-            <h3 class="context-title">Document Stats</h3>
-            <div class="context-item">
-                <strong>New Proforma Invoices:</strong> {st.session_state.proforma_new}
-                <br>
-                <strong>Total Proforma Invoices:</strong> {st.session_state.proforma_total}
-            </div>
-            <div class="context-item">
-                <strong>New Purchase Orders:</strong> {st.session_state.po_new}
-                <br>
-                <strong>Total Purchase Orders:</strong> {st.session_state.po_total}
-            </div>
-            <div class="context-item">
-                <strong>Last Updated:</strong> {st.session_state.last_updated}
-            </div>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown("<h3>Retrieved Context</h3>", unsafe_allow_html=True)
 
+        # Display the context documents
         if st.session_state.context_documents:
-            st.sidebar.markdown('<div class="context-panel"><h3 class="context-title">Relevant Documents</h3>',
-                                unsafe_allow_html=True)
-            for doc in st.session_state.context_documents:
-                source = doc.metadata.get('source', 'N/A').split('/')[-1] if hasattr(doc, 'metadata') else 'N/A'
-                page = doc.metadata.get('page', 'N/A') if hasattr(doc, 'metadata') else 'N/A'
-                content = doc.page_content[:100] + "..." if hasattr(doc, 'page_content') else 'No Content'
-                st.sidebar.markdown(f"""
-                    <div class="context-item">
-                    <div class="document-source">Source: {source}, Page: {page}</div>
-                    {content}
-                    </div>
-                    """, unsafe_allow_html=True)
-            st.sidebar.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div class="context-panel">', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="context-title">Source Documents ({len(st.session_state.context_documents)})</div>',
+                unsafe_allow_html=True)
+
+            for i, doc in enumerate(st.session_state.context_documents):
+                # Determine source type (Proforma or PO)
+                source_type = "Unknown"
+                if hasattr(doc, 'metadata') and 'source' in doc.metadata:
+                    if PROFORMA_FOLDER.lower() in doc.metadata['source'].lower():
+                        source_type = "Proforma"
+                    elif PO_FOLDER.lower() in doc.metadata['source'].lower():
+                        source_type = "PO"
+
+                st.markdown(
+                    f'<div class="document-source">Document {i + 1} - {source_type}</div>' +
+                    f'<div class="context-item">{doc.page_content}</div>',
+                    unsafe_allow_html=True
+                )
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.markdown(
+                '<div class="context-panel">No context retrieved yet. Ask a question to see relevant documents.</div>',
+                unsafe_allow_html=True)
+
+        # Options and stats in the right panel below context
+        st.markdown("<h3>Stats</h3>", unsafe_allow_html=True)
+        st.write(f"Proforma Invoices: {st.session_state.proforma_new} new files")
+        st.write(f"Purchase Orders: {st.session_state.po_new} new files")
+        st.write(f"Last Updated: {st.session_state.last_updated}")
+
+        # Add a refresh button for stats
+        if st.button("Refresh Stats"):
+            st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
+            st.session_state.po_new = count_new_files(PO_FOLDER)
+            st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            st.experimental_rerun()
+
+        # Add a clear chat button
+        if st.button("Clear Chat History"):
+            st.session_state.chat_history = []
+            st.session_state.context_documents = []
+            st.experimental_rerun()
+
 
 if __name__ == "__main__":
     main()
