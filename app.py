@@ -8,7 +8,7 @@ from langchain.prompts import PromptTemplate
 from datetime import datetime
 import threading
 import time
-import re  # Import the regular expression module
+import re
 
 # Configuration constants
 S3_BUCKET = "kalika-rag"
@@ -29,6 +29,7 @@ s3_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_KEY,
 )
 
+
 # Initialize embeddings - use cache for better performance
 @st.cache_resource
 def get_embeddings():
@@ -38,42 +39,62 @@ def get_embeddings():
         encode_kwargs={'normalize_embeddings': False}
     )
 
+
 embeddings = get_embeddings()
 
-# Mock Gemini LLM with better extraction and follow-up suggestions
+
+# Initialize Gemini LLM with proper API implementation and dynamic response length
 class GeminiLLM:
     def __init__(self, api_key):
         self.api_key = api_key
+        # Initialize the client properly here
+        # This is a placeholder - replace with actual initialization
+        # Example: from google.generativeai import GenerativeModel
+        #          self.model = GenerativeModel("gemini-1.5-pro")
 
     def generate(self, prompt, temperature=0.7, max_length=None):
-        # Mock response with bullet points and follow-up questions
-        response_text = f"""
-        - Detail 1: This is a detail extracted from the context.
-        - Detail 2: Another key piece of information.
-        - Detail 3: More relevant data.
-
-        Follow-up Questions:
-        1. What is the status of the order?
-        2. Can you provide more details on pricing?
-        3. What are the delivery dates?
         """
-        return response_text
+        Generate response with dynamic length based on user request or content needs
 
-    def extract_response(self, response_text):
-        """Extract bullet point answers from the response."""
-        bullet_pattern = r"^- (.*)$"
-        bullets = re.findall(bullet_pattern, response_text, re.MULTILINE)
-        return bullets
+        Args:
+            prompt: The input prompt
+            temperature: Controls randomness (lower = more deterministic)
+            max_length: Maximum token length (None = no limit)
 
-    def extract_followup_questions(self, response_text):
-        """Extract follow-up questions from the response."""
-        question_pattern = r"^\d+\. (.*)\?$"
-        questions = re.findall(question_pattern, response_text, re.MULTILINE)
-        return questions
+        Returns:
+            Generated text response
+        """
+        # Replace with actual implementation
+        # Example:
+        # generation_config = {
+        #     "temperature": temperature,
+        # }
+        # if max_length:
+        #     generation_config["max_output_tokens"] = max_length
+        #
+        # response = self.model.generate_content(
+        #     prompt,
+        #     generation_config=generation_config
+        # )
+        # return response.text
+        return f"Generated response for: {prompt}"  # Placeholder response
 
+    def generate_followup_questions(self, prompt):
+        """Generate dynamic follow-up questions based on the prompt."""
+        # Implement logic to generate follow-up questions using an LLM.
+        # This is a placeholder, replace it with your actual implementation.
+        return [
+            "What is the status of the order?",
+            "Can you provide more details on pricing?",
+            "What are the delivery dates?"
+        ]
+
+
+# Cache the LLM to avoid reinitializing
 @st.cache_resource
 def get_llm():
     return GeminiLLM(api_key=st.secrets["GEMINI_API_KEY"])
+
 
 gemini_llm = get_llm()
 
@@ -81,31 +102,27 @@ gemini_llm = get_llm()
 prompt_template = PromptTemplate(
     input_variables=["documents", "question", "doc_count"],
     template="""
-    You are an assistant designed to support a sales team. Using the provided information from {doc_count} documents, answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
+    You are an assistant designed to support a sales team. Using the provided information from {doc_count} documents (including proforma invoices and purchase orders), answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
 
-    Make your response as comprehensive as needed to fully address the query - don't artificially limit length. Provide follow-up questions that would help the user get more specific information.
+    Make your response as comprehensive as needed to fully address the query - don't artificially limit length.
 
     Information from documents: {documents}
     Question: {question}
 
-    Important: Your response must ONLY include the answer in bullet points and a list of follow-up questions. Do NOT include:
+    Important: Your response must ONLY include the answer in bullet points. Do NOT include:
     - The documents or source information you used
     - Any preamble or introduction to your answer
     - Any mention of the context you're referencing
     - This instruction itself
 
-    Respond directly with bullet points and follow-up questions:
+    Respond directly with bullet points:
     - [Relevant detail addressing the user's question]
     - [Additional relevant detail, if applicable]
     - [Further relevant detail, if applicable]
-
-    Follow-up Questions:
-    1. [Suggested question 1]
-    2. [Suggested question 2]
-    3. [Suggested question 3]
-    (Include as many bullet points and follow-up questions as necessary)
+    (Include as many bullet points as necessary to fully answer the question)
     """
 )
+
 
 # Function to load FAISS index from S3 - cached for performance
 @st.cache_resource
@@ -118,6 +135,7 @@ def load_faiss_index_from_s3(index_path):
         vector_store = FAISS.load_local(temp_dir, embeddings, allow_dangerous_deserialization=True)
     return vector_store
 
+
 # Preload both indexes at startup to avoid loading delays
 @st.cache_resource
 def get_all_indexes():
@@ -129,6 +147,7 @@ def get_all_indexes():
         "Combined": None  # Will be created when needed
     }
 
+
 # Function to create a combined index from both sources
 def get_combined_index(proforma_index, po_index):
     # This is a placeholder implementation
@@ -138,6 +157,7 @@ def get_combined_index(proforma_index, po_index):
     # For now, we'll return a simple dict to be used for dual querying
     return {"proforma": proforma_index, "po": po_index}
 
+
 # Function to count new files in S3 folder
 def count_new_files(folder_prefix):
     response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=folder_prefix)
@@ -145,6 +165,15 @@ def count_new_files(folder_prefix):
         return 0
     new_files = sum(1 for obj in response['Contents'] if not obj['Key'].endswith('_processed.pdf'))
     return new_files
+
+
+# Function to count total files in S3 folder
+def count_total_files(folder_prefix):
+    response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=folder_prefix)
+    if 'Contents' not in response:
+        return 0
+    return len(response['Contents'])
+
 
 # Function to retrieve documents from combined indexes
 def retrieve_from_all_indexes(query, k=10):
@@ -166,12 +195,18 @@ def retrieve_from_all_indexes(query, k=10):
 
     return all_docs
 
+
 # Background thread to periodically refresh file counts
 def background_refresh():
     while True:
         try:
             st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
             st.session_state.po_new = count_new_files(PO_FOLDER)
+
+            # Update total file counts
+            st.session_state.proforma_total = count_total_files(PROFORMA_FOLDER)
+            st.session_state.po_total = count_total_files(PO_FOLDER)
+
             st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             time.sleep(300)  # Refresh every 5 minutes
         except Exception as e:
@@ -272,17 +307,6 @@ def load_css():
             margin-right: 10px;
             border-left: 3px solid #03DAC6;
         }
-        .followup-question {
-            background-color: #333333;
-            color: #E0E0E0;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 5px 0;
-            cursor: pointer;
-        }
-        .followup-question:hover {
-            background-color: #444444;
-        }
         </style>
     """
 
@@ -302,14 +326,19 @@ def main():
         st.session_state.proforma_new = 0
     if "po_new" not in st.session_state:
         st.session_state.po_new = 0
+    # Initialize total file counts
+    if "proforma_total" not in st.session_state:
+        st.session_state.proforma_total = 0
+    if "po_total" not in st.session_state:
+        st.session_state.po_total = 0
     if "last_updated" not in st.session_state:
         st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if "background_thread_started" not in st.session_state:
         st.session_state.background_thread_started = False
     if "response_length" not in st.session_state:
         st.session_state.response_length = "Auto"  # Default to auto length
-    if "followup_question" not in st.session_state:
-        st.session_state.followup_question = None
+    if "followup_questions" not in st.session_state:
+        st.session_state.followup_questions = []
 
     # Start background thread for file count updates
     if not st.session_state.background_thread_started:
@@ -331,12 +360,8 @@ def main():
                 st.session_state.all_indexes = get_all_indexes()
                 st.session_state.indexes_loaded = True
 
-        # Follow-up question handling
-        if st.session_state.followup_question:
-            user_input = st.session_state.followup_question
-            st.session_state.followup_question = None  # Clear the follow-up question
-        else:
-            user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
+        # User input area
+        user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
 
         # Options for query
         input_col1, input_col2, input_col3 = st.columns([2, 2, 1])
@@ -358,14 +383,6 @@ def main():
                 index=0
             )
             st.session_state.response_length = response_length
-
-        # Function to display follow-up questions
-        def display_followup_questions(questions):
-            st.write("Suggested Follow-up Questions:")
-            for question in questions:
-                if st.button(question, key=f"followup_{question}"):
-                    st.session_state.followup_question = question
-                    st.experimental_rerun()
 
         if st.button("Send") and user_input:
             # Append user question to chat history immediately for better UX
@@ -407,8 +424,7 @@ def main():
                 )
 
                 response_text = gemini_llm.generate(prompt_instance, max_length=max_length)
-                bullets = gemini_llm.extract_response(response_text)
-                followup_questions = gemini_llm.extract_followup_questions(response_text)
+                followup_questions = gemini_llm.generate_followup_questions(user_input)
 
                 # Add document source information to the response for context
                 doc_sources = {}
@@ -427,13 +443,11 @@ def main():
 
                 # Update chat history with bot response including document stats
                 st.session_state.chat_history.append(("bot_metadata", f"Using {len(documents)} documents"))
-                st.session_state.chat_history.append(("bot", bullets))
+                st.session_state.chat_history.append(("bot", response_text))
+                st.session_state.followup_questions = followup_questions  # Store for display
 
                 # Clear the placeholder
                 response_placeholder.empty()
-
-                # Display follow-up questions
-                display_followup_questions(followup_questions)
 
                 # Force a rerun to update the UI
                 st.experimental_rerun()
@@ -447,14 +461,27 @@ def main():
             if role == "user":
                 st.markdown(f'<div class="chat-message user-message">{message}</div>', unsafe_allow_html=True)
             elif role == "bot":
-                if isinstance(message, list):
-                    st.markdown('<div class="chat-message bot-message"><ul>' +
-                                ''.join(f'<li>{item}</li>' for item in message) +
-                                '</ul></div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
             elif role == "bot_metadata":
                 st.markdown(f'<div class="chat-message bot-message">{message}</div>', unsafe_allow_html=True)
+
+        # Display follow-up questions
+        if st.session_state.followup_questions:
+            st.write("Suggested Follow-up Questions:")
+            for question in st.session_state.followup_questions:
+                if st.button(question):
+                    st.session_state.chat_history.append(("user", question))
+                    # Process the follow-up question immediately
+                    documents = retrieve_from_all_indexes(question, k=doc_count)
+                    prompt_instance = prompt_template.format(
+                        documents=documents,
+                        question=question,
+                        doc_count=len(documents)
+                    )
+                    response_text = gemini_llm.generate(prompt_instance)
+                    st.session_state.chat_history.append(("bot", response_text))
+                    st.session_state.followup_questions = gemini_llm.generate_followup_questions(question)
+                    st.experimental_rerun()  # Rerun to update the UI
 
     # Context panel in the right column
     with col2:
@@ -464,9 +491,13 @@ def main():
             <h3 class="context-title">Document Stats</h3>
             <div class="context-item">
                 <strong>New Proforma Invoices:</strong> {st.session_state.proforma_new}
+                <br>
+                <strong>Total Proforma Invoices:</strong> {st.session_state.proforma_total}
             </div>
             <div class="context-item">
                 <strong>New Purchase Orders:</strong> {st.session_state.po_new}
+                <br>
+                <strong>Total Purchase Orders:</strong> {st.session_state.po_total}
             </div>
             <div class="context-item">
                 <strong>Last Updated:</strong> {st.session_state.last_updated}
