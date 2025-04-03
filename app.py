@@ -5,7 +5,7 @@ import tempfile
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.prompts import PromptTemplate
-from datetime import datetime
+from datetime import datetime, timedelta
 import threading
 import time
 
@@ -16,6 +16,7 @@ PO_INDEX_PATH = "faiss_indexes/po_faiss_index/"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 PROFORMA_FOLDER = "proforma_invoice/"
 PO_FOLDER = "PO_Dump/"
+INDEX_REFRESH_INTERVAL_HOURS = 24  # Refresh indexes every 24 hours
 
 # Load secrets from secrets.toml
 AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
@@ -91,30 +92,45 @@ gemini_llm = get_llm()
 prompt_template = PromptTemplate(
     input_variables=["documents", "question", "doc_count"],
     template="""
-    You are an assistant designed to support a sales team. Using the provided information from {doc_count} documents (including proforma invoices and purchase orders), answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
+        You are an assistant designed to support a sales team. Using the provided information from {doc_count} documents (including proforma invoices and purchase orders), answer the user's question with accurate, concise, and actionable details in a well-structured bullet-point format.
 
-    Make your response as comprehensive as needed to fully address the query - don't artificially limit length.
+        Make your response as comprehensive as needed to fully address the query - don't artificially limit length.
 
-    Information from documents: {documents}
-    Question: {question}
+        Information from documents: {documents}
+        Question: {question}
 
-    Important: Your response must ONLY include the answer in bullet points. Do NOT include:
-    - The documents or source information you used
-    - Any preamble or introduction to your answer
-    - Any mention of the context you're referencing
-    - This instruction itself
+        Important: Your response must ONLY include the answer in bullet points. Do NOT include:
+        - The documents or source information you used
+        - Any preamble or introduction to your answer
+        - Any mention of the context you're referencing
+        - This instruction itself
 
-    Respond directly with bullet points:
-    - [Relevant detail addressing the user's question]
-    - [Additional relevant detail, if applicable]
-    - [Further relevant detail, if applicable]
-    (Include as many bullet points as necessary to fully answer the question)
-    """
+        Respond directly with bullet points:
+        - [Relevant detail addressing the user's question]
+        - [Additional relevant detail, if applicable]
+        - [Further relevant detail, if applicable]
+        (Include as many bullet points as necessary to fully answer the question)
+        """
 )
 
 
-# Function to load FAISS index from S3 - cached for performance
-@st.cache_resource
+# Function to get the last modified date of index files in S3
+def get_index_last_modified(index_path):
+    latest_modified = None
+    try:
+        for file_name in ["index.faiss", "index.pkl"]:
+            s3_key = f"{index_path}{file_name}"
+            response = s3_client.head_object(Bucket=S3_BUCKET, Key=s3_key)
+            if 'LastModified' in response:
+                if latest_modified is None or response['LastModified'] > latest_modified:
+                    latest_modified = response['LastModified']
+        return latest_modified
+    except Exception as e:
+        st.warning(f"Error checking index modification time: {e}")
+        return None
+
+
+# Function to load FAISS index from S3 with last_modified tracking
 def load_faiss_index_from_s3(index_path):
     with tempfile.TemporaryDirectory() as temp_dir:
         for file_name in ["index.faiss", "index.pkl"]:
@@ -122,19 +138,66 @@ def load_faiss_index_from_s3(index_path):
             local_path = os.path.join(temp_dir, file_name)
             s3_client.download_file(S3_BUCKET, s3_key, local_path)
         vector_store = FAISS.load_local(temp_dir, embeddings, allow_dangerous_deserialization=True)
-    return vector_store
 
+    # Get the last modified time for tracking
+    last_modified = get_index_last_modified(index_path)
 
-# Preload both indexes at startup to avoid loading delays
-@st.cache_resource
-def get_all_indexes():
-    proforma_index = load_faiss_index_from_s3(PROFORMA_INDEX_PATH)
-    po_index = load_faiss_index_from_s3(PO_INDEX_PATH)
     return {
-        "Proforma Invoices": proforma_index,
-        "Purchase Orders": po_index,
-        "Combined": None  # Will be created when needed
+        "index": vector_store,
+        "last_loaded": datetime.now(),
+        "last_modified": last_modified
     }
+
+
+# Function to check if indexes need refreshing
+def should_refresh_indexes():
+    # Check if it's been more than INDEX_REFRESH_INTERVAL_HOURS since last load
+    if "index_last_refresh" not in st.session_state:
+        return True
+
+    time_since_refresh = datetime.now() - st.session_state.index_last_refresh
+    if time_since_refresh > timedelta(hours=INDEX_REFRESH_INTERVAL_HOURS):
+        return True
+
+    # Check if the S3 index files have been modified since last load
+    for index_type, index_path in [("Proforma Invoices", PROFORMA_INDEX_PATH), ("Purchase Orders", PO_INDEX_PATH)]:
+        if index_type in st.session_state.all_indexes:
+            s3_last_modified = get_index_last_modified(index_path)
+            loaded_index = st.session_state.all_indexes[index_type]
+
+            # If the S3 index has been updated since we last loaded it
+            if (loaded_index.get("last_modified") is not None and
+                    s3_last_modified is not None and
+                    s3_last_modified > loaded_index["last_modified"]):
+                return True
+
+    return False
+
+
+# Load all indexes with refresh capability
+def load_all_indexes(force_refresh=False):
+    # Check if indexes exist and if we should refresh them
+    should_refresh = force_refresh
+
+    if not force_refresh and "all_indexes" in st.session_state:
+        should_refresh = should_refresh_indexes()
+
+    # If we need to refresh or don't have indexes yet, load them
+    if should_refresh or "all_indexes" not in st.session_state:
+        with st.spinner("Loading FAISS indexes from S3..."):
+            st.session_state.all_indexes = {
+                "Proforma Invoices": load_faiss_index_from_s3(PROFORMA_INDEX_PATH),
+                "Purchase Orders": load_faiss_index_from_s3(PO_INDEX_PATH),
+                "Combined": None  # Will be created when needed
+            }
+            st.session_state.index_last_refresh = datetime.now()
+            st.session_state.indexes_loaded = True
+
+            # Update the status message
+            st.session_state.index_status = f"Indexes loaded at {st.session_state.index_last_refresh.strftime('%Y-%m-%d %H:%M:%S')}"
+            return True
+
+    return False
 
 
 # Function to create a combined index from both sources
@@ -159,8 +222,8 @@ def count_new_files(folder_prefix):
 # Function to retrieve documents from combined indexes
 def retrieve_from_all_indexes(query, k=10):
     """Retrieve documents from both indexes and combine results"""
-    proforma_index = st.session_state.all_indexes["Proforma Invoices"]
-    po_index = st.session_state.all_indexes["Purchase Orders"]
+    proforma_index = st.session_state.all_indexes["Proforma Invoices"]["index"]
+    po_index = st.session_state.all_indexes["Purchase Orders"]["index"]
 
     # Retrieve from both indexes
     proforma_docs = proforma_index.similarity_search(query, k=k // 2)
@@ -177,14 +240,22 @@ def retrieve_from_all_indexes(query, k=10):
     return all_docs
 
 
-# Background thread to periodically refresh file counts
+# Background thread to periodically refresh file counts and check indexes
 def background_refresh():
     while True:
         try:
+            # Update file counts
             st.session_state.proforma_new = count_new_files(PROFORMA_FOLDER)
             st.session_state.po_new = count_new_files(PO_FOLDER)
             st.session_state.last_updated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            time.sleep(300)  # Refresh every 5 minutes
+
+            # Check if indexes need refreshing
+            if should_refresh_indexes():
+                load_all_indexes(force_refresh=True)
+                st.session_state.index_status = f"Indexes auto-refreshed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+            # Sleep for 5 minutes before next check
+            time.sleep(300)
         except Exception as e:
             print(f"Error in background refresh: {e}")
             time.sleep(60)  # Retry after a minute if there's an error
@@ -193,99 +264,107 @@ def background_refresh():
 # Custom styling
 def load_css():
     return """
-        <style>
-        .stApp {
-            background-color: #1E1E1E;
-            color: #E0E0E0;
-        }
-        .chat-message {
-            padding: 12px;
-            border-radius: 8px;
-            margin: 8px 0;
-            font-size: 16px;
-        }
-        .user-message {
-            background-color: #2D2D2D;
-            color: #BB86FC;
-            text-align: right;
-            border: 1px solid #BB86FC;
-        }
-        .bot-message {
-            background-color: #333333;
-            color: #E0E0E0;
-            text-align: left;
-            border: 1px solid #03DAC6;
-        }
-        .sidebar .sidebar-content {
-            background-color: #252525;
-            padding: 20px;
-            color: #E0E0E0;
-        }
-        .context-panel {
-            background-color: #252525;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #555555;
-            margin-top: 10px;
-        }
-        .context-title {
-            color: #03DAC6;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .context-item {
-            background-color: #333333;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            border-left: 3px solid #BB86FC;
-        }
-        .document-source {
-            font-size: 12px;
-            color: #BB86FC;
-            margin-bottom: 5px;
-        }
-        .stTextInput > div > div > input {
-            background-color: #333333;
-            color: #E0E0E0;
-            border: 1px solid #555555;
-            border-radius: 5px;
-        }
-        .stButton > button {
-            background-color: #BB86FC;
-            color: #1E1E1E;
-            border: none;
-            border-radius: 5px;
-        }
-        .stButton > button:hover {
-            background-color: #03DAC6;
-            color: #1E1E1E;
-        }
-        h1, h2, h3 {
-            color: #BB86FC;
-        }
-        .stSpinner > div > div {
-            color: #03DAC6;
-        }
-        .loading-message {
-            background-color: #2D2D2D;
-            color: #03DAC6;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .doc-stats {
-            background-color: #252525;
-            padding: 8px 12px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-right: 10px;
-            border-left: 3px solid #03DAC6;
-        }
-        </style>
-    """
+            <style>
+            .stApp {
+                background-color: #1E1E1E;
+                color: #E0E0E0;
+            }
+            .chat-message {
+                padding: 12px;
+                border-radius: 8px;
+                margin: 8px 0;
+                font-size: 16px;
+            }
+            .user-message {
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                text-align: right;
+                border: 1px solid #BB86FC;
+            }
+            .bot-message {
+                background-color: #333333;
+                color: #E0E0E0;
+                text-align: left;
+                border: 1px solid #03DAC6;
+            }
+            .sidebar .sidebar-content {
+                background-color: #252525;
+                padding: 20px;
+                color: #E0E0E0;
+            }
+            .context-panel {
+                background-color: #252525;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #555555;
+                margin-top: 10px;
+            }
+            .context-title {
+                color: #03DAC6;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            .context-item {
+                background-color: #333333;
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 8px;
+                font-size: 14px;
+                border-left: 3px solid #BB86FC;
+            }
+            .document-source {
+                font-size: 12px;
+                color: #BB86FC;
+                margin-bottom: 5px;
+            }
+            .stTextInput > div > div > input {
+                background-color: #333333;
+                color: #E0E0E0;
+                border: 1px solid #555555;
+                border-radius: 5px;
+            }
+            .stButton > button {
+                background-color: #BB86FC;
+                color: #1E1E1E;
+                border: none;
+                border-radius: 5px;
+            }
+            .stButton > button:hover {
+                background-color: #03DAC6;
+                color: #1E1E1E;
+            }
+            h1, h2, h3 {
+                color: #BB86FC;
+            }
+            .stSpinner > div > div {
+                color: #03DAC6;
+            }
+            .loading-message {
+                background-color: #2D2D2D;
+                color: #03DAC6;
+                padding: 10px;
+                border-radius: 5px;
+                text-align: center;
+                margin: 20px 0;
+            }
+            .doc-stats {
+                background-color: #252525;
+                padding: 8px 12px;
+                border-radius: 4px;
+                display: inline-block;
+                margin-right: 10px;
+                border-left: 3px solid #03DAC6;
+            }
+            .status-panel {
+                background-color: #333333;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 14px;
+                margin-top: 10px;
+                border-left: 3px solid #03DAC6;
+            }
+            </style>
+        """
 
 
 # Main Streamlit app
@@ -310,6 +389,10 @@ def main():
         st.session_state.background_thread_started = False
     if "response_length" not in st.session_state:
         st.session_state.response_length = "Auto"  # Default to auto length
+    if "index_status" not in st.session_state:
+        st.session_state.index_status = "Indexes not loaded yet"
+    if "index_last_refresh" not in st.session_state:
+        st.session_state.index_last_refresh = datetime.min  # Set to minimum date to force initial load
 
     # Start background thread for file count updates
     if not st.session_state.background_thread_started:
@@ -327,9 +410,7 @@ def main():
 
         # Load indexes in the background if not already loaded
         if not st.session_state.indexes_loaded:
-            with st.spinner("Loading FAISS indexes..."):
-                st.session_state.all_indexes = get_all_indexes()
-                st.session_state.indexes_loaded = True
+            load_all_indexes()
 
         # User input area
         user_input = st.text_input("Your Question:", key="input", placeholder="Type your question here...")
@@ -372,10 +453,10 @@ def main():
                     # Use both indexes
                     documents = retrieve_from_all_indexes(user_input, k=doc_count)
                 elif option == "Proforma Invoices Only":
-                    vector_store = st.session_state.all_indexes["Proforma Invoices"]
+                    vector_store = st.session_state.all_indexes["Proforma Invoices"]["index"]
                     documents = vector_store.similarity_search(user_input, k=doc_count)
                 else:  # Purchase Orders Only
-                    vector_store = st.session_state.all_indexes["Purchase Orders"]
+                    vector_store = st.session_state.all_indexes["Purchase Orders"]["index"]
                     documents = vector_store.similarity_search(user_input, k=doc_count)
 
                 st.session_state.context_documents = documents
@@ -468,6 +549,16 @@ def main():
             st.markdown(
                 '<div class="context-panel">No context retrieved yet. Ask a question to see relevant documents.</div>',
                 unsafe_allow_html=True)
+
+        # Index status and refresh button
+        st.markdown("<h3>FAISS Indexes</h3>", unsafe_allow_html=True)
+        st.markdown(f'<div class="status-panel">{st.session_state.index_status}</div>', unsafe_allow_html=True)
+
+        if st.button("Force Refresh Indexes"):
+            with st.spinner("Refreshing FAISS indexes..."):
+                load_all_indexes(force_refresh=True)
+                st.session_state.index_status = f"Indexes manually refreshed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                st.experimental_rerun()
 
         # Options and stats in the right panel below context
         st.markdown("<h3>Stats</h3>", unsafe_allow_html=True)
