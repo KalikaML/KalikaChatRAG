@@ -10,7 +10,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 # Configuration constants
 S3_BUCKET = "kalika-rag"
 S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/"
-LOCAL_FAISS_DIR = "/faiss_index"  # Local folder to store FAISS index
+LOCAL_FAISS_DIR = "faiss_indexes/faiss_index"  # Local folder to store FAISS index
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 GEMINI_MODEL = "gemini-1.5-pro"
 
