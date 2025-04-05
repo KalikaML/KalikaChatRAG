@@ -6,6 +6,7 @@
 #### Basic RAG Architecture
  ![rag_image](https://www.clarifai.com/hs-fs/hubfs/rag-query-drawio%20(1)-png-2.png?width=2056&height=1334&name=rag-query-drawio%20(1)-png-2.png)
 
+
 ## RAG Usecases
 
 ### Gmail RAG
