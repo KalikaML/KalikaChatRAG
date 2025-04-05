@@ -7,8 +7,7 @@ langchain_community
 sentence-transformers
 PyPDF2
 schedule
-schedule
-PyPDF2
 langchain_huggingface
 nest_asyncio
 transformers
+langchain_google_genai
