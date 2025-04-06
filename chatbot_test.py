@@ -16,7 +16,7 @@ secrets = toml.load(SECRETS_FILE_PATH)
 # Configuration constants
 S3_BUCKET = "kalika-rag"
 S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/"
-EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"  # Embedding model used
+EMBEDDING_MODEL = "BAAI/BGE-small-en-v1.5"  # Embedding model used
 AWS_ACCESS_KEY = secrets["access_key_id"]
 AWS_SECRET_KEY = secrets["secret_access_key"]
 GEMINI_MODEL = "gemini-1.5-pro"  # Specify Gemini model version
@@ -105,21 +105,34 @@ def query_faiss_index(vector_store, query_text):
         return []
 
 
-def generate_response(gemini_model, query_text, context=None):
+def count_faiss_files(bucket, prefix):
     """
-    Generate a response using the Gemini model.
+    Count the number of FAISS-related files in the S3 bucket.
     """
-    if context:
-        messages_to_send = [SystemMessage(content=f"Context: {context}"), HumanMessage(content=query_text)]
-    else:
-        messages_to_send = [HumanMessage(content=query_text)]
+    if not s3_client:
+        logging.error("S3 client not initialized. Check your AWS credentials.")
+        return 0
 
-    ai_response_message: AIMessage = gemini_model.invoke(messages_to_send)
-    return ai_response_message.content
+    try:
+        response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
+        if 'Contents' not in response:
+            return 0
+
+        # Ensure only valid keys are counted (e.g., strings)
+        file_count = sum(1 for obj in response['Contents'] if isinstance(obj.get('Key'), str))
+        return file_count
+
+    except Exception as e:
+        logging.error(f"Error counting FAISS files: {str(e)}")
+        return 0
 
 
-# Streamlit Query and Response Interface
-st.title("Query and Response Interface")
+# Streamlit Chatbot UI
+st.title("Personalized Chatbot")
+
+# Initialize session state for conversation history
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = []
 
 # Load FAISS index from S3 with caching for faster access
 st.write("Loading FAISS index from S3...")
@@ -130,20 +143,35 @@ if vector_store:
 else:
     st.error("Failed to load FAISS index.")
 
-# Query input box
-query_text = st.text_input("Enter your query like give me list of all products:", placeholder="Enter your message")
+# Display count of indexed files in S3
+faiss_file_count = count_faiss_files(S3_BUCKET, S3_PROFORMA_INDEX_PATH)
+st.write(f"Number of indexed files in S3: {faiss_file_count}")
 
-if query_text:
+# Chat input box
+user_input = st.text_input("You:", placeholder="Enter your message")
+
+if user_input:
+    # Append user input to conversation history as HumanMessage objects
+    st.session_state.conversation_history.append(HumanMessage(content=user_input))
+
     # Query FAISS index for relevant results (if available)
-    results = query_faiss_index(vector_store, query_text)
-    if results:
-        context = results[0].page_content
-    else:
-        context = None
+    context_messages = []
+    if vector_store:
+        results = query_faiss_index(vector_store, user_input)
+        if results:
+            context_messages.append(SystemMessage(content=f"Context: {results[0].page_content}"))
 
-    # Generate response using Gemini model
-    response = generate_response(gemini_model, query_text, context)
+    # Generate response using Gemini model with structured messages (HumanMessage + SystemMessage)
+    messages_to_send = context_messages + [HumanMessage(content=user_input)]
 
-    # Display response
-    st.write("Response:")
-    st.write(response)
+    # Generate AI response using invoke method and append it directly to conversation history
+    ai_response_message: AIMessage = gemini_model.invoke(messages_to_send)  # Response is an AIMessage object
+
+    st.session_state.conversation_history.append(ai_response_message)
+
+    # Display conversation history
+    st.write("Conversation:")
+
+    for message in st.session_state.conversation_history:
+        role_prefix = "AI:" if isinstance(message, AIMessage) else "You:"
+        st.write(f"{role_prefix} {message}")
