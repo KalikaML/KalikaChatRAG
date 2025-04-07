@@ -9,141 +9,268 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 import toml
 
-# Load secrets from secrets.toml
+# --- Configuration and Secrets ---
 SECRETS_FILE_PATH = ".streamlit/secrets.toml"
-secrets = toml.load(SECRETS_FILE_PATH)
-
-# Configuration constants
-S3_BUCKET = "kalika-rag"
-S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/"
-EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"  # Embedding model used
-AWS_ACCESS_KEY = secrets["access_key_id"]
-AWS_SECRET_KEY = secrets["secret_access_key"]
-GEMINI_MODEL = "gemini-1.5-pro"  # Specify Gemini model version
-GEMINI_API_KEY = secrets["gemini_api_key"]
-
-# Initialize S3 client
 try:
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=AWS_ACCESS_KEY,
-        aws_secret_access_key=AWS_SECRET_KEY,
-    )
-except Exception as e:
-    logging.error(f"Error initializing S3 client: {str(e)}")
-    s3_client = None
+    secrets = toml.load(SECRETS_FILE_PATH)
+    S3_BUCKET = "kalika-rag" # Ensure this matches the indexer script
+    S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index" # Base path (no trailing slash)
+    EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"
+    AWS_ACCESS_KEY = secrets["access_key_id"]
+    AWS_SECRET_KEY = secrets["secret_access_key"]
+    GEMINI_MODEL = "gemini-1.5-pro" # Or other suitable Gemini model
+    GEMINI_API_KEY = secrets["gemini_api_key"]
+except FileNotFoundError:
+    st.error(f"Secrets file not found at {SECRETS_FILE_PATH}. App cannot run.")
+    st.stop()
+except KeyError as e:
+    st.error(f"Missing secret key in {SECRETS_FILE_PATH}: {e}. App cannot run.")
+    st.stop()
 
-# Initialize embeddings model
-embeddings = HuggingFaceEmbeddings(
-    model_name=EMBEDDING_MODEL,
-    model_kwargs={'device': 'cpu'},
-    encode_kwargs={'normalize_embeddings': False}
-)
+# --- Set up logging ---
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Initialize Gemini model for LLM responses
-gemini_model = ChatGoogleGenerativeAI(
-    model=GEMINI_MODEL,
-    google_api_key=GEMINI_API_KEY,
-    temperature=0.5  # Adjustable parameter for response creativity
-)
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-
-
-@st.cache_resource
-def download_faiss_index_from_s3(bucket, prefix):
-    """
-    Download and load the FAISS index from S3 to a local directory.
-    """
-    if not s3_client:
-        logging.error("S3 client not initialized. Check your AWS credentials.")
-        return None
-
+# --- Initialize S3 client ---
+@st.cache_resource # Cache S3 client resource across reruns
+def get_s3_client():
     try:
-        # Create a temporary directory to store the downloaded files
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # List all objects in the specified S3 prefix
-            response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
-
-            if 'Contents' not in response:
-                logging.warning("No FAISS index files found in S3.")
-                return None
-
-            # Download all FAISS-related files from S3 to the local temp directory
-            for obj in response['Contents']:
-                key = obj.get('Key')
-                if isinstance(key, str):  # Ensure key is a string
-                    local_file_path = os.path.join(temp_dir, os.path.basename(key))
-                    s3_client.download_file(bucket, key, local_file_path)
-                    logging.info(f"Downloaded {key} to {local_file_path}")
-                else:
-                    logging.warning(f"Invalid key type: {key}")
-
-            # Load the FAISS index from the local directory with dangerous deserialization enabled
-            vector_store = FAISS.load_local(
-                temp_dir,
-                embeddings,
-                allow_dangerous_deserialization=True  # Enable dangerous deserialization explicitly
-            )
-            return vector_store
-
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=AWS_ACCESS_KEY,
+            aws_secret_access_key=AWS_SECRET_KEY,
+        )
+        # Quick check to verify credentials
+        s3.list_buckets()
+        logging.info("S3 client initialized successfully.")
+        return s3
     except Exception as e:
-        logging.error(f"Error downloading or loading FAISS index: {str(e)}")
+        logging.error(f"Error initializing S3 client: {str(e)}")
+        st.error(f"Failed to connect to S3. Check AWS credentials and permissions. Error: {e}")
         return None
 
+s3_client = get_s3_client()
 
-def query_faiss_index(vector_store, query_text):
-    """
-    Query the FAISS index and return results.
-    """
+# --- Initialize Embeddings Model ---
+@st.cache_resource # Cache embeddings model
+def get_embeddings_model():
     try:
-        results = vector_store.similarity_search(query_text, k=5)
+        embeddings = HuggingFaceEmbeddings(
+            model_name=EMBEDDING_MODEL,
+            model_kwargs={'device': 'cpu'}, # Use 'cuda' if GPU available
+            encode_kwargs={'normalize_embeddings': True} # Match indexer settings
+        )
+        logging.info(f"Embeddings model {EMBEDDING_MODEL} loaded.")
+        return embeddings
+    except Exception as e:
+        st.error(f"Failed to load embeddings model {EMBEDDING_MODEL}. Error: {e}")
+        logging.error(f"Failed to load embeddings model: {e}")
+        return None
+
+embeddings = get_embeddings_model()
+
+# --- Initialize Gemini LLM ---
+@st.cache_resource # Cache LLM model
+def get_gemini_model():
+    try:
+        llm = ChatGoogleGenerativeAI(
+            model=GEMINI_MODEL,
+            google_api_key=GEMINI_API_KEY,
+            temperature=0.3, # Lower temperature for more factual answers based on context
+            convert_system_message_to_human=True # Good practice for some models
+        )
+        logging.info(f"Gemini model {GEMINI_MODEL} initialized.")
+        return llm
+    except Exception as e:
+        st.error(f"Failed to initialize Gemini model {GEMINI_MODEL}. Check API Key. Error: {e}")
+        logging.error(f"Failed to initialize Gemini model: {e}")
+        return None
+
+gemini_model = get_gemini_model()
+
+
+# --- FAISS Index Loading ---
+@st.cache_resource(ttl=3600) # Cache the loaded index for 1 hour
+def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
+    """
+    Downloads the FAISS index files (index.faiss, index.pkl) from S3
+    to a temporary local directory and loads them.
+    Uses Streamlit's caching.
+    Requires allow_dangerous_deserialization=True for FAISS.load_local.
+    """
+    if not _s3_client or not _embeddings:
+        st.error("S3 client or embeddings model not initialized. Cannot load index.")
+        return None
+
+    # Define the specific file keys
+    s3_index_key = f"{prefix}.faiss"
+    s3_pkl_key = f"{prefix}.pkl"
+
+    try:
+        # Create a temporary directory that persists for the cached resource
+        # Note: Streamlit handles temp dir cleanup for @st.cache_resource
+        temp_dir = tempfile.mkdtemp()
+        local_index_path = os.path.join(temp_dir, "index.faiss")
+        local_pkl_path = os.path.join(temp_dir, "index.pkl")
+
+        logging.info(f"Attempting to download index from s3://{bucket}/{prefix}")
+
+        # Download the files
+        _s3_client.download_file(bucket, s3_index_key, local_index_path)
+        _s3_client.download_file(bucket, s3_pkl_key, local_pkl_path)
+        logging.info(f"Successfully downloaded index files to {temp_dir}")
+
+        # Load the FAISS index from the temporary directory
+        vector_store = FAISS.load_local(
+            temp_dir,
+            _embeddings,
+            allow_dangerous_deserialization=True # *** Absolutely required ***
+        )
+        logging.info("FAISS index loaded successfully into memory.")
+        # No need to manually cleanup temp_dir here, Streamlit cache handles it
+        return vector_store
+
+    except _s3_client.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == '404':
+             st.error(f"FAISS index files not found at s3://{bucket}/{prefix}. Please run the indexing script.")
+             logging.error(f"FAISS index files not found at s3://{bucket}/{prefix}.")
+        else:
+             st.error(f"Error downloading FAISS index from S3: {e}")
+             logging.error(f"S3 ClientError downloading index: {e}")
+        return None
+    except Exception as e:
+        st.error(f"An error occurred while loading the FAISS index: {e}")
+        logging.error(f"Error loading FAISS index: {e}", exc_info=True)
+        return None
+
+# --- Querying Functions ---
+def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
+    """
+    Query the FAISS index. Returns a list of LangChain Document objects.
+    k: Number of results to return. Start with 5-10.
+    use_mmr: Set to True to use Maximal Marginal Relevance for potentially more diverse results.
+    """
+    if not vector_store:
+        return []
+    try:
+        search_kwargs = {'k': k}
+        search_type = 'similarity'
+        if use_mmr:
+             search_type = 'mmr'
+             # MMR specific defaults, can be tuned:
+             # search_kwargs['fetch_k'] = 20 # Fetch more initially for MMR to select from
+             # search_kwargs['lambda_mult'] = 0.5 # 0.5 balances similarity and diversity
+
+        # Use the retriever interface for more options if needed later
+        # retriever = vector_store.as_retriever(search_type=search_type, search_kwargs=search_kwargs)
+        # results = retriever.get_relevant_documents(query_text)
+
+        # Direct similarity search:
+        if use_mmr:
+            results = vector_store.max_marginal_relevance_search(query_text, k=k, fetch_k=k*4) # Fetch more for MMR
+        else:
+            results = vector_store.similarity_search(query_text, k=k)
+
+        logging.info(f"Retrieved {len(results)} chunks using {search_type} search for query: '{query_text}'")
         return results
     except Exception as e:
+        st.error(f"Error querying FAISS index: {str(e)}")
         logging.error(f"Error querying FAISS index: {str(e)}")
         return []
 
+def generate_llm_response(llm, query_text, retrieved_docs):
+    """
+    Generate a response using the Gemini LLM, providing retrieved documents as context.
+    """
+    if not llm:
+        return "LLM model is not available."
 
-def generate_response(gemini_model, query_text, context=None):
-    """
-    Generate a response using the Gemini model.
-    """
-    if context:
-        messages_to_send = [SystemMessage(content=f"Context: {context}"), HumanMessage(content=query_text)]
+    if retrieved_docs:
+        # --- Context Preparation ---
+        context = "\n\n---\n\n".join([doc.page_content for doc in retrieved_docs]) # Separate chunks clearly
+
+        # --- Enhanced System Prompt ---
+        system_prompt = f"""You are an AI assistant specialized in answering questions about Proforma Invoices based *only* on the provided context documents.
+        Synthesize the information from all the context sections below to provide a comprehensive and accurate answer to the user's query.
+        If the answer cannot be fully found in the context, state clearly what information is available and what is missing. Do not make assumptions or use external knowledge.
+
+        Context Documents:
+        ---
+        {context}
+        ---
+        """
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=query_text)
+        ]
+        logging.info(f"Generating response for query: '{query_text}' with {len(retrieved_docs)} context chunks.")
+
     else:
-        messages_to_send = [HumanMessage(content=query_text)]
+        # Handle case where no relevant documents were found
+        messages = [
+             SystemMessage(content="You are an AI assistant. No relevant context documents were found for the user's query about Proforma Invoices."),
+             HumanMessage(content=query_text)
+        ]
+        logging.info(f"Generating response for query: '{query_text}' without context documents.")
 
-    ai_response_message: AIMessage = gemini_model.invoke(messages_to_send)
-    return ai_response_message.content
+    try:
+        ai_response: AIMessage = llm.invoke(messages)
+        return ai_response.content
+    except Exception as e:
+        st.error(f"Error generating response from LLM: {e}")
+        logging.error(f"LLM invocation error: {e}", exc_info=True)
+        return "Sorry, I encountered an error while generating the response."
 
 
-# Streamlit Query and Response Interface
-st.title("Query and Response Interface")
+# --- Streamlit UI ---
+# st.set_page_config(layout="wide")
+st.title("📄 Proforma Invoice Query Assistant")
+st.markdown("Ask questions about the proforma invoices processed from email attachments.")
 
-# Load FAISS index from S3 with caching for faster access
-st.write("Loading FAISS index from S3...")
-vector_store = download_faiss_index_from_s3(S3_BUCKET, S3_PROFORMA_INDEX_PATH)
+# Load resources only if prerequisites are met
+if not s3_client or not embeddings or not gemini_model:
+    st.error("Application cannot start due to initialization errors. Check logs.")
+    st.stop()
+
+# Load FAISS index (cached)
+with st.spinner("Loading knowledge base index from S3... Please wait."):
+    vector_store = download_and_load_faiss_index(s3_client, embeddings, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
 
 if vector_store:
-    st.success("FAISS index loaded successfully!")
+    st.success("Knowledge base index loaded successfully!")
 else:
-    st.error("Failed to load FAISS index.")
+    st.error("Failed to load the knowledge base index. Querying is disabled.")
+    st.stop() # Stop execution if index loading fails
 
-# Query input box
-query_text = st.text_input("Enter your query like give me list of all products:", placeholder="Enter your message")
+# Input area
+st.markdown("---")
+query_text = st.text_input("Enter your query:", placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].")
+
+# Query parameters (optional advanced settings)
+# with st.sidebar:
+#     st.header("Query Settings")
+#     k_results = st.slider("Number of context chunks (k):", min_value=1, max_value=20, value=5, step=1)
+#     use_mmr_search = st.checkbox("Use MMR search (for diversity)", value=False)
+k_results = 25 # Default K value
+use_mmr_search = False # Default search type
 
 if query_text:
-    # Query FAISS index for relevant results (if available)
-    results = query_faiss_index(vector_store, query_text)
-    if results:
-        context = results[0].page_content
+    # 1. Query FAISS index
+    retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)
+
+    # 2. Generate LLM response
+    with st.spinner("Thinking..."):
+        response = generate_llm_response(gemini_model, query_text, retrieved_docs)
+
+    # 3. Display response
+    st.markdown("### Response:")
+    st.markdown(response)
+    st.markdown("---")
+
+    # Optional: Display retrieved context for debugging/transparency
+    if retrieved_docs:
+        with st.expander("Show Retrieved Context Snippets"):
+            for i, doc in enumerate(retrieved_docs):
+                 st.markdown(f"**Snippet {i+1} (Source: {doc.metadata.get('source', 'N/A') if hasattr(doc, 'metadata') else 'N/A'})**")
+                 st.text_area(f"snippet_{i}", doc.page_content, height=150, key=f"snippet_{i}")
     else:
-        context = None
-
-    # Generate response using Gemini model
-    response = generate_response(gemini_model, query_text, context)
-
-    # Display response
-    st.write("Response:")
-    st.write(response)
+        st.info("No relevant snippets were found in the knowledge base for this query.")
