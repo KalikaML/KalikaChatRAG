@@ -19,6 +19,8 @@ GEMINI_MODEL = "gemini-1.5-pro" # Or your preferred Gemini model
 
 # --- Set up logging ---
 # Logs will show up in the terminal where you run Streamlit
+# Use DEBUG level for more detailed output if needed during troubleshooting
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info("Application starting up...")
 
@@ -127,6 +129,8 @@ try:
     # --- Log values just before Authenticate init ---
     logging.info("Attempting to initialize Authenticate with:")
     logging.info(f"  Credentials type: {type(credentials_config)}") # Should be dict
+    # Optional: Add more detailed logging for credentials structure if needed for debugging
+    # logging.debug(f"Credentials structure being passed to Authenticate: {credentials_config}")
     logging.info(f"  Cookie Name: '{cookie_name}' (type: {type(cookie_name)})") # Should be str
     logging.info(f"  Cookie Key Type: {type(cookie_key)}") # Should be str - DO NOT LOG VALUE
     logging.info(f"  Cookie Expiry Days: {cookie_expiry_days} (type: {type(cookie_expiry_days)})") # Should be int
@@ -149,22 +153,29 @@ except Exception as auth_init_e:
 
 
 # --- Render Login Form & Handle Authentication ---
-# This section should now execute only if authenticator was initialized successfully
+# This section now explicitly checks if login() returns None to prevent TypeError
 try:
-    # The line that previously caused TypeError
-    name, authentication_status, username = authenticator.login(location='main')
-    logging.info(f"Login check complete. Status: {authentication_status}, User: {username}")
+    # Assign the return value to a single variable first
+    login_result = authenticator.login(location='main')
 
-except TypeError as login_te:
-    # Catch the specific TypeError if it still happens, providing more context
-    st.error(f"Internal Error: TypeError during authenticator.login(): {login_te}. This might indicate an issue within the library or unexpected data state after initialization.")
-    logging.error(f"TypeError during login call: {login_te}", exc_info=True)
-    # Log the state again just before the call might help diagnose
-    logging.error(f"State just before login call - Credentials type: {type(credentials_config)}, Cookie Name: {cookie_name}, Key Type: {type(cookie_key)}, Expiry: {cookie_expiry_days}")
-    st.info("Please check the application logs for more details and ensure your secrets.toml file is correctly formatted, especially the [cookie] section.")
-    st.stop()
+    # Log what was returned, this is crucial for debugging the NoneType error
+    logging.info(f"authenticator.login() returned: {login_result} (type: {type(login_result)})")
+
+    # Check if the result is None BEFORE attempting to unpack
+    if login_result is None:
+        st.error("Authentication service encountered an internal issue (login returned None). Cannot proceed.")
+        logging.error("CRITICAL: authenticator.login() unexpectedly returned None. Aborting.")
+        # Advise user on next steps if this error occurs
+        st.info("This may indicate an issue with session state, cookies, or the authenticator library itself. Try clearing browser cookies for this site. Check logs for earlier errors during initialization. Verify library versions.")
+        st.stop() # Stop execution as we cannot determine login state
+    else:
+        # If login_result is not None, proceed with unpacking
+        # These variables will be used in the subsequent block
+        name, authentication_status, username = login_result
+        logging.info(f"Login unpacked. Status: {authentication_status}, User: {username}, Name: {name}")
+
 except Exception as login_e:
-     # Catch any other unexpected errors during login
+     # Catch any other unexpected errors during the login call itself
      st.error(f"An unexpected error occurred during the login process: {login_e}")
      logging.error(f"Exception during login call: {login_e}", exc_info=True)
      st.info("Please check the application logs for more details.")
@@ -172,25 +183,24 @@ except Exception as login_e:
 
 
 # --- Authentication Status Check and Main Application Logic ---
-
+# This block only runs if authenticator initialized AND login() returned a non-None value
 if authentication_status == False:
     st.error('Username/password is incorrect')
-    logging.warning(f"Failed login attempt for username: {username}")
+    logging.warning(f"Failed login attempt for username: {username}") # username is available here
     st.stop() # Stop execution if login fails
 
 elif authentication_status == None:
     st.warning('Please enter your username and password to access the application.')
-    # No st.stop() needed here, as the login form is already displayed
-    # and the rest of the app logic is in the 'elif authentication_status:' block
+    # No st.stop() needed here, login form is displayed, and the main logic below is skipped
 
 elif authentication_status:
     # --- User is Authenticated --- #
     # Proceed with the main application logic and resource loading
 
     # Display welcome message and logout button (typically in the sidebar)
-    st.sidebar.success(f"Welcome *{name}* 👋")
+    st.sidebar.success(f"Welcome *{name}* 👋") # name is available here
     authenticator.logout('Logout', 'sidebar')
-    logging.info(f"User '{username}' authenticated successfully. Loading main application.")
+    logging.info(f"User '{username}' authenticated successfully. Loading main application.") # username is available here
 
     # --- Resource Initialization Functions (Cached) ---
 
@@ -209,7 +219,6 @@ elif authentication_status:
             return s3
         except Exception as e:
             logging.error(f"Error initializing S3 client: {str(e)}", exc_info=True)
-            # Display error in the main area as well
             st.error(f"Failed to connect to S3. Check AWS credentials/permissions. Error: {e}")
             return None
 
@@ -297,7 +306,7 @@ elif authentication_status:
         except _s3_client.exceptions.ClientError as e:
             error_code = e.response.get('Error', {}).get('Code')
             if error_code == '404':
-                st.error(f"FAISS index not found in s3://{bucket}/{s3_prefix}.(faiss/pkl). Check bucket, path, and ensure index exists.")
+                st.error(f"FAISS index not found in s3://{bucket}/{s3_prefix}.(faiss/pkl). Check path/existence.")
                 logging.error(f"FAISS index files not found at s3://{bucket}/{s3_prefix}.")
             elif error_code == 'NoSuchBucket':
                  st.error(f"S3 bucket '{bucket}' not found. Check S3_BUCKET name.")
