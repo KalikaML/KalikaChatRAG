@@ -8,21 +8,40 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 import toml
-# Removed explicit transformers import as it's handled by langchain_huggingface
-# We will set an environment variable instead to guide the library.
+import hashlib
+
+# --- Configure Logging ---
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configuration and Secrets ---
 SECRETS_FILE_PATH = ".streamlit/secrets.toml"
+
 try:
     secrets = toml.load(SECRETS_FILE_PATH)
+    # Core application settings
     S3_BUCKET = "kalika-rag"  # Ensure this matches the indexer script
     S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index"  # Base path (no trailing slash)
-    # IMPORTANT: Ensure this directory exists relative to where you run the script
     MODEL_DIRECTORY = "BAAI/BAAI-bge-base-en-v1.5"
     AWS_ACCESS_KEY = secrets["access_key_id"]
     AWS_SECRET_KEY = secrets["secret_access_key"]
     GEMINI_MODEL = "gemini-1.5-pro"  # Or other suitable Gemini model
     GEMINI_API_KEY = secrets["gemini_api_key"]
+
+    # Authentication credentials
+    # Using standard Streamlit secrets approach
+    if "credentials" in secrets:
+        CREDENTIALS = secrets["credentials"]["usernames"]
+        # st.write(CREDENTIALS)
+    else:
+        # Default credentials if not in secrets (for development)
+        CREDENTIALS = {
+            "user1": {
+                "name": "User",
+                "email": "user@example.com",
+                "password": hashlib.sha256("user@123".encode()).hexdigest()
+            }
+        }
+
 except FileNotFoundError:
     st.error(f"Secrets file not found at {SECRETS_FILE_PATH}. App cannot run.")
     st.stop()
@@ -30,8 +49,34 @@ except KeyError as e:
     st.error(f"Missing secret key in {SECRETS_FILE_PATH}: {e}. App cannot run.")
     st.stop()
 
-# --- Set up logging ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# --- Authentication Functions ---
+def verify_password(username, password):
+    """Verify the password for a given username"""
+    if username not in CREDENTIALS:
+        logging.warning(f"Login attempt for non-existent user: {username}")
+        return False
+
+    # Get the pre-hashed password stored in the credentials
+    stored_hashed_password = CREDENTIALS[username]["password"]
+
+    # Hash the password *provided by the user during login*
+    input_password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+    # --- Debugging Output (Optional - remove/log in production) ---
+    # st.write(f"Username: {username}")
+    # st.write(f"Stored Hash: {stored_hashed_password}")
+    st.write(f"Input Hash (from typed password): {input_password_hash}") # Keep requested debug output
+    # ---
+
+    # Compare the hash of the input password with the stored hash
+    is_match = input_password_hash == stored_hashed_password
+    if not is_match:
+        logging.warning(f"Password mismatch for user: {username}")
+    return is_match
+
+def get_user_info(username):
+    """Get user info for a given username"""
+    return CREDENTIALS[username]["name"] if username in CREDENTIALS else None
 
 
 # --- Initialize S3 client ---
@@ -53,9 +98,6 @@ def get_s3_client():
         return None
 
 
-s3_client = get_s3_client()
-
-
 # --- Initialize Embeddings Model ---
 @st.cache_resource  # Cache embeddings model
 def get_embeddings_model():
@@ -63,7 +105,7 @@ def get_embeddings_model():
     Loads the HuggingFace embeddings model from a local directory.
     Sets the TRANSFORMERS_CACHE environment variable to help the library find the files.
     """
-    model_path = MODEL_DIRECTORY # Relative path to the local model directory
+    model_path = MODEL_DIRECTORY  # Relative path to the local model directory
 
     # --- Crucial Step: Check if local model directory exists ---
     if not os.path.isdir(model_path):
@@ -85,12 +127,12 @@ def get_embeddings_model():
         # Now, initialize HuggingFaceEmbeddings. It should use the environment
         # variable along with local_files_only=True to find the model_path.
         embeddings = HuggingFaceEmbeddings(
-            model_name=model_path, # Use the directory name as the model identifier
+            model_name=model_path,  # Use the directory name as the model identifier
             model_kwargs={
-                'device': 'cpu', # Use CPU if no GPU available/configured
-                "local_files_only": True # Crucial: prevent download attempts
+                'device': 'cpu',  # Use CPU if no GPU available/configured
+                "local_files_only": True  # Crucial: prevent download attempts
             },
-            encode_kwargs={'normalize_embeddings': True} # Recommended for BGE models
+            encode_kwargs={'normalize_embeddings': True}  # Recommended for BGE models
         )
 
         # Perform a dummy embedding to ensure the model loads correctly
@@ -104,16 +146,14 @@ def get_embeddings_model():
         logging.error(f"Failed to load embeddings model from '{model_path}': {e}", exc_info=True)
         # Provide more specific guidance based on the error if possible
         if "ConnectionError" in str(e) or "offline" in str(e):
-             st.error("It seems the application tried to connect to Hugging Face Hub. "
-                      "Ensure 'local_files_only=True' is correctly set and the "
-                      f"'{MODEL_DIRECTORY}' contains all necessary model files (config.json, pytorch_model.bin/model.safetensors, tokenizer files etc.).")
+            st.error("It seems the application tried to connect to Hugging Face Hub. "
+                     "Ensure 'local_files_only=True' is correctly set and the "
+                     f"'{MODEL_DIRECTORY}' contains all necessary model files (config.json, pytorch_model.bin/model.safetensors, tokenizer files etc.).")
         elif "snapshot" in str(e):
-             st.error(f"The library could not find the model files within the expected structure in '{os.path.abspath(model_path)}' "
-                      f"even with TRANSFORMERS_CACHE set. Please verify the contents of the '{MODEL_DIRECTORY}' directory.")
+            st.error(
+                f"The library could not find the model files within the expected structure in '{os.path.abspath(model_path)}' "
+                f"even with TRANSFORMERS_CACHE set. Please verify the contents of the '{MODEL_DIRECTORY}' directory.")
         return None
-
-
-embeddings = get_embeddings_model()
 
 
 # --- Initialize Gemini LLM ---
@@ -132,9 +172,6 @@ def get_gemini_model():
         st.error(f"Failed to initialize Gemini model {GEMINI_MODEL}. Check API Key. Error: {e}")
         logging.error(f"Failed to initialize Gemini model: {e}")
         return None
-
-
-gemini_model = get_gemini_model()
 
 
 # --- FAISS Index Loading ---
@@ -164,8 +201,8 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
     try:
         # Create a temporary directory that persists for the cached resource
         with tempfile.TemporaryDirectory() as temp_dir:
-            local_index_path = os.path.join(temp_dir, "index.faiss") # FAISS expects these specific names
-            local_pkl_path = os.path.join(temp_dir, "index.pkl")     # when loading from a directory
+            local_index_path = os.path.join(temp_dir, "index.faiss")  # FAISS expects these specific names
+            local_pkl_path = os.path.join(temp_dir, "index.pkl")  # when loading from a directory
 
             logging.info(f"Attempting to download index from s3://{bucket}/{prefix} (.faiss and .pkl)")
 
@@ -177,24 +214,25 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
             # Load the FAISS index from the temporary directory
             # Pass the directory path, not individual file paths
             vector_store = FAISS.load_local(
-                folder_path=temp_dir, # Pass the directory path
+                folder_path=temp_dir,  # Pass the directory path
                 embeddings=_embeddings,
                 allow_dangerous_deserialization=True  # *** Absolutely required ***
             )
             logging.info("FAISS index loaded successfully into memory.")
-            return vector_store # The vector store is returned, temp_dir is cleaned up automatically after 'with' block
+            return vector_store  # The vector store is returned, temp_dir is cleaned up automatically after 'with' block
 
     except _s3_client.exceptions.ClientError as e:
         error_code = e.response.get('Error', {}).get('Code')
         if error_code == '404':
-            st.error(f"FAISS index files ({s3_index_key}, {s3_pkl_key}) not found in s3://{bucket}/. Please run the indexing script.")
+            st.error(
+                f"FAISS index files ({s3_index_key}, {s3_pkl_key}) not found in s3://{bucket}/. Please run the indexing script.")
             logging.error(f"FAISS index files not found at s3://{bucket}/{prefix}.")
         elif error_code == 'NoSuchBucket':
-             st.error(f"S3 bucket '{bucket}' not found. Please check the S3_BUCKET name.")
-             logging.error(f"S3 bucket '{bucket}' not found.")
+            st.error(f"S3 bucket '{bucket}' not found. Please check the S3_BUCKET name.")
+            logging.error(f"S3 bucket '{bucket}' not found.")
         elif error_code in ['NoCredentialsError', 'InvalidAccessKeyId', 'SignatureDoesNotMatch']:
-             st.error(f"AWS S3 Authentication Error: {e}. Please check your AWS credentials in secrets.toml.")
-             logging.error(f"S3 Authentication Error: {e}")
+            st.error(f"AWS S3 Authentication Error: {e}. Please check your AWS credentials in secrets.toml.")
+            logging.error(f"S3 Authentication Error: {e}")
         else:
             st.error(f"Error downloading FAISS index from S3: {e}")
             logging.error(f"S3 ClientError downloading index: {e}")
@@ -202,11 +240,11 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
     except Exception as e:
         st.error(f"An error occurred while loading the FAISS index: {e}")
         logging.error(f"Error loading FAISS index: {e}", exc_info=True)
-         # Check if it's a deserialization issue
+        # Check if it's a deserialization issue
         if "Pickle" in str(e) or "deserialization" in str(e):
-             st.error("Potential deserialization issue with the FAISS index (.pkl file). "
-                      "Ensure the index was created with the same version of LangChain/FAISS "
-                      "and that 'allow_dangerous_deserialization=True' is set.")
+            st.error("Potential deserialization issue with the FAISS index (.pkl file). "
+                     "Ensure the index was created with the same version of LangChain/FAISS "
+                     "and that 'allow_dangerous_deserialization=True' is set.")
         return None
 
 
@@ -234,7 +272,7 @@ def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
         # Direct similarity search:
         if use_mmr:
             # Increase fetch_k for MMR to have more documents to choose from for diversity
-            results = vector_store.max_marginal_relevance_search(query_text, k=k, fetch_k=k*4)
+            results = vector_store.max_marginal_relevance_search(query_text, k=k, fetch_k=k * 4)
         else:
             results = vector_store.similarity_search(query_text, k=k)
 
@@ -257,7 +295,8 @@ def generate_llm_response(llm, query_text, retrieved_docs):
     if retrieved_docs:
         # --- Context Preparation ---
         context = "\n\n---\n\n".join([doc.page_content for doc in retrieved_docs])  # Separate chunks clearly
-        context_sources = ", ".join(list(set(doc.metadata.get('source', 'N/A') for doc in retrieved_docs if hasattr(doc, 'metadata') and 'source' in doc.metadata))) # Get unique sources
+        context_sources = ", ".join(list(set(doc.metadata.get('source', 'N/A') for doc in retrieved_docs if hasattr(doc,
+                                                                                                                    'metadata') and 'source' in doc.metadata)))  # Get unique sources
         context_log_msg = f"Context from sources: {context_sources}" if context_sources else "Context from retrieved chunks."
 
         # --- Enhanced System Prompt ---
@@ -277,14 +316,16 @@ def generate_llm_response(llm, query_text, retrieved_docs):
             SystemMessage(content=system_prompt),
             HumanMessage(content=query_text)
         ]
-        logging.info(f"Generating response for query: '{query_text}' with {len(retrieved_docs)} context chunks. {context_log_msg}")
+        logging.info(
+            f"Generating response for query: '{query_text}' with {len(retrieved_docs)} context chunks. {context_log_msg}")
 
     else:
         # Handle case where no relevant documents were found
         messages = [
             SystemMessage(content="You are an AI assistant answering questions about Proforma Invoices. "
                                   "No relevant context documents were found in the knowledge base for the user's query."),
-            HumanMessage(content=query_text + "\n\nSince no relevant documents were found, please state that you cannot answer the question based on the available knowledge base.")
+            HumanMessage(
+                content=query_text + "\n\nSince no relevant documents were found, please state that you cannot answer the question based on the available knowledge base.")
         ]
         logging.info(f"Generating response for query: '{query_text}' without context documents.")
 
@@ -297,93 +338,143 @@ def generate_llm_response(llm, query_text, retrieved_docs):
         return "Sorry, I encountered an error while generating the response."
 
 
-# --- Streamlit UI ---
-# st.set_page_config(layout="wide") # Optional: Uncomment for wider layout
-st.title("📄 Proforma Invoice Query Assistant")
-st.markdown("Ask questions about the proforma invoices processed from email attachments.")
+# --- Login Page ---
+def login_page():
+    st.title("📄 Proforma Invoice Assistant - Login")
 
-# --- Resource Loading and Status ---
-s3_status = "✅ S3 Client Initialized" if s3_client else "❌ S3 Client Failed"
-embeddings_status = "✅ Embeddings Model Loaded" if embeddings else "❌ Embeddings Model Failed"
-gemini_status = "✅ Gemini LLM Initialized" if gemini_model else "❌ Gemini LLM Failed"
+    # Center the login form with custom styling
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-with st.status("Initializing resources...", expanded=False) as status_container:
-    st.write(s3_status)
-    st.write(embeddings_status)
-    st.write(gemini_status)
-    # Check if core components failed
-    if not s3_client or not embeddings or not gemini_model:
-        st.error("Core components failed to initialize. Application cannot proceed. Check logs for details.")
-        status_container.update(label="Initialization Failed!", state="error")
-        st.stop() # Stop execution if core components fail
-    else:
-        # Load FAISS index only if core components are okay
-        st.write("Loading Knowledge Base Index...")
-        vector_store = download_and_load_faiss_index(s3_client, embeddings, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
-        if vector_store:
-            st.write("✅ Knowledge Base Index Loaded")
-            status_container.update(label="Initialization Complete!", state="complete", expanded=False)
-        else:
-            st.write("❌ Knowledge Base Index Failed to Load")
+    with col2:
+        st.markdown("### Login to Access the System")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        login_button = st.button("Login", use_container_width=True)
+
+        if login_button:
+            if verify_password(username, password):
+                st.session_state.authenticated = True
+                st.session_state.username = username
+                st.session_state.name = get_user_info(username)
+                st.success("Login successful!")
+                st.rerun()  # Refresh the page
+            else:
+                st.error("Invalid username or password")
+
+
+# --- Main Application ---
+def main_app():
+    # Add logout button in sidebar
+    with st.sidebar:
+        st.write(f"Welcome, {st.session_state.name}")
+        if st.button("Logout"):
+            st.session_state.authenticated = False
+            st.session_state.username = None
+            st.session_state.name = None
+            st.rerun()  # Refresh the page after logout
+
+    # Main app UI
+    st.title("📄 Proforma Invoice Query Assistant")
+    st.markdown("Ask questions about the proforma invoices processed from email attachments.")
+
+    # Initialize resources
+    s3_client = get_s3_client()
+    embeddings = get_embeddings_model()
+    gemini_model = get_gemini_model()
+
+    # --- Resource Loading and Status ---
+    s3_status = "✅ S3 Client Initialized" if s3_client else "❌ S3 Client Failed"
+    embeddings_status = "✅ Embeddings Model Loaded" if embeddings else "❌ Embeddings Model Failed"
+    gemini_status = "✅ Gemini LLM Initialized" if gemini_model else "❌ Gemini LLM Failed"
+
+    with st.status("Initializing resources...", expanded=False) as status_container:
+        st.write(s3_status)
+        st.write(embeddings_status)
+        st.write(gemini_status)
+        # Check if core components failed
+        if not s3_client or not embeddings or not gemini_model:
+            st.error("Core components failed to initialize. Application cannot proceed. Check logs for details.")
             status_container.update(label="Initialization Failed!", state="error")
-            st.error("Failed to load the knowledge base index. Querying is disabled. Check S3 path and permissions.")
-            st.stop() # Stop execution if index loading fails
+            st.stop()  # Stop execution if core components fail
+        else:
+            # Load FAISS index only if core components are okay
+            st.write("Loading Knowledge Base Index...")
+            vector_store = download_and_load_faiss_index(s3_client, embeddings, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
+            if vector_store:
+                st.write("✅ Knowledge Base Index Loaded")
+                status_container.update(label="Initialization Complete!", state="complete", expanded=False)
+            else:
+                st.write("❌ Knowledge Base Index Failed to Load")
+                status_container.update(label="Initialization Failed!", state="error")
+                st.error(
+                    "Failed to load the knowledge base index. Querying is disabled. Check S3 path and permissions.")
+                st.stop()  # Stop execution if index loading fails
 
-# --- Query Interface ---
-st.markdown("---")
-query_text = st.text_input("Enter your query:",
-                            placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
-                            key="query_input", # Add key for potential state management
-                            disabled=not vector_store) # Disable input if index failed
-
-# --- Advanced Settings (Optional Sidebar) ---
-# Consider moving these to a sidebar if the main interface gets crowded
-# with st.sidebar:
-#     st.header("Query Settings")
-#     k_results = st.slider("Number of context chunks (k):", min_value=1, max_value=50, value=15, step=1,
-#                           help="How many relevant text snippets to retrieve for context. More snippets can provide more context but increase LLM processing time.")
-#     use_mmr_search = st.checkbox("Use MMR search (more diverse results)", value=False,
-#                                  help="Maximal Marginal Relevance tries to find snippets that are relevant but also different from each other.")
-
-# Using fixed settings for simplicity now:
-k_results = 15  # Increased default K value for potentially better context
-use_mmr_search = False # Default search type
-
-if query_text and vector_store: # Ensure vector_store is available
-    # 1. Query FAISS index
-    with st.spinner(f"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})..."):
-        retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)
-
-    # 2. Generate LLM response
-    with st.spinner("🧠 Synthesizing answer using retrieved context..."):
-        response = generate_llm_response(gemini_model, query_text, retrieved_docs)
-
-    # 3. Display response
-    st.markdown("### Response:")
-    st.markdown(response) # Use markdown for better formatting if the LLM provides it
+    # --- Query Interface ---
     st.markdown("---")
+    query_text = st.text_input("Enter your query:",
+                               placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
+                               key="query_input",  # Add key for potential state management
+                               disabled=not vector_store)  # Disable input if index failed
 
-    # 4. Optional: Display retrieved context
-    if retrieved_docs:
-        with st.expander("🔍 Show Retrieved Context Snippets"):
-            st.markdown(f"Retrieved {len(retrieved_docs)} snippets:")
-            for i, doc in enumerate(retrieved_docs):
-                 # Try to get filename from metadata
-                source_info = "Unknown Source"
-                if hasattr(doc, 'metadata') and doc.metadata:
-                     source_info = f"Source: {doc.metadata.get('source', 'N/A')}" # Default to N/A if 'source' key missing
-                     # You could add more metadata here if available, e.g., page number
-                     # source_info += f", Page: {doc.metadata.get('page', 'N/A')}"
+    # Using fixed settings for simplicity:
+    k_results = 15  # Increased default K value for potentially better context
+    use_mmr_search = False  # Default search type
 
-                st.text_area(
-                    label=f"**Snippet {i + 1}** ({source_info})", # Use label instead of markdown in text_area
-                    value=doc.page_content, # Use value for text_area content
-                    height=150,
-                    key=f"snippet_{i}",
-                    disabled=True # Make text area read-only
-                )
+    if query_text and vector_store:  # Ensure vector_store is available
+        # 1. Query FAISS index
+        with st.spinner(f"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})..."):
+            retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)
+
+        # 2. Generate LLM response
+        with st.spinner("🧠 Synthesizing answer using retrieved context..."):
+            response = generate_llm_response(gemini_model, query_text, retrieved_docs)
+
+        # 3. Display response
+        st.markdown("### Response:")
+        st.markdown(response)  # Use markdown for better formatting if the LLM provides it
+        st.markdown("---")
+
+        # 4. Optional: Display retrieved context
+        if retrieved_docs:
+            with st.expander("🔍 Show Retrieved Context Snippets"):
+                st.markdown(f"Retrieved {len(retrieved_docs)} snippets:")
+                for i, doc in enumerate(retrieved_docs):
+                    # Try to get filename from metadata
+                    source_info = "Unknown Source"
+                    if hasattr(doc, 'metadata') and doc.metadata:
+                        source_info = f"Source: {doc.metadata.get('source', 'N/A')}"  # Default to N/A if 'source' key missing
+                        # You could add more metadata here if available, e.g., page number
+                        # source_info += f", Page: {doc.metadata.get('page', 'N/A')}"
+
+                    st.text_area(
+                        label=f"**Snippet {i + 1}** ({source_info})",  # Use label instead of markdown in text_area
+                        value=doc.page_content,  # Use value for text_area content
+                        height=150,
+                        key=f"snippet_{i}",
+                        disabled=True  # Make text area read-only
+                    )
+        else:
+            st.info("No relevant snippets were found in the knowledge base for this query.")
+
+    elif query_text and not vector_store:
+        st.error("Cannot process query because the knowledge base index is not loaded.")
+
+
+# --- Main Entry Point ---
+def main():
+    # Initialize session state for authentication
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+        st.session_state.username = None
+        st.session_state.name = None
+
+    # Show login page or main app based on authentication status
+    if not st.session_state.authenticated:
+        login_page()
     else:
-        st.info("No relevant snippets were found in the knowledge base for this query.")
+        main_app()
 
-elif query_text and not vector_store:
-     st.error("Cannot process query because the knowledge base index is not loaded.")
+
+if __name__ == "__main__":
+    main()
