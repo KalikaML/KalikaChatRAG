@@ -3,10 +3,12 @@ import boto3
 import os
 import tempfile
 import logging
+import time
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from sentence_transformers import SentenceTransformer
 import toml
 
 # --- Configuration and Secrets ---
@@ -30,6 +32,7 @@ except KeyError as e:
 # --- Set up logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 # --- Initialize S3 client ---
 @st.cache_resource  # Cache S3 client resource across reruns
 def get_s3_client():
@@ -48,26 +51,41 @@ def get_s3_client():
         st.error(f"Failed to connect to S3. Check AWS credentials and permissions. Error: {e}")
         return None
 
+
 s3_client = get_s3_client()
+
 
 # --- Initialize Embeddings Model ---
 @st.cache_resource  # Cache embeddings model
 def get_embeddings_model():
-    try:
-        # Model will be downloaded from Hugging Face Hub if not cached
-        embeddings = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL,  # Downloads BAAI/bge-base-en-v1.5 automatically
-            model_kwargs={'device': 'cpu'},  # Use 'cuda' if GPU available on deployment server
-            encode_kwargs={'normalize_embeddings': True}  # Match indexer settings
-        )
-        logging.info(f"Embeddings model {EMBEDDING_MODEL} loaded.")
-        return embeddings
-    except Exception as e:
-        st.error(f"Failed to load embeddings model {EMBEDDING_MODEL}. Error: {e}")
-        logging.error(f"Failed to load embeddings model: {e}")
-        return None
+    max_retries = 3
+    retry_delay = 5  # seconds
+    for attempt in range(max_retries):
+        try:
+            # Use sentence-transformers to load the model
+            embeddings = SentenceTransformer(EMBEDDING_MODEL)
+            logging.info(f"Embeddings model {EMBEDDING_MODEL} loaded via sentence-transformers.")
+
+            # Wrap it in HuggingFaceEmbeddings for LangChain compatibility
+            embedding_wrapper = HuggingFaceEmbeddings(
+                model_name=EMBEDDING_MODEL,
+                model_kwargs={'device': 'cpu'},  # Use 'cuda' if GPU available on deployment server
+                encode_kwargs={'normalize_embeddings': True}  # Match indexer settings
+            )
+            logging.info(f"Embeddings model wrapped for LangChain compatibility.")
+            return embedding_wrapper
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logging.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+            else:
+                st.error(f"Failed to load embeddings model {EMBEDDING_MODEL} after {max_retries} attempts. Error: {e}")
+                logging.error(f"Failed to load embeddings model after retries: {e}")
+                return None
+
 
 embeddings = get_embeddings_model()
+
 
 # --- Initialize Gemini LLM ---
 @st.cache_resource  # Cache LLM model
@@ -86,7 +104,9 @@ def get_gemini_model():
         logging.error(f"Failed to initialize Gemini model: {e}")
         return None
 
+
 gemini_model = get_gemini_model()
+
 
 # --- FAISS Index Loading ---
 @st.cache_resource(ttl=3600)  # Cache the loaded index for 1 hour
@@ -140,6 +160,7 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
         logging.error(f"Error loading FAISS index: {e}", exc_info=True)
         return None
 
+
 # --- Querying Functions ---
 def query_faiss_index(vector_store, query_text, k=30, use_mmr=False):
     """
@@ -152,16 +173,18 @@ def query_faiss_index(vector_store, query_text, k=30, use_mmr=False):
     try:
         search_kwargs = {'k': k}
         if use_mmr:
-            results = vector_store.max_marginal_relevance_search(query_text, k=k, fetch_k=k*4)
+            results = vector_store.max_marginal_relevance_search(query_text, k=k, fetch_k=k * 4)
         else:
             results = vector_store.similarity_search(query_text, k=k)
 
-        logging.info(f"Retrieved {len(results)} chunks using {'mmr' if use_mmr else 'similarity'} search for query: '{query_text}'")
+        logging.info(
+            f"Retrieved {len(results)} chunks using {'mmr' if use_mmr else 'similarity'} search for query: '{query_text}'")
         return results
     except Exception as e:
         st.error(f"Error querying FAISS index: {str(e)}")
         logging.error(f"Error querying FAISS index: {str(e)}")
         return []
+
 
 def generate_llm_response(llm, query_text, retrieved_docs):
     """
@@ -189,7 +212,8 @@ def generate_llm_response(llm, query_text, retrieved_docs):
         logging.info(f"Generating response for query: '{query_text}' with {len(retrieved_docs)} context chunks.")
     else:
         messages = [
-            SystemMessage(content="You are an AI assistant. No relevant context documents were found for the user's query about Proforma Invoices."),
+            SystemMessage(
+                content="You are an AI assistant. No relevant context documents were found for the user's query about Proforma Invoices."),
             HumanMessage(content=query_text)
         ]
         logging.info(f"Generating response for query: '{query_text}' without context documents.")
@@ -201,6 +225,7 @@ def generate_llm_response(llm, query_text, retrieved_docs):
         st.error(f"Error generating response from LLM: {e}")
         logging.error(f"LLM invocation error: {e}", exc_info=True)
         return "Sorry, I encountered an error while generating the response."
+
 
 # --- Streamlit UI ---
 st.title("📄 Proforma Invoice Query Assistant")
@@ -223,7 +248,8 @@ else:
 
 # Input area
 st.markdown("---")
-query_text = st.text_input("Enter your query:", placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].")
+query_text = st.text_input("Enter your query:",
+                           placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].")
 
 # Default query parameters
 k_results = 25  # Default K value
@@ -246,7 +272,8 @@ if query_text:
     if retrieved_docs:
         with st.expander("Show Retrieved Context Snippets"):
             for i, doc in enumerate(retrieved_docs):
-                st.markdown(f"*Snippet {i+1} (Source: {doc.metadata.get('source', 'N/A') if hasattr(doc, 'metadata') else 'N/A'})*")
+                st.markdown(
+                    f"*Snippet {i + 1} (Source: {doc.metadata.get('source', 'N/A') if hasattr(doc, 'metadata') else 'N/A'})*")
                 st.text_area(f"snippet_{i}", doc.page_content, height=150, key=f"snippet_{i}")
     else:
         st.info("No relevant snippets were found in the knowledge base for this query.")
