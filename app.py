@@ -8,6 +8,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 import toml
+from transformers import AutoTokenizer, AutoModel  # Import necessary classes
+
 
 # --- Configuration and Secrets ---
 SECRETS_FILE_PATH = ".streamlit/secrets.toml"
@@ -15,7 +17,7 @@ try:
     secrets = toml.load(SECRETS_FILE_PATH)
     S3_BUCKET = "kalika-rag" # Ensure this matches the indexer script
     S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index" # Base path (no trailing slash)
-    EMBEDDING_MODEL = "BAAI-bge-base-en-v1.5"
+    MODEL_DIRECTORY = "BAAI-bge-base-en-v1.5"  # Directory where model files are stored
     AWS_ACCESS_KEY = secrets["access_key_id"]
     AWS_SECRET_KEY = secrets["secret_access_key"]
     GEMINI_MODEL = "gemini-1.5-pro" # Or other suitable Gemini model
@@ -51,21 +53,27 @@ def get_s3_client():
 s3_client = get_s3_client()
 
 # --- Initialize Embeddings Model ---
-@st.cache_resource # Cache embeddings model
+@st.cache_resource  # Cache embeddings model
 def get_embeddings_model():
     try:
+        model_path = MODEL_DIRECTORY  # Path to the local model directory
+        #Explicitly load tokenizer and model from local path
+        tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+        model = AutoModel.from_pretrained(model_path, local_files_only=True)
+
         embeddings = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL,
-            model_kwargs={'device': 'cpu'}, # Use 'cuda' if GPU available
-            encode_kwargs={'normalize_embeddings': True} # Match indexer settings
+            model_name=model_path,  # Pass the local path
+            model_kwargs={'device': 'cpu'},  # Use 'cuda' if GPU available
+            encode_kwargs={'normalize_embeddings': True},  # Match indexer settings
+            tokenizer=tokenizer,
+            model=model
         )
-        logging.info(f"Embeddings model {EMBEDDING_MODEL} loaded.")
+        logging.info(f"Embeddings model loaded from {model_path}.")
         return embeddings
     except Exception as e:
-        st.error(f"Failed to load embeddings model {EMBEDDING_MODEL}. Error: {e}")
+        st.error(f"Failed to load embeddings model from {MODEL_DIRECTORY}. Error: {e}")
         logging.error(f"Failed to load embeddings model: {e}")
         return None
-
 embeddings = get_embeddings_model()
 
 # --- Initialize Gemini LLM ---
@@ -86,7 +94,6 @@ def get_gemini_model():
         return None
 
 gemini_model = get_gemini_model()
-
 
 # --- FAISS Index Loading ---
 @st.cache_resource(ttl=3600) # Cache the loaded index for 1 hour
@@ -219,7 +226,6 @@ def generate_llm_response(llm, query_text, retrieved_docs):
         st.error(f"Error generating response from LLM: {e}")
         logging.error(f"LLM invocation error: {e}", exc_info=True)
         return "Sorry, I encountered an error while generating the response."
-
 
 # --- Streamlit UI ---
 # st.set_page_config(layout="wide")
