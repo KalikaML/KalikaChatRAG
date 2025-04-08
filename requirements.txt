@@ -1,13 +1,3 @@
-streamlit
-boto3
-faiss-cpu
-pdfplumber
-langchain
-langchain_community
-sentence-transformers
-PyPDF2
-schedule
-langchain_huggingface
-nest_asyncio
-transformers
-langchain_google_genai
+version https://git-lfs.github.com/spec/v1
+oid sha256:1b379215f681c7b55da2215981e20ee11410a8f4c48e39b9a70031e599868663
+size 189
