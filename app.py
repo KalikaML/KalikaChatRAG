@@ -19,9 +19,10 @@ GEMINI_MODEL = "gemini-1.5-pro" # Or your preferred Gemini model
 
 # --- Set up logging ---
 # Logs will show up in the terminal where you run Streamlit
-# Use DEBUG level for more detailed output if needed during troubleshooting
-# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Use DEBUG level for more detailed output during troubleshooting
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+# Also get debug messages from the authenticator library itself
+logging.getLogger("streamlit_authenticator").setLevel(logging.DEBUG)
 logging.info("Application starting up...")
 
 # --- Load Secrets and Basic Configuration ---
@@ -128,9 +129,11 @@ try:
 
     # --- Log values just before Authenticate init ---
     logging.info("Attempting to initialize Authenticate with:")
-    logging.info(f"  Credentials type: {type(credentials_config)}") # Should be dict
-    # Optional: Add more detailed logging for credentials structure if needed for debugging
-    # logging.debug(f"Credentials structure being passed to Authenticate: {credentials_config}")
+    logging.info(f"  Credentials type: {type(credentials_config)}")
+    # --- ADDED DEBUG LOG for Step 3 Troubleshooting ---
+    # This log helps verify the exact structure loaded from secrets.toml
+    logging.debug(f"  Credentials value structure being passed: {credentials_config}")
+    # --- END ADDITION ---
     logging.info(f"  Cookie Name: '{cookie_name}' (type: {type(cookie_name)})") # Should be str
     logging.info(f"  Cookie Key Type: {type(cookie_key)}") # Should be str - DO NOT LOG VALUE
     logging.info(f"  Cookie Expiry Days: {cookie_expiry_days} (type: {type(cookie_expiry_days)})") # Should be int
@@ -162,7 +165,15 @@ try:
     logging.info(f"authenticator.login() returned: {login_result} (type: {type(login_result)})")
 
     # Check if the result is None BEFORE attempting to unpack
-    if login_result:
+    if login_result is None:
+        st.error("Authentication service encountered an internal issue (login returned None). Cannot proceed.")
+        logging.error("CRITICAL: authenticator.login() unexpectedly returned None. Aborting.")
+        # Advise user on next steps if this error occurs
+        st.info("This may indicate an issue with session state, cookies, or the authenticator library itself. Try clearing browser cookies for this site. Check logs for earlier errors during initialization. Verify library versions (streamlit, streamlit-authenticator).")
+        st.stop() # Stop execution as we cannot determine login state
+    else:
+        # If login_result is not None, proceed with unpacking
+        # These variables will be used in the subsequent block
         name, authentication_status, username = login_result
         logging.info(f"Login unpacked. Status: {authentication_status}, User: {username}, Name: {name}")
 
