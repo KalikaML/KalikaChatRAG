@@ -12,3 +12,4 @@ nest_asyncio
 transformers
 langchain_google_genai
 toml
+transformers
