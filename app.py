@@ -15,12 +15,12 @@ from transformers import AutoTokenizer, AutoModel  # Import necessary classes
 SECRETS_FILE_PATH = ".streamlit/secrets.toml"
 try:
     secrets = toml.load(SECRETS_FILE_PATH)
-    S3_BUCKET = "kalika-rag" # Ensure this matches the indexer script
-    S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index" # Base path (no trailing slash)
-    MODEL_DIRECTORY = "BAAI-bge-base-en-v1.5"  # Directory where model files are stored
+    S3_BUCKET = "kalika-rag"  # Ensure this matches the indexer script
+    S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index"  # Base path (no trailing slash)
+    MODEL_NAME = "BAAI/bge-base-en-v1.5"  # Changed to HF model path instead of local directory
     AWS_ACCESS_KEY = secrets["access_key_id"]
     AWS_SECRET_KEY = secrets["secret_access_key"]
-    GEMINI_MODEL = "gemini-1.5-pro" # Or other suitable Gemini model
+    GEMINI_MODEL = "gemini-1.5-pro"  # Or other suitable Gemini model
     GEMINI_API_KEY = secrets["gemini_api_key"]
 except FileNotFoundError:
     st.error(f"Secrets file not found at {SECRETS_FILE_PATH}. App cannot run.")
@@ -32,8 +32,9 @@ except KeyError as e:
 # --- Set up logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 # --- Initialize S3 client ---
-@st.cache_resource # Cache S3 client resource across reruns
+@st.cache_resource  # Cache S3 client resource across reruns
 def get_s3_client():
     try:
         s3 = boto3.client(
@@ -50,41 +51,41 @@ def get_s3_client():
         st.error(f"Failed to connect to S3. Check AWS credentials and permissions. Error: {e}")
         return None
 
+
 s3_client = get_s3_client()
+
 
 # --- Initialize Embeddings Model ---
 @st.cache_resource  # Cache embeddings model
 def get_embeddings_model():
     try:
-        model_path = MODEL_DIRECTORY  # Path to the local model directory
-        #Explicitly load tokenizer and model from local path
-        tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
-        model = AutoModel.from_pretrained(model_path, local_files_only=True)
-
+        # Changed to use the Hugging Face model ID directly
+        # This will download the model if not available locally
         embeddings = HuggingFaceEmbeddings(
-            model_name=model_path,  # Pass the local path
-            model_kwargs={'device': 'cpu'},  # Use 'cuda' if GPU available
-            encode_kwargs={'normalize_embeddings': True},  # Match indexer settings
-            tokenizer=tokenizer,
-            model=model
+            model_name=MODEL_NAME,
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
         )
-        logging.info(f"Embeddings model loaded from {model_path}.")
+        logging.info(f"Embeddings model loaded from {MODEL_NAME}.")
         return embeddings
     except Exception as e:
-        st.error(f"Failed to load embeddings model from {MODEL_DIRECTORY}. Error: {e}")
+        st.error(f"Failed to load embeddings model from {MODEL_NAME}. Error: {e}")
         logging.error(f"Failed to load embeddings model: {e}")
         return None
+
+
 embeddings = get_embeddings_model()
 
+
 # --- Initialize Gemini LLM ---
-@st.cache_resource # Cache LLM model
+@st.cache_resource  # Cache LLM model
 def get_gemini_model():
     try:
         llm = ChatGoogleGenerativeAI(
             model=GEMINI_MODEL,
             google_api_key=GEMINI_API_KEY,
-            temperature=0.3, # Lower temperature for more factual answers based on context
-            convert_system_message_to_human=True # Good practice for some models
+            temperature=0.3,  # Lower temperature for more factual answers based on context
+            convert_system_message_to_human=True  # Good practice for some models
         )
         logging.info(f"Gemini model {GEMINI_MODEL} initialized.")
         return llm
@@ -93,10 +94,12 @@ def get_gemini_model():
         logging.error(f"Failed to initialize Gemini model: {e}")
         return None
 
+
 gemini_model = get_gemini_model()
 
+
 # --- FAISS Index Loading ---
-@st.cache_resource(ttl=3600) # Cache the loaded index for 1 hour
+@st.cache_resource(ttl=3600)  # Cache the loaded index for 1 hour
 def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
     """
     Downloads the FAISS index files (index.faiss, index.pkl) from S3
@@ -130,7 +133,7 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
         vector_store = FAISS.load_local(
             temp_dir,
             _embeddings,
-            allow_dangerous_deserialization=True # *** Absolutely required ***
+            allow_dangerous_deserialization=True  # *** Absolutely required ***
         )
         logging.info("FAISS index loaded successfully into memory.")
         # No need to manually cleanup temp_dir here, Streamlit cache handles it
@@ -138,16 +141,17 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
 
     except _s3_client.exceptions.ClientError as e:
         if e.response['Error']['Code'] == '404':
-             st.error(f"FAISS index files not found at s3://{bucket}/{prefix}. Please run the indexing script.")
-             logging.error(f"FAISS index files not found at s3://{bucket}/{prefix}.")
+            st.error(f"FAISS index files not found at s3://{bucket}/{prefix}. Please run the indexing script.")
+            logging.error(f"FAISS index files not found at s3://{bucket}/{prefix}.")
         else:
-             st.error(f"Error downloading FAISS index from S3: {e}")
-             logging.error(f"S3 ClientError downloading index: {e}")
+            st.error(f"Error downloading FAISS index from S3: {e}")
+            logging.error(f"S3 ClientError downloading index: {e}")
         return None
     except Exception as e:
         st.error(f"An error occurred while loading the FAISS index: {e}")
         logging.error(f"Error loading FAISS index: {e}", exc_info=True)
         return None
+
 
 # --- Querying Functions ---
 def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
@@ -162,10 +166,10 @@ def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
         search_kwargs = {'k': k}
         search_type = 'similarity'
         if use_mmr:
-             search_type = 'mmr'
-             # MMR specific defaults, can be tuned:
-             # search_kwargs['fetch_k'] = 20 # Fetch more initially for MMR to select from
-             # search_kwargs['lambda_mult'] = 0.5 # 0.5 balances similarity and diversity
+            search_type = 'mmr'
+            # MMR specific defaults, can be tuned:
+            # search_kwargs['fetch_k'] = 20 # Fetch more initially for MMR to select from
+            # search_kwargs['lambda_mult'] = 0.5 # 0.5 balances similarity and diversity
 
         # Use the retriever interface for more options if needed later
         # retriever = vector_store.as_retriever(search_type=search_type, search_kwargs=search_kwargs)
@@ -173,7 +177,7 @@ def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
 
         # Direct similarity search:
         if use_mmr:
-            results = vector_store.max_marginal_relevance_search(query_text, k=k, fetch_k=k*4) # Fetch more for MMR
+            results = vector_store.max_marginal_relevance_search(query_text, k=k, fetch_k=k*4)  # Fetch more for MMR
         else:
             results = vector_store.similarity_search(query_text, k=k)
 
@@ -184,6 +188,7 @@ def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
         logging.error(f"Error querying FAISS index: {str(e)}")
         return []
 
+
 def generate_llm_response(llm, query_text, retrieved_docs):
     """
     Generate a response using the Gemini LLM, providing retrieved documents as context.
@@ -193,7 +198,7 @@ def generate_llm_response(llm, query_text, retrieved_docs):
 
     if retrieved_docs:
         # --- Context Preparation ---
-        context = "\n\n---\n\n".join([doc.page_content for doc in retrieved_docs]) # Separate chunks clearly
+        context = "\n\n---\n\n".join([doc.page_content for doc in retrieved_docs])  # Separate chunks clearly
 
         # --- Enhanced System Prompt ---
         system_prompt = f"""You are an AI assistant specialized in answering questions about Proforma Invoices based *only* on the provided context documents.
@@ -214,8 +219,8 @@ def generate_llm_response(llm, query_text, retrieved_docs):
     else:
         # Handle case where no relevant documents were found
         messages = [
-             SystemMessage(content="You are an AI assistant. No relevant context documents were found for the user's query about Proforma Invoices."),
-             HumanMessage(content=query_text)
+            SystemMessage(content="You are an AI assistant. No relevant context documents were found for the user's query about Proforma Invoices."),
+            HumanMessage(content=query_text)
         ]
         logging.info(f"Generating response for query: '{query_text}' without context documents.")
 
@@ -226,6 +231,7 @@ def generate_llm_response(llm, query_text, retrieved_docs):
         st.error(f"Error generating response from LLM: {e}")
         logging.error(f"LLM invocation error: {e}", exc_info=True)
         return "Sorry, I encountered an error while generating the response."
+
 
 # --- Streamlit UI ---
 # st.set_page_config(layout="wide")
@@ -245,19 +251,20 @@ if vector_store:
     st.success("Knowledge base index loaded successfully!")
 else:
     st.error("Failed to load the knowledge base index. Querying is disabled.")
-    st.stop() # Stop execution if index loading fails
+    st.stop()  # Stop execution if index loading fails
 
 # Input area
 st.markdown("---")
-query_text = st.text_input("Enter your query:", placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].")
+query_text = st.text_input("Enter your query:",
+                            placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].")
 
 # Query parameters (optional advanced settings)
 # with st.sidebar:
 #     st.header("Query Settings")
 #     k_results = st.slider("Number of context chunks (k):", min_value=1, max_value=20, value=5, step=1)
 #     use_mmr_search = st.checkbox("Use MMR search (for diversity)", value=False)
-k_results = 25 # Default K value
-use_mmr_search = False # Default search type
+k_results = 25  # Default K value
+use_mmr_search = False  # Default search type
 
 if query_text:
     # 1. Query FAISS index
@@ -276,7 +283,8 @@ if query_text:
     if retrieved_docs:
         with st.expander("Show Retrieved Context Snippets"):
             for i, doc in enumerate(retrieved_docs):
-                 st.markdown(f"**Snippet {i+1} (Source: {doc.metadata.get('source', 'N/A') if hasattr(doc, 'metadata') else 'N/A'})**")
-                 st.text_area(f"snippet_{i}", doc.page_content, height=150, key=f"snippet_{i}")
+                st.markdown(
+                    f"**Snippet {i + 1} (Source: {doc.metadata.get('source', 'N/A') if hasattr(doc, 'metadata') else 'N/A'})**")
+                st.text_area(f"snippet_{i}", doc.page_content, height=150, key=f"snippet_{i}")
     else:
         st.info("No relevant snippets were found in the knowledge base for this query.")
