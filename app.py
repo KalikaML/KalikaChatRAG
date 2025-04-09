@@ -9,9 +9,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 import toml
 import hashlib
-from uuid import uuid4
-from datetime import datetime
-from typing import List, Dict, Any
 
 # --- Configure Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -333,173 +330,151 @@ def generate_llm_response(llm, query_text, retrieved_docs):
         logging.info(f"Generating response for query: '{query_text}' without context documents.")
 
     try:
-        ai_response: AIMessage = llm(messages)  # Type hint for clarity
-        logging.info("LLM response generated successfully.")
+        ai_response: AIMessage = llm.invoke(messages)
         return ai_response.content
     except Exception as e:
-        st.error(f"Error generating response from the LLM: {e}")
-        logging.error(f"Error generating LLM response: {e}", exc_info=True)
-        return "An error occurred while generating the response."
+        st.error(f"Error generating response from LLM: {e}")
+        logging.error(f"LLM invocation error: {e}", exc_info=True)
+        return "Sorry, I encountered an error while generating the response."
 
 
-# --- Authentication Decorator ---
-def streamlit_auth(func):
-    """Authentication decorator for Streamlit apps."""
-    def wrapper(*args, **kwargs):
-        # Check if authentication is already done
-        if 'authentication_status' in st.session_state and st.session_state['authentication_status']:
-            func(*args, **kwargs)  # Run the decorated function if authenticated
-            return  # Exit the wrapper after running func
+# --- Login Page ---
+def login_page():
+    st.title("📄 Proforma Invoice Assistant - Login")
 
-        # --- Login Form ---
-        st.subheader("Login")
+    # Center the login form with custom styling
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col2:
+        st.markdown("### Login to Access the System")
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        login_button = st.button("Login")
+        login_button = st.button("Login", use_container_width=True)
 
         if login_button:
             if verify_password(username, password):
-                # --- Authentication successful ---
-                st.session_state['authentication_status'] = True
-                st.session_state['username'] = username
-                st.session_state['name'] = get_user_info(username)
-
-                st.success(f"Welcome, {st.session_state['name']}!")
-
-                # Refresh the page to run the main app
-                st.rerun()  # Important: rerun the script to show the authenticated view
+                st.session_state.authenticated = True
+                st.session_state.username = username
+                st.session_state.name = get_user_info(username)
+                st.success("Login successful!")
+                st.rerun()  # Refresh the page
             else:
-                # --- Authentication failed ---
                 st.error("Invalid username or password")
-                st.session_state['authentication_status'] = False  # Ensure it's explicitly set
-        else:
-            # Initial state: not authenticated
-            st.session_state['authentication_status'] = False
-            st.stop()  # Halt execution until login
 
-    return wrapper
 
-# =============================================================================
-# New Chat History Functionality (Add BEFORE existing Streamlit UI code)
-# =============================================================================
-
-def initialize_chat_session():
-    """Initialize or reset the current chat session"""
-    if 'current_chat' not in st.session_state:
-        st.session_state.current_chat = {
-            'id': str(uuid4()),
-            'messages': [],
-            'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-    
-    if 'chats' not in st.session_state:
-        st.session_state.chats = []
-    
-    if 'follow_up_questions' not in st.session_state:
-        st.session_state.follow_up_questions = []
-
-# =============================================================================
-# Main Application with Authentication
-# =============================================================================
-
-@streamlit_auth
-def main():
-    s3_client = get_s3_client()
-    embeddings_model = get_embeddings_model()
-    llm = get_gemini_model()
-    vector_store = download_and_load_faiss_index(s3_client, embeddings_model, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
-
-    # --- New Chat History Sidebar ---
+# --- Main Application ---
+def main_app():
+    # Add logout button in sidebar
     with st.sidebar:
-        st.header("Chat History")
-        
-        # New Chat Button
-        if st.button("➕ New Chat"):
-            # Archive current chat if not empty
-            if st.session_state.get('current_chat') and len(st.session_state.current_chat['messages']) > 0:
-                st.session_state.chats.append(st.session_state.current_chat)
-            initialize_chat_session()
-            st.rerun()
-        
-        # Display chat history
-        if 'chats' in st.session_state:
-            for chat in reversed(st.session_state.chats):
-                col1, col2 = st.columns([0.7, 0.3])
-                with col1:
-                    if chat['messages']:  # Check if chat has messages
-                        first_message = chat['messages'][0]['content']
-                        chat_title = f"💬 {first_message[:30]}..."
-                    else:
-                        chat_title = "💬 Empty Chat"
-                    if st.button(chat_title, key=chat['id']):
-                        st.session_state.current_chat = chat
-                        st.rerun()
-                with col2:
-                    st.caption(chat['created_at'][-8:])
-        
-        st.markdown("---")
-    
-    # --- Main Chat Interface ---
-    st.title("Proforma Invoice Assistant")
-    
-    # Initialize chat session
-    initialize_chat_session()
-    
-    # Display chat messages
-    if 'current_chat' in st.session_state and st.session_state.current_chat:
-        for msg in st.session_state.current_chat['messages']:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
-                
-                # Display follow-up questions if available
-                if msg.get("follow_ups"):
-                    st.markdown("**Follow-up Questions:**")
-                    for question in msg["follow_ups"]:
-                        if st.button(question, key=f"followup_{question[:20]}"):
-                            # Handle follow-up question click
-                            st.session_state.user_input = question
-                            user_query = question  # Assign question to user_query
-                            retrieved_docs = query_faiss_index(vector_store, user_query)
-                            ai_response = generate_llm_response(llm, user_query, retrieved_docs)
-                            
-                            follow_up_prompt = SystemMessage(content=f"""
-                                Generate 3 concise follow-up questions that a user might ask after this response. 
-                                Return only the questions as a bullet point list, nothing else.
-                                Response: {ai_response}
-                            """)
-                            follow_ups = llm([follow_up_prompt]).content.split("\n")[:3]
-                            
-                            st.session_state.current_chat['messages'].extend([
-                                {"role": "user", "content": user_query},
-                                {"role": "assistant", "content": ai_response, "follow_ups": follow_ups}
-                            ])
-                            st.rerun()
-    
-    # --- Existing query input and processing ---
-    if user_query := st.chat_input("Ask about proforma invoices..."):
-        retrieved_docs = query_faiss_index(vector_store, user_query)
-        ai_response = generate_llm_response(llm, user_query, retrieved_docs)
-        
-        # --- New Follow-up Question Generation ---
-        follow_up_prompt = SystemMessage(content=f"""
-            Generate 3 concise follow-up questions that a user might ask after this response. 
-            Return only the questions as a bullet point list, nothing else.
-            Response: {ai_response}
-        """)
-        follow_ups = llm([follow_up_prompt]).content.split("\n")[:3]
-        
-        # Store message with follow-ups
-        st.session_state.current_chat['messages'].extend([
-            {"role": "user", "content": user_query},
-            {"role": "assistant", "content": ai_response, "follow_ups": follow_ups}
-        ])
-        
-        # Store follow-ups in session state
-        st.session_state.follow_up_questions = follow_ups
-        
-        # Rerun to update UI
-        st.rerun()
+        st.write(f"Welcome, {st.session_state.name}")
+        if st.button("Logout"):
+            st.session_state.authenticated = False
+            st.session_state.username = None
+            st.session_state.name = None
+            st.rerun()  # Refresh the page after logout
 
-# --- Run the app ---
+    # Main app UI
+    st.title("📄 Proforma Invoice Query Assistant")
+    st.markdown("Ask questions about the proforma invoices processed from email attachments.")
+
+    # Initialize resources
+    s3_client = get_s3_client()
+    embeddings = get_embeddings_model()
+    gemini_model = get_gemini_model()
+
+    # --- Resource Loading and Status ---
+    s3_status = "✅ S3 Client Initialized" if s3_client else "❌ S3 Client Failed"
+    embeddings_status = "✅ Embeddings Model Loaded" if embeddings else "❌ Embeddings Model Failed"
+    gemini_status = "✅ Gemini LLM Initialized" if gemini_model else "❌ Gemini LLM Failed"
+
+    with st.status("Initializing resources...", expanded=False) as status_container:
+        st.write(s3_status)
+        st.write(embeddings_status)
+        st.write(gemini_status)
+        # Check if core components failed
+        if not s3_client or not embeddings or not gemini_model:
+            st.error("Core components failed to initialize. Application cannot proceed. Check logs for details.")
+            status_container.update(label="Initialization Failed!", state="error")
+            st.stop()  # Stop execution if core components fail
+        else:
+            # Load FAISS index only if core components are okay
+            st.write("Loading Knowledge Base Index...")
+            vector_store = download_and_load_faiss_index(s3_client, embeddings, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
+            if vector_store:
+                st.write("✅ Knowledge Base Index Loaded")
+                status_container.update(label="Initialization Complete!", state="complete", expanded=False)
+            else:
+                st.write("❌ Knowledge Base Index Failed to Load")
+                status_container.update(label="Initialization Failed!", state="error")
+                st.error(
+                    "Failed to load the knowledge base index. Querying is disabled. Check S3 path and permissions.")
+                st.stop()  # Stop execution if index loading fails
+
+    # --- Query Interface ---
+    st.markdown("---")
+    query_text = st.text_input("Enter your query:",
+                               placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
+                               key="query_input",  # Add key for potential state management
+                               disabled=not vector_store)  # Disable input if index failed
+
+    # Using fixed settings for simplicity:
+    k_results = 15  # Increased default K value for potentially better context
+    use_mmr_search = False  # Default search type
+
+    if query_text and vector_store:  # Ensure vector_store is available
+        # 1. Query FAISS index
+        with st.spinner(f"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})..."):
+            retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)
+
+        # 2. Generate LLM response
+        with st.spinner("🧠 Synthesizing answer using retrieved context..."):
+            response = generate_llm_response(gemini_model, query_text, retrieved_docs)
+
+        # 3. Display response
+        st.markdown("### Response:")
+        st.markdown(response)  # Use markdown for better formatting if the LLM provides it
+        st.markdown("---")
+
+        # 4. Optional: Display retrieved context
+        if retrieved_docs:
+            with st.expander("🔍 Show Retrieved Context Snippets"):
+                st.markdown(f"Retrieved {len(retrieved_docs)} snippets:")
+                for i, doc in enumerate(retrieved_docs):
+                    # Try to get filename from metadata
+                    source_info = "Unknown Source"
+                    if hasattr(doc, 'metadata') and doc.metadata:
+                        source_info = f"Source: {doc.metadata.get('source', 'N/A')}"  # Default to N/A if 'source' key missing
+                        # You could add more metadata here if available, e.g., page number
+                        # source_info += f", Page: {doc.metadata.get('page', 'N/A')}"
+
+                    st.text_area(
+                        label=f"**Snippet {i + 1}** ({source_info})",  # Use label instead of markdown in text_area
+                        value=doc.page_content,  # Use value for text_area content
+                        height=150,
+                        key=f"snippet_{i}",
+                        disabled=True  # Make text area read-only
+                    )
+        else:
+            st.info("No relevant snippets were found in the knowledge base for this query.")
+
+    elif query_text and not vector_store:
+        st.error("Cannot process query because the knowledge base index is not loaded.")
+
+
+# --- Main Entry Point ---
+def main():
+    # Initialize session state for authentication
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+        st.session_state.username = None
+        st.session_state.name = None
+
+    # Show login page or main app based on authentication status
+    if not st.session_state.authenticated:
+        login_page()
+    else:
+        main_app()
+
+
 if __name__ == "__main__":
     main()
