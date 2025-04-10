@@ -21,7 +21,8 @@ EMAIL = st.secrets["gmail_uname"]
 PASSWORD = st.secrets["gmail_pwd"]
 IMAP_SERVER = "imap.gmail.com"
 
-# --- WhatsApp Configuration for Seller Team ---
+
+
 SELLER_TEAM_RECIPIENTS_STR = st.secrets.get("ADDITIONAL_WHATSAPP_RECIPIENTS")
 
 # --- Session state ---
