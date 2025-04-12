@@ -232,6 +232,7 @@ def main_app():
         st.session_state.chat_sessions = {}
         st.session_state.current_chat_id = None
         st.session_state.chat_counter = 0
+        st.session_state.input_query = {}
 
     # Create a new chat if none exists
     if not st.session_state.current_chat_id:
@@ -243,6 +244,7 @@ def main_app():
             'follow_up_questions': []
         }
         st.session_state.current_chat_id = new_chat_id
+        st.session_state.input_query[new_chat_id] = ""
 
     # Sidebar
     with st.sidebar:
@@ -251,7 +253,9 @@ def main_app():
         for chat_id in sorted(st.session_state.chat_sessions.keys()):
             if st.button(f"Chat {chat_id.split('_')[1]}", key=f"chat_{chat_id}"):
                 st.session_state.current_chat_id = chat_id
-                st.session_state.input_query = ""  # Clear input
+                # Ensure input_query exists for this chat
+                if chat_id not in st.session_state.input_query:
+                    st.session_state.input_query[chat_id] = ""
                 st.rerun()
         if st.button("New Chat"):
             st.session_state.chat_counter += 1
@@ -262,13 +266,14 @@ def main_app():
                 'follow_up_questions': []
             }
             st.session_state.current_chat_id = new_chat_id
-            st.session_state.input_query = ""  # Clear input
+            st.session_state.input_query[new_chat_id] = ""
             st.rerun()
         if st.button("Logout"):
             st.session_state.authenticated = False
             st.session_state.username = None
             st.session_state.name = None
             st.session_state.chat_sessions = {}
+            st.session_state.input_query = {}
             st.rerun()
 
     # Main UI
@@ -299,33 +304,37 @@ def main_app():
             st.markdown("---")
 
     # Handle follow-up question click
+    current_chat_id = st.session_state.current_chat_id
+    if current_chat_id not in st.session_state.input_query:
+        st.session_state.input_query[current_chat_id] = ""
+
     if 'follow_up_query' in st.session_state and st.session_state.follow_up_query:
-        st.session_state.input_query = st.session_state.follow_up_query
+        st.session_state.input_query[current_chat_id] = st.session_state.follow_up_query
         st.session_state.follow_up_query = None
 
-    # Query input
+    # Query input with Enter key submission
     query_text = st.text_input(
         "Enter your query:",
         placeholder="e.g., What is the total amount for invoice [filename]?",
-        key=f"query_input_{st.session_state.current_chat_id}",
-        value=st.session_state.get('input_query', '')
+        key=f"query_input_{current_chat_id}",
+        value=st.session_state.input_query.get(current_chat_id, '')
     )
 
-    # Process query if submitted
-    if query_text and query_text != st.session_state.get('input_query', ''):
+    # Process query if submitted (new input different from current state)
+    if query_text and query_text != st.session_state.input_query.get(current_chat_id, ''):
         process_query(query_text, vector_store, gemini_model, current_chat, chat_container)
-        st.session_state.input_query = ""  # Clear input after processing
+        st.session_state.input_query[current_chat_id] = ""  # Clear input after processing
         st.rerun()
 
     # Update input_query state to reflect current input
-    st.session_state.input_query = query_text
+    st.session_state.input_query[current_chat_id] = query_text
 
     # Display follow-up questions
     if current_chat.get('follow_up_questions'):
         st.markdown("### Suggested Follow-Up Questions:")
         cols = st.columns(min(len(current_chat['follow_up_questions']), 3))
         for i, question in enumerate(current_chat['follow_up_questions']):
-            if cols[i % len(cols)].button(question, key=f"follow_up_{i}_{st.session_state.current_chat_id}"):
+            if cols[i % len(cols)].button(question, key=f"follow_up_{i}_{current_chat_id}"):
                 st.session_state.follow_up_query = question
                 st.rerun()
 
