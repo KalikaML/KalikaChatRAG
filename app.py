@@ -98,7 +98,7 @@ def get_embeddings_model():
         os.environ['TRANSFORMERS_CACHE'] = cache_dir
         logging.info(f"Set TRANSFORMERS_CACHE to: {cache_dir}")
 
-        embeddings = HuggingFrameEmbeddings(
+        embeddings = HuggingFaceEmbeddings(
             model_name=model_path,
             model_kwargs={
                 'device': 'cpu',
