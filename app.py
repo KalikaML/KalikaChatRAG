@@ -46,6 +46,7 @@ except KeyError as e:
     st.error(f"Missing secret key in {SECRETS_FILE_PATH}: {e}. App cannot run.")
     st.stop()
 
+
 # --- Authentication Functions ---
 def verify_password(username, password):
     """Verify the password for a given username"""
@@ -61,9 +62,11 @@ def verify_password(username, password):
         logging.warning(f"Password mismatch for user: {username}")
     return is_match
 
+
 def get_user_info(username):
     """Get user info for a given username"""
     return CREDENTIALS[username]["name"] if username in CREDENTIALS else None
+
 
 # --- Initialize S3 client ---
 @st.cache_resource
@@ -81,6 +84,7 @@ def get_s3_client():
         logging.error(f"Error initializing S3 client: {str(e)}")
         st.error(f"Failed to connect to S3. Check AWS credentials and permissions. Error: {e}")
         return None
+
 
 # --- Initialize Embeddings Model ---
 @st.cache_resource
@@ -124,6 +128,7 @@ def get_embeddings_model():
                 f"even with TRANSFORMERS_CACHE set. Please verify the contents of the '{MODEL_DIRECTORY}' directory.")
         return None
 
+
 # --- Initialize Gemini LLM ---
 @st.cache_resource
 def get_gemini_model():
@@ -140,6 +145,7 @@ def get_gemini_model():
         st.error(f"Failed to initialize Gemini model {GEMINI_MODEL}. Check API Key. Error: {e}")
         logging.error(f"Failed to initialize Gemini model: {e}")
         return None
+
 
 # --- FAISS Index Loading ---
 @st.cache_resource(ttl=3600)
@@ -196,8 +202,9 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
                      "and that 'allow_dangerous_deserialization=True' is set.")
         return None
 
+
 # --- Querying Functions ---
-def query_faiss_index(vector_store, query_text,k=10, use_mmr=False):
+def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
     if not vector_store:
         logging.warning("query_faiss_index called but vector_store is None.")
         return []
@@ -217,6 +224,7 @@ def query_faiss_index(vector_store, query_text,k=10, use_mmr=False):
         st.error(f"Error querying FAISS index: {str(e)}")
         logging.error(f"Error querying FAISS index: {str(e)}", exc_info=True)
         return []
+
 
 def generate_follow_up_questions(llm, query_text, response_text, retrieved_docs):
     if not llm:
@@ -241,7 +249,8 @@ def generate_follow_up_questions(llm, query_text, response_text, retrieved_docs)
         or natural next steps in understanding the invoice information.
         """
         messages = [
-            SystemMessage(content="You are an AI assistant that generates relevant follow-up questions about invoices."),
+            SystemMessage(
+                content="You are an AI assistant that generates relevant follow-up questions about invoices."),
             HumanMessage(content=follow_up_prompt)
         ]
         ai_response: AIMessage = llm.invoke(messages)
@@ -256,13 +265,15 @@ def generate_follow_up_questions(llm, query_text, response_text, retrieved_docs)
         logging.error(f"Error generating follow-up questions: {e}", exc_info=True)
         return []
 
+
 def generate_llm_response(llm, query_text, retrieved_docs):
     if not llm:
         logging.error("generate_llm_response called but llm is None.")
         return "LLM model is not available."
     if retrieved_docs:
         context = "\n\n---\n\n".join([doc.page_content for doc in retrieved_docs])
-        context_sources = ", ".join(list(set(doc.metadata.get('source', 'N/A') for doc in retrieved_docs if hasattr(doc, 'metadata') and 'source' in doc.metadata)))
+        context_sources = ", ".join(list(set(doc.metadata.get('source', 'N/A') for doc in retrieved_docs if
+                                             hasattr(doc, 'metadata') and 'source' in doc.metadata)))
         context_log_msg = f"Context from sources: {context_sources}" if context_sources else "Context from retrieved chunks."
         system_prompt = f"""You are an AI assistant specialized in answering questions about Proforma Invoices based *only* on the provided context documents.
         Analyze the user's query and the following context documents carefully.
@@ -280,12 +291,14 @@ def generate_llm_response(llm, query_text, retrieved_docs):
             SystemMessage(content=system_prompt),
             HumanMessage(content=query_text)
         ]
-        logging.info(f"Generating response for query: '{query_text}' with {len(retrieved_docs)} context chunks. {context_log_msg}")
+        logging.info(
+            f"Generating response for query: '{query_text}' with {len(retrieved_docs)} context chunks. {context_log_msg}")
     else:
         messages = [
             SystemMessage(content="You are an AI assistant answering questions about Proforma Invoices. "
                                   "No relevant context documents were found in the knowledge base for the user's query."),
-            HumanMessage(content=query_text + "\n\nSince no relevant documents were found, please state that you cannot answer the question based on the available knowledge base.")
+            HumanMessage(
+                content=query_text + "\n\nSince no relevant documents were found, please state that you cannot answer the question based on the available knowledge base.")
         ]
         logging.info(f"Generating response for query: '{query_text}' without context documents.")
     try:
@@ -295,6 +308,7 @@ def generate_llm_response(llm, query_text, retrieved_docs):
         st.error(f"Error generating response from LLM: {e}")
         logging.error(f"LLM invocation error: {e}", exc_info=True)
         return "Sorry, I encountered an error while generating the response."
+
 
 # --- Login Page ---
 def login_page():
@@ -315,6 +329,7 @@ def login_page():
             else:
                 st.error("Invalid username or password")
 
+
 # --- Main Application ---
 def main_app():
     # Sidebar with New Chat and Logout
@@ -330,6 +345,7 @@ def main_app():
                 'response_history': [],
                 'follow_up_questions': []
             }
+
         # New Chat Button
         if st.button("New Chat"):
             st.session_state.chat_counter += 1
@@ -341,129 +357,96 @@ def main_app():
             }
             st.session_state.current_chat_id = new_chat_id
             st.rerun()
+
+        # Chat selection
+        chat_keys = list(st.session_state.chat_sessions.keys())
+        if chat_keys:
+            st.write("Select Chat:")
+            for chat_id in chat_keys:
+                if st.button(f"Chat {chat_id.split('_')[1]}", key=f"select_{chat_id}"):
+                    st.session_state.current_chat_id = chat_id
+                    st.rerun()
+
         # Logout Button
         if st.button("Logout"):
             st.session_state.authenticated = False
-            st.session_state.username = None
-            st.session_state.name = None
+            del st.session_state.username
+            del st.session_state.name
             st.rerun()
 
-    # Main app UI
-    st.title("📄 Proforma Invoice Query Assistant")
-    st.markdown("Ask questions about the proforma invoices processed from email attachments.")
-
-    # Initialize resources
+    # Initialize necessary components
     s3_client = get_s3_client()
-    embeddings = get_embeddings_model()
+    embeddings_model = get_embeddings_model()
     gemini_model = get_gemini_model()
+    vector_store = download_and_load_faiss_index(s3_client, embeddings_model, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
 
-    # --- Resource Loading and Status ---
-    s3_status = "✅ S3 Client Initialized" if s3_client else "❌ S3 Client Failed"
-    embeddings_status = "✅ Embeddings Model Loaded" if embeddings else "❌ Embeddings Model Failed"
-    gemini_status = "✅ Gemini LLM Initialized" if gemini_model else "❌ Gemini LLM Failed"
+    # Main Chat Interface
+    st.title("📄 Proforma Invoice Assistant")
 
-    with st.status("Initializing resources...", expanded=False) as status_container:
-        st.write(s3_status)
-        st.write(embeddings_status)
-        st.write(gemini_status)
-        if not s3_client or not embeddings or not gemini_model:
-            st.error("Core components failed to initialize. Application cannot proceed. Check logs for details.")
-            status_container.update(label="Initialization Failed!", state="error")
-            st.stop()
-        else:
-            st.write("Loading Knowledge Base Index...")
-            vector_store = download_and_load_faiss_index(s3_client, embeddings, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
-            if vector_store:
-                st.write("✅ Knowledge Base Index Loaded")
-                status_container.update(label="Initialization Complete!", state="complete", expanded=False)
-            else:
-                st.write("❌ Knowledge Base Index Failed to Load")
-                status_container.update(label="Initialization Failed!", state="error")
-                st.error("Failed to load the knowledge base index. Querying is disabled. Check S3 path and permissions.")
-                st.stop()
+    # Initialize chat history for the current session
+    if 'query_history' not in st.session_state.chat_sessions[st.session_state.current_chat_id]:
+        st.session_state.chat_sessions[st.session_state.current_chat_id]['query_history'] = []
+    if 'response_history' not in st.session_state.chat_sessions[st.session_state.current_chat_id]:
+        st.session_state.chat_sessions[st.session_state.current_chat_id]['response_history'] = []
+    if 'follow_up_questions' not in st.session_state.chat_sessions[st.session_state.current_chat_id]:
+        st.session_state.chat_sessions[st.session_state.current_chat_id]['follow_up_questions'] = []
 
-    # --- Query Interface ---
-    st.markdown("---")
+    # Display chat history
+    for i in range(len(st.session_state.chat_sessions[st.session_state.current_chat_id]['query_history'])):
+        st.markdown(
+            f"**Question:** {st.session_state.chat_sessions[st.session_state.current_chat_id]['query_history'][i]}")
+        st.markdown(
+            f"**Response:** {st.session_state.chat_sessions[st.session_state.current_chat_id]['response_history'][i]}")
 
-    # Use current chat session
-    current_chat = st.session_state.chat_sessions[st.session_state.current_chat_id]
-    if 'query_history' not in current_chat:
-        current_chat['query_history'] = []
-    if 'response_history' not in current_chat:
-        current_chat['response_history'] = []
-    if 'follow_up_questions' not in current_chat:
-        current_chat['follow_up_questions'] = []
+    # Input box for the query
+    query = st.text_input("Enter your query:", key=f"query_input_{st.session_state.current_chat_id}")
 
-    # Display current chat history
-    if current_chat['query_history']:
-        for i in range(len(current_chat['query_history'])):
-            st.markdown(f"**Question:**")
-            st.markdown(f"> {current_chat['query_history'][i]}")
-            st.markdown(f"**Answer:**")
-            st.markdown(current_chat['response_history'][i])
-            st.markdown("---")
+    # Follow-up question functionality
+    if st.session_state.chat_sessions[st.session_state.current_chat_id]['follow_up_questions']:
+        st.write("Follow-up Questions:")
+        for question in st.session_state.chat_sessions[st.session_state.current_chat_id]['follow_up_questions']:
+            if st.button(question, key=question):
+                query = question  # Set the query to the follow-up question
+                st.session_state.chat_sessions[st.session_state.current_chat_id][
+                    'follow_up_questions'] = []  # Clear follow-up questions after click
+                break  # Exit loop after a question is selected
 
-    # Display input box for query
-    if 'follow_up_clicked' in st.session_state and st.session_state.follow_up_clicked:
-        query_text = st.session_state.follow_up_clicked
-        st.session_state.follow_up_clicked = None
-    else:
-        query_text = st.text_input("Enter your query:",
-                                   placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
-                                   key="query_input",
-                                   value=st.session_state.get('follow_up_clicked', ''),
-                                   disabled=not vector_store)
+    # When the user enters a query
+    if query:
+        # Querying and generating response
+        retrieved_docs = query_faiss_index(vector_store, query)
+        response = generate_llm_response(gemini_model, query, retrieved_docs)
 
-    # Using fixed settings for simplicity
-    k_results = 15
-    use_mmr_search = False
+        # Generating follow-up questions
+        follow_up_questions = generate_follow_up_questions(gemini_model, query, response, retrieved_docs)
 
-    if query_text and vector_store:
-        # 1. Query FAISS index
-        with st.spinner(f"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})..."):
-            retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)
+        # Store the query, response, and follow-up questions in the current chat session
+        st.session_state.chat_sessions[st.session_state.current_chat_id]['query_history'].append(query)
+        st.session_state.chat_sessions[st.session_state.current_chat_id]['response_history'].append(response)
+        st.session_state.chat_sessions[st.session_state.current_chat_id]['follow_up_questions'] = follow_up_questions
 
-        # 2. Generate LLM response
-        with st.spinner("🧠 Synthesizing answer using retrieved context..."):
-            response = generate_llm_response(gemini_model, query_text, retrieved_docs)
+        # Display the current question and response
+        st.markdown(f"**Question:** {query}")
+        st.markdown(f"**Response:** {response}")
 
-        # Store in current chat
-        current_chat['query_history'].append(query_text)
-        current_chat['response_history'].append(response)
+        # Rerun to display the updated chat history and follow-up questions
+        st.rerun()
 
-        # 3. Generate follow-up questions
-        with st.spinner("Generating follow-up questions..."):
-            follow_up_questions = generate_follow_up_questions(gemini_model, query_text, response, retrieved_docs)
-            current_chat['follow_up_questions'] = follow_up_questions
 
-        # 4. Display response
-        st.markdown("### Response:")
-        st.markdown(response)
-
-        # 5. Display follow-up questions as clickable buttons
-        if follow_up_questions:
-            st.markdown("### You might want to ask:")
-            cols = st.columns(len(follow_up_questions))
-            for i, question in enumerate(follow_up_questions):
-                if cols[i].button(question, key=f"follow_up_{i}_{st.session_state.current_chat_id}"):
-                    st.session_state.follow_up_clicked = question
-                    st.rerun()
-
-        st.markdown("---")
-
-    elif query_text and not vector_store:
-        st.error("Cannot process query because the knowledge base index is not loaded.")
-
-# --- Main Entry Point ---
+# --- Main ---
 def main():
+    st.set_page_config(page_title="Proforma Invoice Assistant", page_icon="📄")
+
+    # Initialize authentication state
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
-        st.session_state.username = None
-        st.session_state.name = None
+
+    # Authentication
     if not st.session_state.authenticated:
         login_page()
     else:
         main_app()
+
 
 if __name__ == "__main__":
     main()
