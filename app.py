@@ -49,6 +49,7 @@ except KeyError as e:
     st.error(f"Missing secret key in {SECRETS_FILE_PATH}: {e}. App cannot run.")
     st.stop()
 
+
 # --- Authentication Functions ---
 def verify_password(username, password):
     """Verify the password for a given username"""
@@ -65,7 +66,7 @@ def verify_password(username, password):
     # --- Debugging Output (Optional - remove/log in production) ---
     # st.write(f"Username: {username}")
     # st.write(f"Stored Hash: {stored_hashed_password}")
-    st.write(f"Input Hash (from typed password): {input_password_hash}") # Keep requested debug output
+    st.write(f"Input Hash (from typed password): {input_password_hash}")  # Keep requested debug output
     # ---
 
     # Compare the hash of the input password with the stored hash
@@ -73,6 +74,7 @@ def verify_password(username, password):
     if not is_match:
         logging.warning(f"Password mismatch for user: {username}")
     return is_match
+
 
 def get_user_info(username):
     """Get user info for a given username"""
@@ -284,6 +286,62 @@ def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
         return []
 
 
+def generate_follow_up_questions(llm, query_text, response_text, retrieved_docs):
+    """
+    Generate follow-up questions based on the user's query and the response.
+    """
+    if not llm:
+        logging.error("generate_follow_up_questions called but llm is None.")
+        return []
+
+    # Create context from retrieved documents if available
+    context = ""
+    if retrieved_docs:
+        context = "\n\n".join([doc.page_content for doc in retrieved_docs[:5]])  # Use first 5 docs for context
+
+    try:
+        # Create a prompt asking for follow-up questions
+        follow_up_prompt = f"""Based on the following user query and the response provided, 
+        generate 3 specific, relevant follow-up questions the user might want to ask next.
+        Make questions clear, concise, and directly relevant to the invoice context. 
+
+        Previous Query: {query_text}
+
+        Response: {response_text}
+
+        {f'Context (excerpt): {context[:500]}...' if context else ''}
+
+        Provide ONLY three follow-up questions in a simple list format, one per line.
+        Each question should be directly related to invoices, specific details mentioned, 
+        or natural next steps in understanding the invoice information.
+        """
+
+        messages = [
+            SystemMessage(
+                content="You are an AI assistant that generates relevant follow-up questions about invoices."),
+            HumanMessage(content=follow_up_prompt)
+        ]
+
+        ai_response: AIMessage = llm.invoke(messages)
+
+        # Parse the response to extract questions
+        questions = []
+        for line in ai_response.content.strip().split('\n'):
+            # Clean up the line - remove numbers, bullet points, etc.
+            clean_line = line.strip()
+            # Remove leading numbers or bullets (1., 2., -, *, etc.)
+            clean_line = clean_line.lstrip("0123456789.-*• ").strip()
+            if clean_line and '?' in clean_line:  # Ensure it looks like a question
+                questions.append(clean_line)
+
+        # Limit to 3 questions
+        return questions[:3]
+
+    except Exception as e:
+        logging.error(f"Error generating follow-up questions: {e}", exc_info=True)
+        return []
+
+
 def generate_llm_response(llm, query_text, retrieved_docs):
     """
     Generate a response using the Gemini LLM, providing retrieved documents as context.
@@ -412,10 +470,25 @@ def main_app():
 
     # --- Query Interface ---
     st.markdown("---")
+
+    # Track conversation history in session state
+    if 'query_history' not in st.session_state:
+        st.session_state.query_history = []
+    if 'response_history' not in st.session_state:
+        st.session_state.response_history = []
+    if 'follow_up_questions' not in st.session_state:
+        st.session_state.follow_up_questions = []
+
+    # Display input box for query
     query_text = st.text_input("Enter your query:",
                                placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
                                key="query_input",  # Add key for potential state management
                                disabled=not vector_store)  # Disable input if index failed
+
+    # Check if a follow-up question was clicked and set it as the query
+    if 'follow_up_clicked' in st.session_state and st.session_state.follow_up_clicked:
+        query_text = st.session_state.follow_up_clicked
+        st.session_state.follow_up_clicked = None
 
     # Using fixed settings for simplicity:
     k_results = 15  # Increased default K value for potentially better context
@@ -430,12 +503,33 @@ def main_app():
         with st.spinner("🧠 Synthesizing answer using retrieved context..."):
             response = generate_llm_response(gemini_model, query_text, retrieved_docs)
 
-        # 3. Display response
+        # Store in conversation history
+        st.session_state.query_history.append(query_text)
+        st.session_state.response_history.append(response)
+
+        # 3. Generate follow-up questions
+        with st.spinner("Generating follow-up questions..."):
+            follow_up_questions = generate_follow_up_questions(gemini_model, query_text, response, retrieved_docs)
+            st.session_state.follow_up_questions = follow_up_questions
+
+        # 4. Display response
         st.markdown("### Response:")
         st.markdown(response)  # Use markdown for better formatting if the LLM provides it
+
+        # 5. Display follow-up questions as clickable buttons
+        if follow_up_questions:
+            st.markdown("### You might want to ask:")
+            cols = st.columns(len(follow_up_questions))
+
+            for i, question in enumerate(follow_up_questions):
+                # Create a button for each follow-up question
+                if cols[i].button(question, key=f"follow_up_{i}"):
+                    st.session_state.follow_up_clicked = question
+                    st.rerun()  # Refresh to process the clicked question
+
         st.markdown("---")
 
-        # 4. Optional: Display retrieved context
+        # 6. Optional: Display retrieved context
         if retrieved_docs:
             with st.expander("🔍 Show Retrieved Context Snippets"):
                 st.markdown(f"Retrieved {len(retrieved_docs)} snippets:")
@@ -459,6 +553,16 @@ def main_app():
 
     elif query_text and not vector_store:
         st.error("Cannot process query because the knowledge base index is not loaded.")
+
+    # Display conversation history if any exists
+    if st.session_state.query_history:
+        with st.expander("📝 View Conversation History", expanded=False):
+            for i in range(len(st.session_state.query_history) - 1, -1, -1):  # Display most recent first
+                st.markdown(f"**Question:**")
+                st.markdown(f"> {st.session_state.query_history[i]}")
+                st.markdown(f"**Answer:**")
+                st.markdown(st.session_state.response_history[i])
+                st.markdown("---")
 
 
 # --- Main Entry Point ---
