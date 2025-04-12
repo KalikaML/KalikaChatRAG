@@ -98,7 +98,7 @@ def get_embeddings_model():
         os.environ['TRANSFORMERS_CACHE'] = cache_dir
         logging.info(f"Set TRANSFORMERS_CACHE to: {cache_dir}")
 
-        embeddings = HuggingFaceEmbeddings(
+        embeddings = HuggingFrameEmbeddings(
             model_name=model_path,
             model_kwargs={
                 'device': 'cpu',
@@ -299,12 +299,41 @@ def generate_llm_response(llm, query_text, retrieved_docs):
 # --- Login Page ---
 def login_page():
     st.title("📄 Proforma Invoice Assistant - Login")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
+    # Professional UI for login
+    st.markdown("""
+        <style>
+        .login-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        .stTextInput > div > input {
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .stButton > button {
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            padding: 10px 20px;
+            width: 100%;
+        }
+        .stButton > button:hover {
+            background-color: #0056b3;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown('<div class="login-container">', unsafe_allow_html=True)
         st.markdown("### Login to Access the System")
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        login_button = st.button("Login", use_container_width=True)
+        login_button = st.button("Login")
         if login_button:
             if verify_password(username, password):
                 st.session_state.authenticated = True
@@ -314,12 +343,91 @@ def login_page():
                 st.rerun()
             else:
                 st.error("Invalid username or password")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Main Application ---
 def main_app():
-    # Add logout button and chat history in sidebar
+    # Professional UI Styling
+    st.markdown("""
+        <style>
+        .stApp {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .sidebar .sidebar-content {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .chat-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .chat-message {
+            margin-bottom: 15px;
+        }
+        .chat-message strong {
+            color: #333;
+        }
+        .stTextInput > div > input {
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .stButton > button {
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin: 5px;
+        }
+        .stButton > button:hover {
+            background-color: #0056b3;
+        }
+        .sidebar-button-container {
+            background-color: #f1f3f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .logout-button {
+            float: right;
+            background-color: #dc3545;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h3 {
+            color: #555;
+        }
+        .stSpinner > div {
+            border-color: #007bff transparent transparent transparent;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Sidebar with New Chat and Logout
     with st.sidebar:
-        st.write(f"Welcome, {st.session_state.name}")
+        # Welcome message
+        st.markdown(f"<p style='color: #333; font-size: 16px;'>Welcome, {st.session_state.name}</p>", unsafe_allow_html=True)
+        # Logout button in top-right corner
+        st.markdown('<div style="overflow: hidden;">', unsafe_allow_html=True)
+        if st.button("Logout", key="logout", help="Sign out", extra_class="logout-button"):
+            st.session_state.authenticated = False
+            st.session_state.username = None
+            st.session_state.name = None
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("<hr>", unsafe_allow_html=True)
         # Initialize chat sessions
         if 'chat_sessions' not in st.session_state:
             st.session_state.chat_sessions = {}
@@ -330,164 +438,138 @@ def main_app():
                 'response_history': [],
                 'follow_up_questions': []
             }
-        # New Chat Button
-        if st.button("New Chat"):
-            st.session_state.chat_counter += 1
-            new_chat_id = f"chat_{st.session_state.chat_counter}"
-            st.session_state.chat_sessions[new_chat_id] = {
-                'query_history': [],
-                'response_history': [],
-                'follow_up_questions': []
-            }
-            st.session_state.current_chat_id = new_chat_id
-            st.rerun()
-        # Chat History
-        st.markdown("### Chat History")
-        for chat_id, chat_data in st.session_state.chat_sessions.items():
-            chat_title = chat_data['query_history'][0][:30] + "..." if chat_data['query_history'] else "Untitled Chat"
-            if st.button(chat_title, key=chat_id):
-                st.session_state.current_chat_id = chat_id
+        # New Chat Button in a container
+        with st.container():
+            st.markdown('<div class="sidebar-button-container">', unsafe_allow_html=True)
+            if st.button("New Chat", key="new_chat", help="Start a new conversation"):
+                st.session_state.chat_counter += 1
+                new_chat_id = f"chat_{st.session_state.chat_counter}"
+                st.session_state.chat_sessions[new_chat_id] = {
+                    'query_history': [],
+                    'response_history': [],
+                    'follow_up_questions': []
+                }
+                st.session_state.current_chat_id = new_chat_id
                 st.rerun()
-        # Logout Button
-        if st.button("Logout"):
-            st.session_state.authenticated = False
-            st.session_state.username = None
-            st.session_state.name = None
-            st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
     # Main app UI
-    st.title("📄 Proforma Invoice Query Assistant")
-    st.markdown("Ask questions about the proforma invoices processed from email attachments.")
+    with st.container():
+        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+        st.title("📄 Proforma Invoice Query Assistant")
+        st.markdown("Ask questions about the proforma invoices processed from email attachments.")
 
-    # Initialize resources
-    s3_client = get_s3_client()
-    embeddings = get_embeddings_model()
-    gemini_model = get_gemini_model()
+        # Initialize resources
+        s3_client = get_s3_client()
+        embeddings = get_embeddings_model()
+        gemini_model = get_gemini_model()
 
-    # --- Resource Loading and Status ---
-    s3_status = "✅ S3 Client Initialized" if s3_client else "❌ S3 Client Failed"
-    embeddings_status = "✅ Embeddings Model Loaded" if embeddings else "❌ Embeddings Model Failed"
-    gemini_status = "✅ Gemini LLM Initialized" if gemini_model else "❌ Gemini LLM Failed"
+        # --- Resource Loading and Status ---
+        s3_status = "✅ S3 Client Initialized" if s3_client else "❌ S3 Client Failed"
+        embeddings_status = "✅ Embeddings Model Loaded" if embeddings else "❌ Embeddings Model Failed"
+        gemini_status = "✅ Gemini LLM Initialized" if gemini_model else "❌ Gemini LLM Failed"
 
-    with st.status("Initializing resources...", expanded=False) as status_container:
-        st.write(s3_status)
-        st.write(embeddings_status)
-        st.write(gemini_status)
-        if not s3_client or not embeddings or not gemini_model:
-            st.error("Core components failed to initialize. Application cannot proceed. Check logs for details.")
-            status_container.update(label="Initialization Failed!", state="error")
-            st.stop()
-        else:
-            st.write("Loading Knowledge Base Index...")
-            vector_store = download_and_load_faiss_index(s3_client, embeddings, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
-            if vector_store:
-                st.write("✅ Knowledge Base Index Loaded")
-                status_container.update(label="Initialization Complete!", state="complete", expanded=False)
-            else:
-                st.write("❌ Knowledge Base Index Failed to Load")
+        with st.status("Initializing resources...", expanded=False) as status_container:
+            st.write(s3_status)
+            st.write(embeddings_status)
+            st.write(gemini_status)
+            if not s3_client or not embeddings or not gemini_model:
+                st.error("Core components failed to initialize. Application cannot proceed. Check logs for details.")
                 status_container.update(label="Initialization Failed!", state="error")
-                st.error("Failed to load the knowledge base index. Querying is disabled. Check S3 path and permissions.")
                 st.stop()
+            else:
+                st.write("Loading Knowledge Base Index...")
+                vector_store = download_and_load_faiss_index(s3_client, embeddings, S3_BUCKET, S3_PROFORMA_INDEX_PATH)
+                if vector_store:
+                    st.write("✅ Knowledge Base Index Loaded")
+                    status_container.update(label="Initialization Complete!", state="complete", expanded=False)
+                else:
+                    st.write("❌ Knowledge Base Index Failed to Load")
+                    status_container.update(label="Initialization Failed!", state="error")
+                    st.error("Failed to load the knowledge base index. Querying is disabled. Check S3 path and permissions.")
+                    st.stop()
 
-    # --- Query Interface ---
-    st.markdown("---")
-
-    # Use current chat session
-    current_chat = st.session_state.chat_sessions[st.session_state.current_chat_id]
-    if 'query_history' not in current_chat:
-        current_chat['query_history'] = []
-    if 'response_history' not in current_chat:
-        current_chat['response_history'] = []
-    if 'follow_up_questions' not in current_chat:
-        current_chat['follow_up_questions'] = []
-
-    # Display current chat history
-    if current_chat['query_history']:
-        for i in range(len(current_chat['query_history'])):
-            st.markdown(f"**Question:**")
-            st.markdown(f"> {current_chat['query_history'][i]}")
-            st.markdown(f"**Answer:**")
-            st.markdown(current_chat['response_history'][i])
-            st.markdown("---")
-
-    # Display input box for query
-    query_text = st.text_input("Enter your query:",
-                               placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
-                               key="query_input",
-                               disabled=not vector_store)
-
-    # Check if a follow-up question was clicked
-    if 'follow_up_clicked' in st.session_state and st.session_state.follow_up_clicked:
-        query_text = st.session_state.follow_up_clicked
-        st.session_state.follow_up_clicked = None
-
-    # Using fixed settings for simplicity
-    k_results = 15
-    use_mmr_search = False
-
-    if query_text and vector_store:
-        # 1. Query FAISS index
-        with st.spinner(f"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})..."):
-            retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)
-
-        # 2. Generate LLM response
-        with st.spinner("🧠 Synthesizing answer using retrieved context..."):
-            response = generate_llm_response(gemini_model, query_text, retrieved_docs)
-
-        # Store in current chat
-        current_chat['query_history'].append(query_text)
-        current_chat['response_history'].append(response)
-
-        # 3. Generate follow-up questions
-        with st.spinner("Generating follow-up questions..."):
-            follow_up_questions = generate_follow_up_questions(gemini_model, query_text, response, retrieved_docs)
-            current_chat['follow_up_questions'] = follow_up_questions
-
-        # 4. Display response
-        st.markdown("### Response:")
-        st.markdown(response)
-
-        # 5. Display follow-up questions as clickable buttons
-        if follow_up_questions:
-            st.markdown("### You might want to ask:")
-            cols = st.columns(len(follow_up_questions))
-            for i, question in enumerate(follow_up_questions):
-                if cols[i].button(question, key=f"follow_up_{i}_{st.session_state.current_chat_id}"):
-                    st.session_state.follow_up_clicked = question
-                    st.rerun()
-
+        # --- Query Interface ---
         st.markdown("---")
 
-        # 6. Optional: Display retrieved context
-        if retrieved_docs:
-            with st.expander("🔍 Show Retrieved Context Snippets"):
-                st.markdown(f"Retrieved {len(retrieved_docs)} snippets:")
-                for i, doc in enumerate(retrieved_docs):
-                    source_info = "Unknown Source"
-                    if hasattr(doc, 'metadata') and doc.metadata:
-                        source_info = f"Source: {doc.metadata.get('source', 'N/A')}"
-                    st.text_area(
-                        label=f"**Snippet {i + 1}** ({source_info})",
-                        value=doc.page_content,
-                        height=150,
-                        key=f"snippet_{i}_{st.session_state.current_chat_id}",
-                        disabled=True
-                    )
-        else:
-            st.info("No relevant snippets were found in the knowledge base for this query.")
+        # Use current chat session
+        current_chat = st.session_state.chat_sessions[st.session_state.current_chat_id]
+        if 'query_history' not in current_chat:
+            current_chat['query_history'] = []
+        if 'response_history' not in current_chat:
+            current_chat['response_history'] = []
+        if 'follow_up_questions' not in current_chat:
+            current_chat['follow_up_questions'] = []
 
-    elif query_text and not vector_store:
-        st.error("Cannot process query because the knowledge base index is not loaded.")
-
-    # Display conversation history if any exists
-    if current_chat['query_history']:
-        with st.expander("📝 View Conversation History", expanded=False):
-            for i in range(len(current_chat['query_history']) - 1, -1, -1):
+        # Display current chat history
+        if current_chat['query_history']:
+            for i in range(len(current_chat['query_history'])):
+                st.markdown('<div class="chat-message">', unsafe_allow_html=True)
                 st.markdown(f"**Question:**")
                 st.markdown(f"> {current_chat['query_history'][i]}")
                 st.markdown(f"**Answer:**")
                 st.markdown(current_chat['response_history'][i])
                 st.markdown("---")
+                st.markdown('</div>', unsafe_allow_html=True)
+
+        # Display input box for query
+        if 'follow_up_clicked' in st.session_state and st.session_state.follow_up_clicked:
+            query_text = st.session_state.follow_up_clicked
+            st.session_state.follow_up_clicked = None
+        else:
+            query_text = st.text_input(
+                "Enter your query:",
+                placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
+                key="query_input",
+                value=st.session_state.get('follow_up_clicked', ''),
+                disabled=not vector_store
+            )
+
+        # Using fixed settings for simplicity
+        k_results = 15
+        use_mmr_search = False
+
+        if query_text and vector_store:
+            # 1. Query FAISS index
+            with st.spinner(f"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})..."):
+                retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)
+
+            # 2. Generate LLM response
+            with st.spinner("🧠 Synthesizing answer using retrieved context..."):
+                response = generate_llm_response(gemini_model, query_text, retrieved_docs)
+
+            # Store in current chat
+            current_chat['query_history'].append(query_text)
+            current_chat['response_history'].append(response)
+
+            # 3. Generate follow-up questions
+            with st.spinner("Generating follow-up questions..."):
+                follow_up_questions = generate_follow_up_questions(gemini_model, query_text, response, retrieved_docs)
+                current_chat['follow_up_questions'] = follow_up_questions
+
+            # 4. Display response
+            st.markdown('<div class="chat-message">', unsafe_allow_html=True)
+            st.markdown("### Response:")
+            st.markdown(response)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # 5. Display follow-up questions as clickable buttons
+            if follow_up_questions:
+                st.markdown('<div class="chat-message">', unsafe_allow_html=True)
+                st.markdown("### You might want to ask:")
+                cols = st.columns(len(follow_up_questions))
+                for i, question in enumerate(follow_up_questions):
+                    if cols[i].button(question, key=f"follow_up_{i}_{st.session_state.current_chat_id}"):
+                        st.session_state.follow_up_clicked = question
+                        st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            st.markdown("---")
+
+        elif query_text and not vector_store:
+            st.error("Cannot process query because the knowledge base index is not loaded.")
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Main Entry Point ---
 def main():
