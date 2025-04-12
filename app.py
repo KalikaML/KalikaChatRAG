@@ -299,31 +299,41 @@ def generate_llm_response(llm, query_text, retrieved_docs):
 # --- Login Page ---
 def login_page():
     st.title("📄 Proforma Invoice Assistant - Login")
-    # Professional UI for login
+    # Dark theme styling for login
     st.markdown("""
         <style>
         .login-container {
-            background-color: #ffffff;
+            background-color: #2b2d31;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             max-width: 400px;
             margin: 50px auto;
+            color: #d7d8da;
         }
         .stTextInput > div > input {
-            border: 1px solid #d0d0d0;
+            background-color: #3a3c42;
+            color: #d7d8da;
+            border: 1px solid #4a4c52;
             border-radius: 5px;
             padding: 10px;
         }
         .stButton > button {
-            background-color: #007bff;
-            color: white;
+            background-color: #1e88e5;
+            color: #ffffff;
             border-radius: 5px;
             padding: 10px 20px;
             width: 100%;
+            border: none;
         }
         .stButton > button:hover {
-            background-color: #0056b3;
+            background-color: #1565c0;
+        }
+        .stError {
+            color: #ef5350;
+        }
+        .stSuccess {
+            color: #4caf50;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -347,87 +357,115 @@ def login_page():
 
 # --- Main Application ---
 def main_app():
-    # Professional UI Styling
+    # Dark theme styling
     st.markdown("""
         <style>
         .stApp {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
+            background-color: #1e1f23;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: #d7d8da;
         }
         .sidebar .sidebar-content {
-            background-color: #ffffff;
+            background-color: #25262a;
             padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            color: #d7d8da;
         }
         .chat-container {
-            background-color: #ffffff;
+            background-color: #2b2d31;
             border-radius: 10px;
-            padding: 20px;
+            padding: 25px;
             margin: 20px auto;
-            max-width: 800px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 900px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .chat-message {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .chat-message strong {
-            color: #333;
+            color: #ffffff;
+        }
+        .chat-message > p, .chat-message > div {
+            color: #d7d8da;
         }
         .stTextInput > div > input {
-            border: 1px solid #d0d0d0;
+            background-color: #3a3c42;
+            color: #d7d8da;
+            border: 1px solid #4a4c52;
             border-radius: 5px;
             padding: 10px;
-            background-color: #f8f9fa;
         }
         .stButton > button {
-            background-color: #007bff;
-            color: white;
+            background-color: #1e88e5;
+            color: #ffffff;
             border-radius: 5px;
             padding: 8px 15px;
-            margin: 5px;
+            margin: 5px 0;
+            border: none;
+            width: 100%;
+            text-align: left;
         }
         .stButton > button:hover {
-            background-color: #0056b3;
+            background-color: #1565c0;
         }
         .sidebar-button-container {
-            background-color: #f1f3f5;
+            background-color: #323338;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        .follow-up-container {
+            background-color: #323338;
+            padding: 15px;
+            border-radius: 8px;
+        }
         .logout-button {
             float: right;
-            background-color: #dc3545;
+            background-color: #ef5350;
+            padding: 6px 12px;
         }
         .logout-button:hover {
-            background-color: #c82333;
+            background-color: #c62828;
         }
         h1 {
-            color: #333;
+            color: #ffffff;
             text-align: center;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
         h3 {
-            color: #555;
+            color: #b0b2b6;
+            font-size: 18px;
+        }
+        hr {
+            border-color: #4a4c52;
         }
         .stSpinner > div {
-            border-color: #007bff transparent transparent transparent;
+            border-color: #1e88e5 transparent transparent transparent;
+        }
+        .stStatus > div {
+            background-color: #3a3c42;
+            color: #d7d8da;
+        }
+        .stError {
+            color: #ef5350;
         }
         </style>
     """, unsafe_allow_html=True)
 
-    # Sidebar with New Chat and Logout
+    # Sidebar with Logout, New Chat, and Follow-Up Questions
     with st.sidebar:
-        # Welcome message
-        st.markdown(f"<p style='color: #333; font-size: 16px;'>Welcome, {st.session_state.name}</p>", unsafe_allow_html=True)
-        # Logout button in top-right corner
+        # Welcome and Logout
+        st.markdown(f"<p style='color: #d7d8da; font-size: 16px; margin-bottom: 10px;'>Welcome, {st.session_state.name}</p>", unsafe_allow_html=True)
         st.markdown('<div style="overflow: hidden;">', unsafe_allow_html=True)
-        if st.button("Logout", key="logout", help="Sign out", extra_class="logout-button"):
+        if st.button("Logout", key="logout", help="Sign out"):
             st.session_state.authenticated = False
             st.session_state.username = None
             st.session_state.name = None
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("<hr>", unsafe_allow_html=True)
+
         # Initialize chat sessions
         if 'chat_sessions' not in st.session_state:
             st.session_state.chat_sessions = {}
@@ -438,7 +476,8 @@ def main_app():
                 'response_history': [],
                 'follow_up_questions': []
             }
-        # New Chat Button in a container
+
+        # New Chat Button in container
         with st.container():
             st.markdown('<div class="sidebar-button-container">', unsafe_allow_html=True)
             if st.button("New Chat", key="new_chat", help="Start a new conversation"):
@@ -452,6 +491,18 @@ def main_app():
                 st.session_state.current_chat_id = new_chat_id
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
+
+        # Follow-Up Questions in container
+        current_chat = st.session_state.chat_sessions[st.session_state.current_chat_id]
+        if 'follow_up_questions' in current_chat and current_chat['follow_up_questions']:
+            with st.container():
+                st.markdown('<div class="follow-up-container">', unsafe_allow_html=True)
+                st.markdown("<h3 style='margin-bottom: 10px;'>You might want to ask:</h3>", unsafe_allow_html=True)
+                for i, question in enumerate(current_chat['follow_up_questions']):
+                    if st.button(question, key=f"follow_up_{i}_{st.session_state.current_chat_id}"):
+                        st.session_state.follow_up_clicked = question
+                        st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
 
     # Main app UI
     with st.container():
@@ -493,13 +544,10 @@ def main_app():
         st.markdown("---")
 
         # Use current chat session
-        current_chat = st.session_state.chat_sessions[st.session_state.current_chat_id]
         if 'query_history' not in current_chat:
             current_chat['query_history'] = []
         if 'response_history' not in current_chat:
             current_chat['response_history'] = []
-        if 'follow_up_questions' not in current_chat:
-            current_chat['follow_up_questions'] = []
 
         # Display current chat history
         if current_chat['query_history']:
@@ -551,20 +599,8 @@ def main_app():
             st.markdown('<div class="chat-message">', unsafe_allow_html=True)
             st.markdown("### Response:")
             st.markdown(response)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            # 5. Display follow-up questions as clickable buttons
-            if follow_up_questions:
-                st.markdown('<div class="chat-message">', unsafe_allow_html=True)
-                st.markdown("### You might want to ask:")
-                cols = st.columns(len(follow_up_questions))
-                for i, question in enumerate(follow_up_questions):
-                    if cols[i].button(question, key=f"follow_up_{i}_{st.session_state.current_chat_id}"):
-                        st.session_state.follow_up_clicked = question
-                        st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-
             st.markdown("---")
+            st.markdown('</div>', unsafe_allow_html=True)
 
         elif query_text and not vector_store:
             st.error("Cannot process query because the knowledge base index is not loaded.")
