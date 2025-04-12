@@ -197,7 +197,7 @@ def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):
         return None
 
 # --- Querying Functions ---
-def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):
+def query_faiss_index(vector_store, query_text,k=10, use_mmr=False):
     if not vector_store:
         logging.warning("query_faiss_index called but vector_store is None.")
         return []
@@ -317,7 +317,7 @@ def login_page():
 
 # --- Main Application ---
 def main_app():
-    # Add logout button and chat history in sidebar
+    # Sidebar with New Chat and Logout
     with st.sidebar:
         st.write(f"Welcome, {st.session_state.name}")
         # Initialize chat sessions
@@ -341,13 +341,6 @@ def main_app():
             }
             st.session_state.current_chat_id = new_chat_id
             st.rerun()
-        # Chat History
-        st.markdown("### Chat History")
-        for chat_id, chat_data in st.session_state.chat_sessions.items():
-            chat_title = chat_data['query_history'][0][:30] + "..." if chat_data['query_history'] else "Untitled Chat"
-            if st.button(chat_title, key=chat_id):
-                st.session_state.current_chat_id = chat_id
-                st.rerun()
         # Logout Button
         if st.button("Logout"):
             st.session_state.authenticated = False
@@ -411,15 +404,15 @@ def main_app():
             st.markdown("---")
 
     # Display input box for query
-    query_text = st.text_input("Enter your query:",
-                               placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
-                               key="query_input",
-                               disabled=not vector_store)
-
-    # Check if a follow-up question was clicked
     if 'follow_up_clicked' in st.session_state and st.session_state.follow_up_clicked:
         query_text = st.session_state.follow_up_clicked
         st.session_state.follow_up_clicked = None
+    else:
+        query_text = st.text_input("Enter your query:",
+                                   placeholder="e.g., What is the total amount for invoice [filename]? or List all products in [filename].",
+                                   key="query_input",
+                                   value=st.session_state.get('follow_up_clicked', ''),
+                                   disabled=not vector_store)
 
     # Using fixed settings for simplicity
     k_results = 15
@@ -458,36 +451,8 @@ def main_app():
 
         st.markdown("---")
 
-        # 6. Optional: Display retrieved context
-        if retrieved_docs:
-            with st.expander("🔍 Show Retrieved Context Snippets"):
-                st.markdown(f"Retrieved {len(retrieved_docs)} snippets:")
-                for i, doc in enumerate(retrieved_docs):
-                    source_info = "Unknown Source"
-                    if hasattr(doc, 'metadata') and doc.metadata:
-                        source_info = f"Source: {doc.metadata.get('source', 'N/A')}"
-                    st.text_area(
-                        label=f"**Snippet {i + 1}** ({source_info})",
-                        value=doc.page_content,
-                        height=150,
-                        key=f"snippet_{i}_{st.session_state.current_chat_id}",
-                        disabled=True
-                    )
-        else:
-            st.info("No relevant snippets were found in the knowledge base for this query.")
-
     elif query_text and not vector_store:
         st.error("Cannot process query because the knowledge base index is not loaded.")
-
-    # Display conversation history if any exists
-    if current_chat['query_history']:
-        with st.expander("📝 View Conversation History", expanded=False):
-            for i in range(len(current_chat['query_history']) - 1, -1, -1):
-                st.markdown(f"**Question:**")
-                st.markdown(f"> {current_chat['query_history'][i]}")
-                st.markdown(f"**Answer:**")
-                st.markdown(current_chat['response_history'][i])
-                st.markdown("---")
 
 # --- Main Entry Point ---
 def main():
