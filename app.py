@@ -302,45 +302,52 @@ def login_page():
     # Dark theme styling for login
     st.markdown("""
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         .login-container {
-            background-color: #2b2d31;
+            background-color: #25272b;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             max-width: 400px;
-            margin: 50px auto;
-            color: #d7d8da;
+            margin: 60px auto;
+            color: #e6e7eb;
+            font-family: 'Inter', sans-serif;
         }
         .stTextInput > div > input {
-            background-color: #3a3c42;
-            color: #d7d8da;
-            border: 1px solid #4a4c52;
-            border-radius: 5px;
-            padding: 10px;
+            background-color: #2f3136;
+            color: #e6e7eb;
+            border: 1px solid #3f4147;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Inter', sans-serif;
         }
         .stButton > button {
-            background-color: #1e88e5;
+            background-color: #3b82f6;
             color: #ffffff;
-            border-radius: 5px;
-            padding: 10px 20px;
+            border-radius: 6px;
+            padding: 12px;
             width: 100%;
             border: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
         }
         .stButton > button:hover {
-            background-color: #1565c0;
+            background-color: #2563eb;
         }
         .stError {
-            color: #ef5350;
+            color: #ef4444;
+            font-family: 'Inter', sans-serif;
         }
         .stSuccess {
-            color: #4caf50;
+            color: #10b981;
+            font-family: 'Inter', sans-serif;
         }
         </style>
     """, unsafe_allow_html=True)
 
     with st.container():
         st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        st.markdown("### Login to Access the System")
+        st.markdown("<h3 style='margin-bottom: 20px; color: #ffffff; font-weight: 600;'>Login to Access the System</h3>", unsafe_allow_html=True)
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         login_button = st.button("Login")
@@ -360,95 +367,107 @@ def main_app():
     # Dark theme styling
     st.markdown("""
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         .stApp {
-            background-color: #1e1f23;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            color: #d7d8da;
+            background-color: #18191c;
+            font-family: 'Inter', sans-serif;
+            color: #e6e7eb;
         }
         .sidebar .sidebar-content {
-            background-color: #25262a;
+            background-color: #212226;
             padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-            color: #d7d8da;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+            color: #e6e7eb;
         }
         .chat-container {
-            background-color: #2b2d31;
-            border-radius: 10px;
-            padding: 25px;
+            background-color: #25272b;
+            border-radius: 8px;
+            padding: 30px;
             margin: 20px auto;
             max-width: 900px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         .chat-message {
             margin-bottom: 20px;
+            line-height: 1.5;
         }
         .chat-message strong {
             color: #ffffff;
+            font-weight: 600;
         }
         .chat-message > p, .chat-message > div {
-            color: #d7d8da;
+            color: #e6e7eb;
         }
         .stTextInput > div > input {
-            background-color: #3a3c42;
-            color: #d7d8da;
-            border: 1px solid #4a4c52;
-            border-radius: 5px;
-            padding: 10px;
+            background-color: #2f3136;
+            color: #e6e7eb;
+            border: 1px solid #3f4147;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Inter', sans-serif;
         }
         .stButton > button {
-            background-color: #1e88e5;
+            background-color: #3b82f6;
             color: #ffffff;
-            border-radius: 5px;
-            padding: 8px 15px;
+            border-radius: 6px;
+            padding: 10px;
             margin: 5px 0;
             border: none;
             width: 100%;
             text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
         }
         .stButton > button:hover {
-            background-color: #1565c0;
+            background-color: #2563eb;
         }
         .sidebar-button-container {
-            background-color: #323338;
+            background-color: #2b2d32;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 20px;
         }
         .follow-up-container {
-            background-color: #323338;
+            background-color: #2b2d32;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
         }
         .logout-button {
             float: right;
-            background-color: #ef5350;
-            padding: 6px 12px;
+            background-color: #f43f5e;
+            padding: 8px 16px;
+            font-size: 14px;
         }
         .logout-button:hover {
-            background-color: #c62828;
+            background-color: #e11d48;
         }
         h1 {
             color: #ffffff;
             text-align: center;
             font-size: 28px;
+            font-weight: 600;
             margin-bottom: 10px;
         }
         h3 {
-            color: #b0b2b6;
-            font-size: 18px;
+            color: #a0a3a9;
+            font-size: 16px;
+            font-weight: 500;
         }
         hr {
-            border-color: #4a4c52;
+            border-color: #3f4147;
+            margin: 15px 0;
         }
         .stSpinner > div {
-            border-color: #1e88e5 transparent transparent transparent;
+            border-color: #3b82f6 transparent transparent transparent;
         }
         .stStatus > div {
-            background-color: #3a3c42;
-            color: #d7d8da;
+            background-color: #2f3136;
+            color: #e6e7eb;
+            border: 1px solid #3f4147;
+            border-radius: 6px;
         }
         .stError {
-            color: #ef5350;
+            color: #ef4444;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -456,7 +475,7 @@ def main_app():
     # Sidebar with Logout, New Chat, and Follow-Up Questions
     with st.sidebar:
         # Welcome and Logout
-        st.markdown(f"<p style='color: #d7d8da; font-size: 16px; margin-bottom: 10px;'>Welcome, {st.session_state.name}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color: #e6e7eb; font-size: 16px; margin-bottom: 10px; font-weight: 500;'>Welcome, {st.session_state.name}</p>", unsafe_allow_html=True)
         st.markdown('<div style="overflow: hidden;">', unsafe_allow_html=True)
         if st.button("Logout", key="logout", help="Sign out"):
             st.session_state.authenticated = False
@@ -497,7 +516,7 @@ def main_app():
         if 'follow_up_questions' in current_chat and current_chat['follow_up_questions']:
             with st.container():
                 st.markdown('<div class="follow-up-container">', unsafe_allow_html=True)
-                st.markdown("<h3 style='margin-bottom: 10px;'>You might want to ask:</h3>", unsafe_allow_html=True)
+                st.markdown("<h3 style='margin-bottom: 15px; color: #a0a3a9;'>Suggested Questions</h3>", unsafe_allow_html=True)
                 for i, question in enumerate(current_chat['follow_up_questions']):
                     if st.button(question, key=f"follow_up_{i}_{st.session_state.current_chat_id}"):
                         st.session_state.follow_up_clicked = question
@@ -541,7 +560,7 @@ def main_app():
                     st.stop()
 
         # --- Query Interface ---
-        st.markdown("---")
+        st.markdown("<hr>", unsafe_allow_html=True)
 
         # Use current chat session
         if 'query_history' not in current_chat:
@@ -557,7 +576,7 @@ def main_app():
                 st.markdown(f"> {current_chat['query_history'][i]}")
                 st.markdown(f"**Answer:**")
                 st.markdown(current_chat['response_history'][i])
-                st.markdown("---")
+                st.markdown("<hr>")
                 st.markdown('</div>', unsafe_allow_html=True)
 
         # Display input box for query
@@ -599,7 +618,7 @@ def main_app():
             st.markdown('<div class="chat-message">', unsafe_allow_html=True)
             st.markdown("### Response:")
             st.markdown(response)
-            st.markdown("---")
+            st.markdown("<hr>")
             st.markdown('</div>', unsafe_allow_html=True)
 
         elif query_text and not vector_store:
