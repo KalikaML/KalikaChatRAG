@@ -93,7 +93,7 @@ def get_embeddings_model():
         logging.info(f"Embeddings model '{model_path}' loaded successfully.")
         return embeddings
     except Exception as e:
-        st.error(f"Failed to load embeddings model from '{model_path}'. Error: {e}")
+        st.error(f"Failed to load embeddings model. Error: {e}")
         logging.error(f"Failed to load embeddings model: {e}", exc_info=True)
         return None
 
@@ -233,8 +233,8 @@ def main_app():
         st.session_state.current_chat_id = None
         st.session_state.chat_counter = 0
 
-    # Create a new chat if none exists or after clicking New Chat
-    if not st.session_state.current_chat_id or 'new_chat_triggered' in st.session_state:
+    # Create a new chat if none exists
+    if not st.session_state.current_chat_id:
         st.session_state.chat_counter += 1
         new_chat_id = f"chat_{st.session_state.chat_counter}"
         st.session_state.chat_sessions[new_chat_id] = {
@@ -243,8 +243,6 @@ def main_app():
             'follow_up_questions': []
         }
         st.session_state.current_chat_id = new_chat_id
-        if 'new_chat_triggered' in st.session_state:
-            del st.session_state.new_chat_triggered
 
     # Sidebar
     with st.sidebar:
@@ -253,11 +251,18 @@ def main_app():
         for chat_id in sorted(st.session_state.chat_sessions.keys()):
             if st.button(f"Chat {chat_id.split('_')[1]}", key=f"chat_{chat_id}"):
                 st.session_state.current_chat_id = chat_id
-                st.session_state.query_input = ""  # Clear input
+                st.session_state.input_query = ""  # Clear input
                 st.rerun()
         if st.button("New Chat"):
-            st.session_state.new_chat_triggered = True
-            st.session_state.query_input = ""  # Clear input
+            st.session_state.chat_counter += 1
+            new_chat_id = f"chat_{st.session_state.chat_counter}"
+            st.session_state.chat_sessions[new_chat_id] = {
+                'query_history': [],
+                'response_history': [],
+                'follow_up_questions': []
+            }
+            st.session_state.current_chat_id = new_chat_id
+            st.session_state.input_query = ""  # Clear input
             st.rerun()
         if st.button("Logout"):
             st.session_state.authenticated = False
@@ -293,25 +298,27 @@ def main_app():
             st.markdown(current_chat['response_history'][i])
             st.markdown("---")
 
-    # Handle follow-up question
+    # Handle follow-up question click
     if 'follow_up_query' in st.session_state and st.session_state.follow_up_query:
-        query_text = st.session_state.follow_up_query
-        process_query(query_text, vector_store, gemini_model, current_chat, chat_container)
-        st.session_state.follow_up_query = None  # Clear after processing
-        st.rerun()  # Refresh to show input box
+        st.session_state.input_query = st.session_state.follow_up_query
+        st.session_state.follow_up_query = None
 
     # Query input
     query_text = st.text_input(
         "Enter your query:",
         placeholder="e.g., What is the total amount for invoice [filename]?",
         key=f"query_input_{st.session_state.current_chat_id}",
-        value=st.session_state.get('query_input', ''),
-        disabled=not vector_store
+        value=st.session_state.get('input_query', '')
     )
-    st.session_state.query_input = ""  # Reset after capturing
 
-    if query_text:
+    # Process query if submitted
+    if query_text and query_text != st.session_state.get('input_query', ''):
         process_query(query_text, vector_store, gemini_model, current_chat, chat_container)
+        st.session_state.input_query = ""  # Clear input after processing
+        st.rerun()
+
+    # Update input_query state to reflect current input
+    st.session_state.input_query = query_text
 
     # Display follow-up questions
     if current_chat.get('follow_up_questions'):
