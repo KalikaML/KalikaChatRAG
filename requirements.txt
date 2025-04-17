@@ -10,3 +10,12 @@ PyPDF2
 langchain_huggingface
 nest_asyncio
 transformers
+google-generativeai
+
+fastapi
+uvicorn[standard]
+googlemaps
+requests
+beautifulsoup4
+pydantic
+python-dotenv # Optional: for loading .env files
