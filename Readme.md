@@ -6,6 +6,7 @@
 #### Basic RAG Architecture
  ![rag_image](https://www.clarifai.com/hs-fs/hubfs/rag-query-drawio%20(1)-png-2.png?width=2056&height=1334&name=rag-query-drawio%20(1)-png-2.png)
 
+### USage
 
 ## RAG Usecases
 
@@ -17,6 +18,15 @@
  [starting point](https://medium.com/@masego_m/accessing-gmail-with-python-a-beginners-guide-812e0068a568)
 
 #### Problem Statement : Build RAG on Kalika Enterprises Gmail Data
+
+Deployed POCs
+
+![Kalika RAG V1](assets/google_data_extractor.jpg)
+
+!["Kalika Map DataLoader"]("assets/kalika_rag_streamlit.jpg")
+
+Prompt:"Restaurant near Eiffel Tower Coffee shop near Times Square NYC Hardware store, Pune, India"
+
 
 #### Tasks
 
