@@ -21,9 +21,9 @@
 
 Deployed POCs
 
-![Kalika RAG V1](assets/google_data_extractor.jpg)
+![Kalika RAG V1](google_data_extractor.jpg)
 
-!["Kalika Map DataLoader"]("assets/kalika_rag_streamlit.jpg")
+!["Kalika Map DataLoader"](kalika_rag_streamlit.jpg)
 
 Prompt:"Restaurant near Eiffel Tower Coffee shop near Times Square NYC Hardware store, Pune, India"
 
