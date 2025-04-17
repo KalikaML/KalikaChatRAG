@@ -19,14 +19,24 @@
 
 #### Problem Statement : Build RAG on Kalika Enterprises Gmail Data
 
-Deployed POCs
+###Deployed POCs
 
-![KalikaRAGV1](google_data_extractor.jpg)
 
 !["KalikaMapDataLoader"](kalika_rag_streamlit.jpg)
 
-Prompt:"Restaurant near Eiffel Tower Coffee shop near Times Square NYC Hardware store, Pune, India"
+![KalikaRAGV1](google_data_extractor.jpg)
 
+Prompts:
+1. "Restaurant near Eiffel Tower Coffee shop near Times Square NYC Hardware store, Pune, India"
+2. "Industries in nearby or user specific areas"
+3. "Institutes/Colleges nearby or user specific areas"
+4. "super markets/malls and other details"
+5. "Various Offices like sales offices,government"
+
+### Reviews and Sentiment data
+
+
+###
 
 #### Tasks
 
