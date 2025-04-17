@@ -1,5 +1,12 @@
-### Dashboard
-1. Kalika Sales Dashboard visualization using PowerBI
+### Deploy to Secured User Access 
+1. Kalika Sales Dashboard visualization
+2. Kalika Dify Agent 
+3, Kalika Sales and Marketing agent 
+
+4. Prompt Workflow
+5. AWS Services 
+6. GoogleCloud and Agentspace
+
 
 ### RAG
 
