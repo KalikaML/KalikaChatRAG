@@ -26,6 +26,7 @@
 
 ![KalikaRAGV1](google_data_extractor.jpg)
 
+
 Prompts:
 1. "Restaurant near Eiffel Tower Coffee shop near Times Square NYC Hardware store, Pune, India"
 2. "Industries in nearby or user specific areas"
@@ -33,8 +34,11 @@ Prompts:
 4. "super markets/malls and other details"
 5. "Various Offices like sales offices,government"
 
-### Reviews and Sentiment data
-
+### Data
+1. Indiamart and Other ecommerce website API
+![India_mart_fetcher](assets/indiamart_data.jpg)
+2. Reviews and Sentiment data
+3. Design and Build
 
 ###
 

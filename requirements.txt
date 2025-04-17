@@ -1,21 +1,28 @@
-streamlit
-boto3
-faiss-cpu
-pdfplumber
-langchain
-langchain_community
-sentence-transformers
-schedule
-PyPDF2
-langchain_huggingface
-nest_asyncio
-transformers
-google-generativeai
+# streamlit
+# boto3
+# faiss-cpu
+# pdfplumber
+# langchain
+# langchain_community
+# sentence-transformers
+# schedule
+# PyPDF2
+# langchain_huggingface
+# nest_asyncio
+# transformers
+# google-generativeai
+#
+# fastapi
+# uvicorn[standard]
+# googlemaps
+# requests
+# beautifulsoup4
+# pydantic
+# python-dotenv # Optional: for loading .env files
 
-fastapi
-uvicorn[standard]
-googlemaps
+streamlit
 requests
 beautifulsoup4
-pydantic
-python-dotenv # Optional: for loading .env files
+lxml  # Required by BeautifulSoup for parsing
+pandas
+mysql-connector-python # For MySQL connection
