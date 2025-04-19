@@ -20,19 +20,19 @@ import time
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configuration and Secrets ---
-SECRETS_FILE_PATH = ".streamlit/secrets.toml"
+#SECRETS_FILE_PATH = ".streamlit/secrets.toml"
 
 try:
-    secrets = toml.load(SECRETS_FILE_PATH)
+    #secrets = toml.load(SECRETS_FILE_PATH)
     # Invoice Query Settings
     S3_BUCKET = "kalika-rag"
     S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index"
     MODEL_DIRECTORY = "BAAI/BAAI-bge-base-en-v1.5"
-    AWS_ACCESS_KEY = secrets.get("access_key_id")
-    AWS_SECRET_KEY = secrets.get("secret_access_key")
+    AWS_ACCESS_KEY = st.secrets["access_key_id"]
+    AWS_SECRET_KEY = st.secrets["secret_access_key"]
     GEMINI_MODEL = "gemini-1.5-pro"
-    GEMINI_API_KEY = secrets.get("gemini_api_key")
-    MAPS_API_KEY = secrets.get("Maps_API_KEY")
+    GEMINI_API_KEY = st.secrets["gemini_api_key"]
+    MAPS_API_KEY = st.secrets["Maps_API_KEY"]
 
     # Authentication credentials
     CREDENTIALS = secrets.get("credentials", {}).get("usernames", {
@@ -48,13 +48,13 @@ try:
         st.stop()
 
 except FileNotFoundError:
-    st.error(f"Secrets file not found at {SECRETS_FILE_PATH}. Please create it with AWS, Gemini, and Google Maps API keys.")
+    st.error(f"Secrets file not found at . Please create it with AWS, Gemini, and Google Maps API keys.")
     st.stop()
 except KeyError as e:
-    st.error(f"Missing secret key in {SECRETS_FILE_PATH}: {e}")
+    st.error(f"Missing secret key in : {e}")
     st.stop()
 except toml.TomlDecodeError:
-    st.error(f"Invalid TOML syntax in {SECRETS_FILE_PATH}")
+    st.error(f"Invalid TOML syntax in ")
     st.stop()
 
 # --- Initialize Google Maps Client ---
