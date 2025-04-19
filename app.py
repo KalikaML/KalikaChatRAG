@@ -7,7 +7,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-import toml
 import hashlib
 import googlemaps
 import requests
@@ -20,10 +19,8 @@ import time
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configuration and Secrets ---
-#SECRETS_FILE_PATH = ".streamlit/secrets.toml"
-
+# Use Streamlit Cloud's secrets management
 try:
-    #secrets = toml.load(SECRETS_FILE_PATH)
     # Invoice Query Settings
     S3_BUCKET = "kalika-rag"
     S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index"
@@ -35,7 +32,7 @@ try:
     MAPS_API_KEY = st.secrets["Maps_API_KEY"]
 
     # Authentication credentials
-    CREDENTIALS = secrets.get("credentials", {}).get("usernames", {
+    CREDENTIALS = st.secrets.get("credentials", {}).get("usernames", {
         "user1": {
             "name": "User",
             "email": "user@example.com",
@@ -44,17 +41,11 @@ try:
     })
 
     if not all([AWS_ACCESS_KEY, AWS_SECRET_KEY, GEMINI_API_KEY, MAPS_API_KEY]):
-        st.error("Missing one or more required keys in secrets.toml: access_key_id, secret_access_key, gemini_api_key, Maps_API_KEY")
+        st.error("Missing one or more required keys in secrets: access_key_id, secret_access_key, gemini_api_key, Maps_API_KEY")
         st.stop()
 
-except FileNotFoundError:
-    st.error(f"Secrets file not found at . Please create it with AWS, Gemini, and Google Maps API keys.")
-    st.stop()
 except KeyError as e:
-    st.error(f"Missing secret key in : {e}")
-    st.stop()
-except toml.TomlDecodeError:
-    st.error(f"Invalid TOML syntax in ")
+    st.error(f"Missing secret key: {e}")
     st.stop()
 
 # --- Initialize Google Maps Client ---
