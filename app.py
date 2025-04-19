@@ -14,22 +14,22 @@ import hashlib
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configuration and Secrets ---
-#SECRETS_FILE_PATH = ".streamlit/secrets.toml"
+SECRETS_FILE_PATH = ".streamlit/secrets.toml"
 
 try:
-    #secrets = toml.load(SECRETS_FILE_PATH)
+    secrets = toml.load(SECRETS_FILE_PATH)
     # Core application settings
     S3_BUCKET = "kalika-rag"
     S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index"
     MODEL_DIRECTORY = "BAAI/BAAI-bge-base-en-v1.5"
-    AWS_ACCESS_KEY = st.secrets["access_key_id"]
-    AWS_SECRET_KEY = st.secrets["secret_access_key"]
+    AWS_ACCESS_KEY = secrets["access_key_id"]
+    AWS_SECRET_KEY = secrets["secret_access_key"]
     GEMINI_MODEL = "gemini-1.5-pro"
-    GEMINI_API_KEY = st.secrets["gemini_api_key"]
+    GEMINI_API_KEY = secrets["gemini_api_key"]
 
     # Authentication credentials
-    if "credentials" in st.secrets:
-        CREDENTIALS = st.secrets["credentials"]["usernames"]
+    if "credentials" in secrets:
+        CREDENTIALS = secrets["credentials"]["usernames"]
     else:
         CREDENTIALS = {
             "user1": {
@@ -40,10 +40,10 @@ try:
         }
 
 except FileNotFoundError:
-    st.error(f"Secrets file not found at . App cannot run.")
+    st.error(f"Secrets file not found at {SECRETS_FILE_PATH}. App cannot run.")
     st.stop()
 except KeyError as e:
-    st.error(f"Missing secret key in : {e}. App cannot run.")
+    st.error(f"Missing secret key in {SECRETS_FILE_PATH}: {e}. App cannot run.")
     st.stop()
 
 # --- Authentication Functions ---
@@ -451,7 +451,7 @@ def main_app():
 
         st.markdown("---")
 
-    elif query_text and not vector_store:	
+    elif query_text and not vector_store:
         st.error("Cannot process query because the knowledge base index is not loaded.")
 
 # --- Main Entry Point ---
