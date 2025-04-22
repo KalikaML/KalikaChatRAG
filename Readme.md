@@ -26,13 +26,21 @@
 
 ![KalikaRAGV1](google_data_extractor.jpg)
 
+![Rag_agents_space](Rag_agents_space.jpg)
 
-Prompts:
-1. "Restaurant near Eiffel Tower Coffee shop near Times Square NYC Hardware store, Pune, India"
-2. "Industries in nearby or user specific areas"
-3. "Institutes/Colleges nearby or user specific areas"
-4. "super markets/malls and other details"
-5. "Various Offices like sales offices,government"
+FutureScope:
+
+1. Dify is good so lets begin building
+
+    Prompts:
+    1. "Restaurant near Eiffel Tower Coffee shop near Times Square NYC Hardware store, Pune, India"
+    2. "Industries in nearby or user specific areas"
+    3. "Institutes/Colleges nearby or user specific areas"
+    4. "super markets/malls and other details"
+    5. "Various Offices like sales offices,government"
+2. Agentspace
+
+![Rag_agents_space](Rag_agents_space.jpg)
 
 ### Data
 1. Indiamart and Other ecommerce website API
