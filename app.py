@@ -17,11 +17,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 SECRETS_FILE_PATH = ".streamlit/secrets.toml"
 
 try:
+
     secrets = toml.load(SECRETS_FILE_PATH)
     # Core application settings
     S3_BUCKET = "kalika-rag"
-    S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index"
-    MODEL_DIRECTORY = "BAAI/BAAI-bge-base-en-v1.5"
+    S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index/index"
+    MODEL_DIRECTORY = "bge-base-en-v1.5"
     AWS_ACCESS_KEY = secrets["access_key_id"]
     AWS_SECRET_KEY = secrets["secret_access_key"]
     GEMINI_MODEL = "gemini-1.5-pro"
