@@ -21,7 +21,7 @@ try:
     # Core application settings
     S3_BUCKET = "kalika-rag"  # Ensure this matches the indexer script
     S3_PROFORMA_INDEX_PATH = "faiss_indexes/proforma_faiss_index"  # Base path (no trailing slash)
-    MODEL_DIRECTORY = "bge-base-en-v1.5"
+    MODEL_DIRECTORY = "BAAI/bge-base-en-v1.5"
     AWS_ACCESS_KEY = secrets["access_key_id"]
     AWS_SECRET_KEY = secrets["secret_access_key"]
     GEMINI_MODEL = "gemini-1.5-pro"  # Or other suitable Gemini model
