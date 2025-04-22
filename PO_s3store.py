@@ -13,7 +13,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import CharacterTextSplitter
 
 # Configuration constants
-SECRETS_FILE_PATH = "C:/Users/Admin/.vscode/s3/.streamlit/secrets.toml"
+SECRETS_FILE_PATH = ".streamlit/secrets.toml"
 IMAP_SERVER = "imap.gmail.com"
 S3_BUCKET = "kalika-rag"
 PO_DUMP_FOLDER = "PO_Dump/"  # Changed folder name
