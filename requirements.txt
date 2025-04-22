@@ -1,3 +1,22 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:4175c503b033104fc8c70a5ed84ba13200356acc40736ab76871767c2f45733f
-size 326
+streamlit
+boto3
+faiss-cpu
+pdfplumber
+langchain
+langchain_community
+sentence-transformers
+PyPDF2
+schedule
+langchain_huggingface
+nest_asyncio
+transformers
+langchain_google_genai
+streamlit-authenticator
+toml
+pywhatkit
+pyautogui
+regex
+phonenumbers==9.0.2
+googlemaps==4.10.0
+beautifulsoup4==4.12.3
+mysql-connector-python==9.1.0
