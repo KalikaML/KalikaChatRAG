@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-boto3
-flask
-python-dotenv
-faiss-cpu
-transformers
-torch
-google-generativeai
