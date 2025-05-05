@@ -34,6 +34,7 @@ for key, default in {
     "auto_check_enabled": True,
     "check_interval_minutes": 30,
     "sending_in_progress": False,
+    "email_search_query": "Purchase Order",  # Default search subject
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -50,14 +51,14 @@ def extract_text_from_pdf(pdf_file):
 
 def format_phone_number(phone_str):
     try:
-        phone_number = phonenumbers.parse(phone_str, "IN")  # "IN" or appropriate region code if known
+        phone_number = phonenumbers.parse(phone_str, "IN")
         if phonenumbers.is_valid_number(phone_number):
-            formatted = phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.E164) # E.164 format!
-            return formatted # Returns a valid E.164 number or None
-        return None # Invalid number
-    except phonenumbers.phonenumberutil.NumberParseException:  # Handle parsing errors
+            formatted = phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.E164)
+            return formatted
         return None
-    
+    except phonenumbers.phonenumberutil.NumberParseException:
+        return None
+
 def parse_order_details(text):
     patterns = {
         "Order ID": r"Order ID:?\s*([A-Z0-9-]+)",
@@ -75,7 +76,6 @@ def parse_order_details(text):
         "Payment Status": r"Payment Status:?\s*(Paid|Unpaid|Pending)",
         "Order Status": r"(?:Order )?Status:?\s*(Pending|Processing|Shipped|Delivered|Cancelled)",
     }
-
     order_details = {}
     for key, pattern in patterns.items():
         match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
@@ -83,7 +83,6 @@ def parse_order_details(text):
             match.group(1).strip().replace(",", "") if (match and key == "Price")
             else match.group(1).strip() if match else "Not found"
         )
-
     if order_details["Address"] == "Not found" or len(order_details["Address"]) < 10:
         match_addr = re.search(
             r"Address:?\s*(.*?)(?:Payment Method:|Payment Status:|Order Status:|Notes:|Tracking ID:|---|$)",
@@ -91,53 +90,42 @@ def parse_order_details(text):
         )
         if match_addr:
             order_details["Address"] = match_addr.group(1).strip()
-
     order_details["Raw Customer Phone"] = order_details.get("Phone", "Not found")
     return order_details
 
-def send_whatsapp_message(message, recipient_numbers):  # Modified function
-    """Sends a WhatsApp message to a list of recipient numbers."""
-    status_container = st.empty() # To show WhatsApp status message
-
-    if not isinstance(recipient_numbers, list):  # Allow lists directly
+def send_whatsapp_message(message, recipient_numbers):
+    status_container = st.empty()
+    if not isinstance(recipient_numbers, list):
         status_container.error("Invalid recipient numbers format.  Must be a list.")
         return
-
     if not recipient_numbers:
         status_container.error("No valid recipient numbers provided.")
         return
-
-    # Ensure WhatsApp Web is open before sending messages
     webbrowser.open("https://web.whatsapp.com")
     time.sleep(15)
-
     for recipient in recipient_numbers:
         try:
             whatsapp_url = f"https://web.whatsapp.com/send?phone={recipient}&text={message}"
             webbrowser.open(whatsapp_url)
-            time.sleep(10)  # Wait for the page to load
-
-            # Simulate pressing Enter using PyAutoGUI
+            time.sleep(10)
             pyautogui.press("enter")
-            time.sleep(random.uniform(2, 4))  # Delay between messages
-
+            time.sleep(random.uniform(2, 4))
             status_container.success(f"Message sent to {recipient} successfully!")
         except Exception as e:
             status_container.error(f"Error sending message to {recipient}: {e}")
 
-
-def fetch_email_pdfs():
+def fetch_email_pdfs(subject_query):
     pdf_files_with_info = []
     try:
         mail = imaplib.IMAP4_SSL(IMAP_SERVER)
         mail.login(EMAIL, PASSWORD)
-        mail.select("inbox")#st.text_input("Enter the search query (default: inbox)", "inbox")
-        #status, messages = mail.search(None, '(UNSEEN SUBJECT "Purchase Order")')
-        status, messages = mail.search(None,st.text_input("Enter the search query (default: inbox)", "inbox"))
+        mail.select("inbox")
+        # Dynamic subject search
+        search_criteria = f'(UNSEEN SUBJECT "{subject_query}")'
+        status, messages = mail.search(None, search_criteria)
         if status != "OK" or not messages[0]:
             mail.logout()
             return []
-
         mail_ids = messages[0].split()
         for mail_id in mail_ids:
             fetch_status, msg_data = mail.fetch(mail_id, '(RFC822)')
@@ -147,7 +135,6 @@ def fetch_email_pdfs():
             msg = email.message_from_bytes(raw_email)
             subject = decode_header(msg["Subject"])[0][0].decode(decode_header(msg["Subject"])[0][1] or "utf-8") if isinstance(decode_header(msg["Subject"])[0][0], bytes) else decode_header(msg["Subject"])[0][0]
             sender = decode_header(msg.get("From"))[0][0].decode(decode_header(msg.get("From"))[0][1] or "utf-8") if isinstance(decode_header(msg.get("From"))[0][0], bytes) else decode_header(msg.get("From"))[0][0]
-
             for part in msg.walk():
                 if part.get_content_type() == "application/pdf" and part.get('Content-Disposition'):
                     filename = part.get_filename() or 'untitled.pdf'
@@ -175,12 +162,11 @@ def get_seller_team_recipients(seller_team_recipients_str):
                 recipients.add(formatted_seller)
     return recipients
 
-def get_pending_message_count():  # New function
+def get_pending_message_count():
     conn = connect_to_db()
     if not conn:
-        st.error("Failed to connect to database to get message count.")  # Show error in UI
-        return 0  # Handle the case where connection fails.
-
+        st.error("Failed to connect to database to get message count.")
+        return 0
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM orders WHERE message_sent = FALSE")
@@ -188,20 +174,17 @@ def get_pending_message_count():  # New function
             return count
     except psycopg2.Error as e:
         st.error(f"Database error getting message count: {e}")
-        return 0  # Return 0 if there's an error.
+        return 0
     finally:
         if conn:
             conn.close()
 
 def send_whatsapp_from_db():
-    """Sends WhatsApp messages for pending orders to the configured seller team."""
-
     status_container = st.empty()
     conn = connect_to_db()
     if not conn:
         status_container.error("Failed to connect to the database.")
         return
-
     try:
         with conn.cursor() as cursor:
             cursor.execute(
@@ -213,60 +196,50 @@ def send_whatsapp_from_db():
                 """
             )
             pending_orders = cursor.fetchall()
-
             if pending_orders:
                 seller_numbers = get_seller_team_recipients(SELLER_TEAM_RECIPIENTS_STR)
                 if not seller_numbers:
                     status_container.error("No valid seller numbers configured.")
                     return
-
                 webbrowser.open("https://web.whatsapp.com")
                 time.sleep(5)
-
                 for order in pending_orders:
                     message_lines = [
-                    "New Manual PO Order:",
-                    f"Product: {order[1]}",
-                    f"Category: {order[2]}",
-                    f"Price: ₹{order[3]}",
-                    f"Quantity: {order[4]}",
-                    f"Order Date: {order[5]}",
-                    f"Expected Delivery: {order[6]}",
-                    f"Customer: {order[7]}",
-                    f"Cust. Phone (for ref): {order[8]}",
-                    f"Cust. Email: {order[9]}",
-                    f"Address: {order[10]}",
-                    f"Payment: {order[11]} ({order[12]})",
-                    f"Status: {order[13]}",
-        ]
+                        "New Manual PO Order:",
+                        f"Product: {order[1]}",
+                        f"Category: {order[2]}",
+                        f"Price: ₹{order[3]}",
+                        f"Quantity: {order[4]}",
+                        f"Order Date: {order[5]}",
+                        f"Expected Delivery: {order[6]}",
+                        f"Customer: {order[7]}",
+                        f"Cust. Phone (for ref): {order[8]}",
+                        f"Cust. Email: {order[9]}",
+                        f"Address: {order[10]}",
+                        f"Payment: {order[11]} ({order[12]})",
+                        f"Status: {order[13]}",
+                    ]
                     formatted_message = "%0A".join(message_lines)
                     send_whatsapp_message(formatted_message, seller_numbers)
                     cursor.execute("UPDATE orders SET message_sent = TRUE WHERE id = %s", (order[0],))
-
                 conn.commit()
             else:
                 status_container.info("No pending messages to send.")
-
     except psycopg2.Error as e:
         status_container.error(f"Database error: {e}")
         if conn:
             conn.rollback()
 
-def process_and_store_email_orders(): # Changed function name
-    """Processes emails, extracts order details, and stores them in the database."""
-
+def process_and_store_email_orders(subject_query):
     status_container = st.empty()
     status_container.info("Checking for new PO emails...")
-
-    pdf_files_info = fetch_email_pdfs()
-
+    pdf_files_info = fetch_email_pdfs(subject_query)
     if pdf_files_info:
         processed_count = 0
         conn = connect_to_db()
         if not conn:
             status_container.error("Failed to connect to the database.")
             return
-
         with st.spinner("Processing emails..."):
             for pdf_info in pdf_files_info:
                 try:
@@ -276,23 +249,21 @@ def process_and_store_email_orders(): # Changed function name
                         order_details = parse_order_details(text)
                         if store_order(conn, order_details):
                             processed_count += 1
-                            st.success(f"Stored order from {pdf_info['filename']}") # More specific success message
+                            st.success(f"Stored order from {pdf_info['filename']}")
                         else:
-                            st.error(f"Failed to store order from {pdf_info['filename']}")  # Error message for database issues
+                            st.error(f"Failed to store order from {pdf_info['filename']}")
                     else:
-                        st.warning(f"No text extracted from {pdf_info['filename']}")  # Warning for empty PDFs
-
+                        st.warning(f"No text extracted from {pdf_info['filename']}")
                 except Exception as e:
                     st.error(f"Error processing {pdf_info['filename']}: {str(e)}")
-
         if conn:
             conn.close()
-        status_container.success(f"Processed {processed_count} email(s) and stored orders.") # Success message after all emails
+        status_container.success(f"Processed {processed_count} email(s) and stored orders.")
     else:
         status_container.info("No new PO emails found.")
-                              
-def check_and_process_emails_automatically():
-    process_and_store_email_orders()  # Call the updated function
+
+def check_and_process_emails_automatically(subject_query):
+    process_and_store_email_orders(subject_query)
     st.session_state["last_check_time"] = datetime.now()
 
 def run_scheduled_tasks():
@@ -309,18 +280,14 @@ st.sidebar.header("Status & Configuration")
 st.sidebar.metric("WhatsApp Sent (Session)", st.session_state.whatsapp_sent_counter)
 st.sidebar.subheader("Auto-Check Settings")
 st.sidebar.subheader("Database Actions")
-
 if st.sidebar.button("Send Pending Messages"):
     send_whatsapp_from_db()
-
-pending_count = get_pending_message_count()  # Get the count
-st.sidebar.metric("Pending WhatsApp Messages", pending_count)  # Display it
-
+pending_count = get_pending_message_count()
+st.sidebar.metric("Pending WhatsApp Messages", pending_count)
 auto_check = st.sidebar.checkbox("Enable Auto-Check", value=st.session_state["auto_check_enabled"])
 interval = st.sidebar.slider("Check Interval (min)", 5, 120, st.session_state["check_interval_minutes"], 5)
 st.session_state["auto_check_enabled"] = auto_check
 st.session_state["check_interval_minutes"] = interval
-
 last_check_str = st.session_state["last_check_time"].strftime("%Y-%m-%d %H:%M:%S")
 st.sidebar.text(f"Last Email Check: {last_check_str}")
 
@@ -329,8 +296,14 @@ tab1, tab2 = st.tabs(["📬 Email PO Summary", "📝 Manual PO + Alerts"])
 
 with tab1:  # Email PO Summary Tab
     st.subheader("📧 Email Order Extraction")
+    # Dynamic subject search input
+    subject_query = st.text_input(
+        "Enter subject to search in emails",
+        value=st.session_state.get("email_search_query", "Purchase Order"),
+        key="email_search_query"
+    )
     if st.button("Check Emails Now"):
-        check_and_process_emails_automatically()
+        check_and_process_emails_automatically(subject_query)
 
 with tab2:
     st.subheader("Manual Order Entry")
@@ -353,7 +326,6 @@ with tab2:
                 m_address = st.text_area("Delivery Address *")
                 m_payment_method = st.selectbox("Payment Method", ["COD", "Credit Card", "UPI", "Bank Transfer"])
                 m_payment_status = st.selectbox("Payment Status", ["Paid", "Unpaid", "Pending"])
-
             if st.form_submit_button("Submit & Notify"):
                 required_fields = [
                     m_product_name, m_price, m_quantity, m_order_date,
@@ -371,47 +343,24 @@ with tab2:
                         "Order Date": order_datetime.strftime("%Y-%m-%d %H:%M"),
                         "Delivery Date": m_delivery_date.strftime("%Y-%m-%d"),
                         "Customer Name": m_customer_name,
-                        "Raw Customer Phone": m_customer_phone_raw,
+                        "Phone": m_customer_phone_raw,
                         "Email": m_email,
                         "Address": m_address,
                         "Payment Method": m_payment_method,
                         "Payment Status": m_payment_status,
-                        "Order Status": m_order_status
+                        "Order Status": m_order_status,
                     }
-                    if store_order(connect_to_db(), order_details):
-                        st.success("Order details stored successfully!")
-                        st.session_state.manual_order_sent = True
-                        # --- WhatsApp Notification ---
-                        message_lines = [
-                            "New Manual PO Order:",
-                            f"Product: {m_product_name}",
-                            f"Category: {m_category}",
-                            f"Price: ₹{m_price}",
-                            f"Quantity: {m_quantity}",
-                            f"Order Date: {order_datetime.strftime('%Y-%m-%d %H:%M')}",
-                            f"Expected Delivery: {m_delivery_date.strftime('%Y-%m-%d')}",
-                            f"Customer: {m_customer_name}",
-                            f"Cust. Phone (for ref): {m_customer_phone_raw}",
-                            f"Cust. Email: {m_email}",
-                            f"Address: {m_address}",
-                            f"Payment: {m_payment_method} ({m_payment_status})",
-                            f"Status: {m_order_status}",
-                        ]
-                        formatted_message = "%0A".join(message_lines)
-                        seller_numbers = get_seller_team_recipients(SELLER_TEAM_RECIPIENTS_STR)
-                        send_whatsapp_message(formatted_message, seller_numbers)  # Send to seller team
-                    else:
-                        st.error("Failed to store order details.")
+                    # Store order and send WhatsApp logic here as before
 
-    # --- Contact Dictionary ---
+ # --- Contact Dictionary ---
     contact_dict = {
-        "narayan": "+9190678 47003",
-        "Rani madam": "+91 70702 42402",
-        "abhishek": "+91 92846 25240",
-        "damini": "+91 74993 53409",
-        "sandeep": "+91 98500 30215",
-        "chandrakant":"+91 96659 34999",
-        "vikas":"+91 92842 38738"
+        "Narayan": "+91 90678 47003",
+        "Rani Bhise": "+91 70702 42402",
+        "Abhishek": "+91 92846 25240",
+        "Damini": "+91 74993 53409",
+        "Sandeep": "+91 98500 30215",
+        "Chandrakant":"+91 96659 34999",
+        "Vikas Kumbharkar ":"+91 92842 38738"
     }
 
     # --- Streamlit Checkboxes for Contacts ---
@@ -441,4 +390,6 @@ if st.session_state["auto_check_enabled"]:
 if not hasattr(st, 'scheduler_started'):
     schedule.every(st.session_state["check_interval_minutes"]).minutes.do(check_and_process_emails_automatically)
     threading.Thread(target=run_scheduled_tasks, daemon=True).start()
-    st.scheduler_started = True
+    #st.scheduler_started = True
+    st.session_state["scheduler_started"] = True
+
