@@ -326,6 +326,7 @@ with tab2:
                 m_address = st.text_area("Delivery Address *")
                 m_payment_method = st.selectbox("Payment Method", ["COD", "Credit Card", "UPI", "Bank Transfer"])
                 m_payment_status = st.selectbox("Payment Status", ["Paid", "Unpaid", "Pending"])
+
             if st.form_submit_button("Submit & Notify"):
                 required_fields = [
                     m_product_name, m_price, m_quantity, m_order_date,
@@ -343,14 +344,37 @@ with tab2:
                         "Order Date": order_datetime.strftime("%Y-%m-%d %H:%M"),
                         "Delivery Date": m_delivery_date.strftime("%Y-%m-%d"),
                         "Customer Name": m_customer_name,
-                        "Phone": m_customer_phone_raw,
+                        "Raw Customer Phone": m_customer_phone_raw,
                         "Email": m_email,
                         "Address": m_address,
                         "Payment Method": m_payment_method,
                         "Payment Status": m_payment_status,
-                        "Order Status": m_order_status,
+                        "Order Status": m_order_status
                     }
-                    # Store order and send WhatsApp logic here as before
+                    if store_order(connect_to_db(), order_details):
+                        st.success("Order details stored successfully!")
+                        st.session_state.manual_order_sent = True
+                        # --- WhatsApp Notification ---
+                        message_lines = [
+                            "New Manual PO Order:",
+                            f"Product: {m_product_name}",
+                            f"Category: {m_category}",
+                            f"Price: ₹{m_price}",
+                            f"Quantity: {m_quantity}",
+                            f"Order Date: {order_datetime.strftime('%Y-%m-%d %H:%M')}",
+                            f"Expected Delivery: {m_delivery_date.strftime('%Y-%m-%d')}",
+                            f"Customer: {m_customer_name}",
+                            f"Cust. Phone (for ref): {m_customer_phone_raw}",
+                            f"Cust. Email: {m_email}",
+                            f"Address: {m_address}",
+                            f"Payment: {m_payment_method} ({m_payment_status})",
+                            f"Status: {m_order_status}",
+                        ]
+                        formatted_message = "%0A".join(message_lines)
+                        seller_numbers = get_seller_team_recipients(SELLER_TEAM_RECIPIENTS_STR)
+                        send_whatsapp_message(formatted_message, seller_numbers)  # Send to seller team
+                    else:
+                        st.error("Failed to store order details.")
 
  # --- Contact Dictionary ---
     contact_dict = {
