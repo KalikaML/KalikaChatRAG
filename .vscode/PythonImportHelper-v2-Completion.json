@@ -1,0 +1,2674 @@
+[
+    {
+        "label": "streamlit",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "secrets",
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "isExtraImport": true,
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "secrets",
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "isExtraImport": true,
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "secrets",
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "isExtraImport": true,
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "googlemaps",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "googlemaps",
+        "description": "googlemaps",
+        "detail": "googlemaps",
+        "documentation": {}
+    },
+    {
+        "label": "requests",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "requests",
+        "description": "requests",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "BeautifulSoup",
+        "importPath": "bs4",
+        "description": "bs4",
+        "isExtraImport": true,
+        "detail": "bs4",
+        "documentation": {}
+    },
+    {
+        "label": "BeautifulSoup",
+        "importPath": "bs4",
+        "description": "bs4",
+        "isExtraImport": true,
+        "detail": "bs4",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "pandas",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pandas",
+        "description": "pandas",
+        "detail": "pandas",
+        "documentation": {}
+    },
+    {
+        "label": "toml",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "toml",
+        "description": "toml",
+        "detail": "toml",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "mysql.connector",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "mysql.connector",
+        "description": "mysql.connector",
+        "detail": "mysql.connector",
+        "documentation": {}
+    },
+    {
+        "label": "Error",
+        "importPath": "mysql.connector",
+        "description": "mysql.connector",
+        "isExtraImport": true,
+        "detail": "mysql.connector",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "boto3",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "boto3",
+        "description": "boto3",
+        "detail": "boto3",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "ClientError",
+        "importPath": "botocore.exceptions",
+        "description": "botocore.exceptions",
+        "isExtraImport": true,
+        "detail": "botocore.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "NoCredentialsError",
+        "importPath": "botocore.exceptions",
+        "description": "botocore.exceptions",
+        "isExtraImport": true,
+        "detail": "botocore.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "PartialCredentialsError",
+        "importPath": "botocore.exceptions",
+        "description": "botocore.exceptions",
+        "isExtraImport": true,
+        "detail": "botocore.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "psycopg2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "psycopg2",
+        "description": "psycopg2",
+        "detail": "psycopg2",
+        "documentation": {}
+    },
+    {
+        "label": "pywhatkit",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pywhatkit",
+        "description": "pywhatkit",
+        "detail": "pywhatkit",
+        "documentation": {}
+    },
+    {
+        "label": "pyautogui",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pyautogui",
+        "description": "pyautogui",
+        "detail": "pyautogui",
+        "documentation": {}
+    },
+    {
+        "label": "imaplib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "imaplib",
+        "description": "imaplib",
+        "detail": "imaplib",
+        "documentation": {}
+    },
+    {
+        "label": "email",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "email",
+        "description": "email",
+        "detail": "email",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "PyPDF2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "PdfReader",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "errors",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "PdfReader",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "errors",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "io",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "io",
+        "description": "io",
+        "detail": "io",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "phonenumbers",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "phonenumbers",
+        "description": "phonenumbers",
+        "detail": "phonenumbers",
+        "documentation": {}
+    },
+    {
+        "label": "schedule",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "schedule",
+        "description": "schedule",
+        "detail": "schedule",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "webbrowser",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "webbrowser",
+        "description": "webbrowser",
+        "detail": "webbrowser",
+        "documentation": {}
+    },
+    {
+        "label": "connect_to_db",
+        "importPath": "local_postgresql_db",
+        "description": "local_postgresql_db",
+        "isExtraImport": true,
+        "detail": "local_postgresql_db",
+        "documentation": {}
+    },
+    {
+        "label": "store_order",
+        "importPath": "local_postgresql_db",
+        "description": "local_postgresql_db",
+        "isExtraImport": true,
+        "detail": "local_postgresql_db",
+        "documentation": {}
+    },
+    {
+        "label": "connect_to_db",
+        "importPath": "local_postgresql_db",
+        "description": "local_postgresql_db",
+        "isExtraImport": true,
+        "detail": "local_postgresql_db",
+        "documentation": {}
+    },
+    {
+        "label": "store_order",
+        "importPath": "local_postgresql_db",
+        "description": "local_postgresql_db",
+        "isExtraImport": true,
+        "detail": "local_postgresql_db",
+        "documentation": {}
+    },
+    {
+        "label": "tempfile",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tempfile",
+        "description": "tempfile",
+        "detail": "tempfile",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterTextSplitter",
+        "importPath": "langchain.text_splitter",
+        "description": "langchain.text_splitter",
+        "isExtraImport": true,
+        "detail": "langchain.text_splitter",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterTextSplitter",
+        "importPath": "langchain.text_splitter",
+        "description": "langchain.text_splitter",
+        "isExtraImport": true,
+        "detail": "langchain.text_splitter",
+        "documentation": {}
+    },
+    {
+        "label": "process_po_emails",
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "isExtraImport": true,
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_po_emails",
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "isExtraImport": true,
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index_po",
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "isExtraImport": true,
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "ChatGoogleGenerativeAI",
+        "importPath": "langchain_google_genai",
+        "description": "langchain_google_genai",
+        "isExtraImport": true,
+        "detail": "langchain_google_genai",
+        "documentation": {}
+    },
+    {
+        "label": "ChatGoogleGenerativeAI",
+        "importPath": "langchain_google_genai",
+        "description": "langchain_google_genai",
+        "isExtraImport": true,
+        "detail": "langchain_google_genai",
+        "documentation": {}
+    },
+    {
+        "label": "ChatGoogleGenerativeAI",
+        "importPath": "langchain_google_genai",
+        "description": "langchain_google_genai",
+        "isExtraImport": true,
+        "detail": "langchain_google_genai",
+        "documentation": {}
+    },
+    {
+        "label": "HumanMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "SystemMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "AIMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "HumanMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "SystemMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "AIMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "HumanMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "SystemMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "AIMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "hashlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "process_proforma_emails",
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "isExtraImport": true,
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index",
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "isExtraImport": true,
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "find_place_ids_by_text_search",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def find_place_ids_by_text_search(query, max_results=5):\n    \"\"\"\n    Finds multiple place IDs using a text query.\n    Returns a list of place IDs. Handles API errors more explicitly.\n    \"\"\"\n    place_ids = []\n    try:\n        # Using st.status for progress updates within functions if desired\n        # status_update = st.empty()\n        # status_update.write(f\"Searching for places matching: '{query}'...\") # Show progress",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "extract_emails_from_website",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def extract_emails_from_website(website_url):\n    \"\"\"\n    Extracts email addresses from a website. Includes timeout and User-Agent.\n    \"\"\"\n    emails = set() # Use a set to avoid duplicates\n    try:\n        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}\n        response = requests.get(website_url, headers=headers, timeout=10)\n        response.raise_for_status()\n        content_type = response.headers.get('content-type', '').lower()",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "extract_social_links_from_website",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def extract_social_links_from_website(website_url):\n    \"\"\"\n    Extracts social media links (Facebook, Instagram, Twitter/X) from a website.\n    Includes timeout and User-Agent. Looks for common patterns.\n    \"\"\"\n    social_links = {\"facebook\": None, \"instagram\": None, \"twitter\": None}\n    found_count = 0\n    try:\n        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}\n        response = requests.get(website_url, headers=headers, timeout=10)",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "get_place_details",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def get_place_details(place_id):\n    \"\"\"\n    Retrieves details for a specific place using its place ID and predefined fields.\n    Handles API errors more explicitly. Includes DEBUG print.\n    \"\"\"\n    place_details_result = None\n    try:\n        st.write(f\"  Fetching details for Place ID: {place_id}...\")\n        # --- <<< TEMPORARY DEBUGGING LINE >>> ---\n        # This will print the fields list to your terminal AND the sidebar",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "populate_emails_and_social_links",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def populate_emails_and_social_links(place_details):\n    \"\"\"\n    Populates email addresses and social media links by scraping the website if available.\n    Modifies the place_details dictionary in-place.\n    \"\"\"\n    website = place_details.get('website')\n    emails = []\n    social_links = {\"facebook\": None, \"instagram\": None, \"twitter\": None}\n    if website:\n        if not website.startswith(('http://', 'https://')):",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "extract_data",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def extract_data(queries, max_results_per_query):\n    \"\"\"\n    Extracts data for a list of queries. Retrieves multiple results per query.\n    \"\"\"\n    extracted_data = []\n    total_places_processed = 0\n    st.info(f\"Starting data extraction for {len(queries)} queries...\")\n    for query_index, query in enumerate(queries):\n        if not query: continue\n        st.markdown(f\"--- \\n**Processing Query {query_index+1}/{len(queries)}: '{query}'**\")",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "create_dataframe",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def create_dataframe(data):\n    \"\"\"\n    Creates a Pandas DataFrame from the extracted data list (list of dictionaries).\n    Handles missing data gracefully using the CORRECTED field access.\n    \"\"\"\n    rows = []\n    if not data:\n        st.warning(\"No data was successfully extracted to create a DataFrame.\")\n        return pd.DataFrame()\n    for row_data in data:",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "def main():\n    st.title(\"🗺️ Google Maps Place Data Extractor\")\n    st.markdown(\"Enter search queries below. The app searches Google Maps, fetches details, and attempts to scrape website data.\")\n    st.sidebar.header(\"Controls\")\n    default_queries = \"Restaurant near Eiffel Tower\\nCoffee shop near Times Square NYC\\nHardware store, Pune, India\"\n    queries_input = st.sidebar.text_area(\"Enter Search Queries (one per line):\",\n                                 value=default_queries, height=150)\n    max_results_per_query = st.sidebar.slider(\"Max Results per Query\", min_value=1, max_value=10, value=3,\n                                              help=\"How many places to fetch details for per query.\")\n    extract_button = st.sidebar.button(\"🚀 Extract Data\", type=\"primary\")",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "SECRETS_FILE_PATH = \".streamlit/secrets.toml\"\nAPI_KEY = None # Initialize API_KEY\nst.set_page_config(layout=\"wide\") # Use more screen space\ntry:\n    # More standard key name for Google Maps\n    secrets = toml.load(SECRETS_FILE_PATH)\n    API_KEY = secrets.get(\"Maps_API_KEY\")\n    if not API_KEY:\n        st.error(f\"Error: 'Maps_API_KEY' not found or is empty in {SECRETS_FILE_PATH}\")\n        st.stop() # Halt execution if key is missing or empty in the file",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "API_KEY",
+        "kind": 5,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "API_KEY = None # Initialize API_KEY\nst.set_page_config(layout=\"wide\") # Use more screen space\ntry:\n    # More standard key name for Google Maps\n    secrets = toml.load(SECRETS_FILE_PATH)\n    API_KEY = secrets.get(\"Maps_API_KEY\")\n    if not API_KEY:\n        st.error(f\"Error: 'Maps_API_KEY' not found or is empty in {SECRETS_FILE_PATH}\")\n        st.stop() # Halt execution if key is missing or empty in the file\nexcept FileNotFoundError:",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "gmaps",
+        "kind": 5,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "gmaps = googlemaps.Client(key=API_KEY)\nst.sidebar.success(\"Google Maps API Client Initialized.\") # Indicate success\n# --- Constants ---\n# Define the specific fields you want from the Places API Details request\n# *** THIS IS THE CORRECTED LIST - BASED ON THE ERROR MESSAGE ***\nPLACE_DETAIL_FIELDS = [\n    'place_id', 'name', 'formatted_address', 'geometry/location', 'rating',\n    'user_ratings_total', 'website', 'formatted_phone_number', 'business_status',\n    'opening_hours' # Request the parent object, REMOVED 'types' and 'opening_hours/weekday_text'\n]",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "PLACE_DETAIL_FIELDS",
+        "kind": 5,
+        "importPath": "pages.google_maps_loader",
+        "description": "pages.google_maps_loader",
+        "peekOfCode": "PLACE_DETAIL_FIELDS = [\n    'place_id', 'name', 'formatted_address', 'geometry/location', 'rating',\n    'user_ratings_total', 'website', 'formatted_phone_number', 'business_status',\n    'opening_hours' # Request the parent object, REMOVED 'types' and 'opening_hours/weekday_text'\n]\n# --- Helper Functions ---\ndef find_place_ids_by_text_search(query, max_results=5):\n    \"\"\"\n    Finds multiple place IDs using a text query.\n    Returns a list of place IDs. Handles API errors more explicitly.",
+        "detail": "pages.google_maps_loader",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_page",
+        "kind": 2,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "def fetch_page(url, headers):\n    \"\"\"Fetches content from a URL.\"\"\"\n    try:\n        response = requests.get(url, headers=headers, timeout=30)\n        response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)\n        return response\n    except requests.exceptions.RequestException as e:\n        st.error(f\"Error fetching {url}: {e}\")\n        return None\ndef parse_headers(header_string):",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "parse_headers",
+        "kind": 2,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "def parse_headers(header_string):\n    \"\"\"Parses a multiline header string into a dictionary.\"\"\"\n    headers = {}\n    if not header_string:\n        return headers\n    lines = header_string.strip().split('\\n')\n    for line in lines:\n        if ':' in line:\n            key, value = line.split(':', 1)\n            headers[key.strip()] = value.strip()",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "connect_db",
+        "kind": 2,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "def connect_db(host, database, user, password):\n    \"\"\"Connects to the MySQL database.\"\"\"\n    connection = None\n    try:\n        connection = mysql.connector.connect(\n            host=host,\n            database=database,\n            user=user,\n            password=password\n        )",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "check_duplicate",
+        "kind": 2,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "def check_duplicate(cursor, table_name, supplier_url):\n    \"\"\"Checks if a supplier URL already exists in the table.\"\"\"\n    try:\n        query = f\"SELECT id FROM {table_name} WHERE supplier_url = %s\"\n        cursor.execute(query, (supplier_url,))\n        result = cursor.fetchone()\n        return result is not None\n    except Error as e:\n        st.warning(f\"Could not check for duplicate URL {supplier_url}: {e}\")\n        return False # Assume not duplicate if check fails",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "insert_data_db",
+        "kind": 2,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "def insert_data_db(connection, cursor, table_name, data_dict):\n    \"\"\"Inserts a dictionary of data into the specified table.\"\"\"\n    if check_duplicate(cursor, table_name, data_dict.get('supplier_url', '')):\n        st.write(f\"Skipping duplicate: {data_dict.get('company_name')} ({data_dict.get('supplier_url')})\")\n        return False\n    # Prepare columns and placeholders dynamically\n    columns = list(data_dict.keys())\n    placeholders = ', '.join(['%s'] * len(columns))\n    sql_query = f\"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})\"\n    values = [str(data_dict.get(col, '')) for col in columns] # Ensure all values are strings",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "scrape_indiamart",
+        "kind": 2,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "def scrape_indiamart(start_url, headers, db_connection=None, db_cursor=None, db_table_name=None, save_to_db=False):\n    \"\"\"Scrapes Indiamart based on the starting category URL.\"\"\"\n    BASE_URL = \"https://dir.indiamart.com\"\n    scraped_data = []\n    s_count = 0\n    total_sub_cats = 0\n    processed_sub_cats = 0\n    st.info(f\"Fetching main category page: {start_url}\")\n    response = fetch_page(start_url, headers)\n    if not response:",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "start_url",
+        "kind": 5,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "start_url = st.sidebar.text_input(\n    \"Indiamart Category URL\",\n    \"https://dir.indiamart.com/industry/apparel-garments.html\", # Default value\n    help=\"Enter the URL of the main Indiamart category page you want to scrape (e.g., .../industry/apparel-garments.html)\"\n)\nst.sidebar.subheader(\"Request Headers\")\nst.sidebar.info(\"\"\"\n**IMPORTANT:** You MUST provide headers, especially a valid 'Cookie' from a logged-in Indiamart session.\n1. Log in to Indiamart in your browser.\n2. Go to a supplier listing page.",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "headers_str",
+        "kind": 5,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "headers_str = st.sidebar.text_area(\n    \"Paste Headers Here (key: value format, one per line)\",\n    \"\"\"\nauthority: dir.indiamart.com\naccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\naccept-language: en-US,en;q=0.9\ncache-control: no-cache\npragma: no-cache\nsec-ch-ua: \"Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"115\", \"Chromium\";v=\"115\"\nsec-ch-ua-mobile: ?0",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "save_option",
+        "kind": 5,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "save_option = st.sidebar.radio(\n    \"How to save the data?\",\n    ('Save to CSV File Only', 'Save to MySQL Database Only', 'Save to Both CSV and MySQL'),\n    index=0\n)\n# --- MySQL Database Inputs (Conditional) ---\ndb_conn = None\ndb_cursor = None\ndb_table = \"apparel\" # Default table name from original script\nsave_db = \"MySQL\" in save_option",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "db_conn",
+        "kind": 5,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "db_conn = None\ndb_cursor = None\ndb_table = \"apparel\" # Default table name from original script\nsave_db = \"MySQL\" in save_option\nif save_db:\n    st.sidebar.subheader(\"MySQL Database Credentials\")\n    db_host = st.sidebar.text_input(\"DB Host\", \"localhost\")\n    db_user = st.sidebar.text_input(\"DB User\", \"root\")\n    db_pass = st.sidebar.text_input(\"DB Password\", type=\"password\")\n    db_name = st.sidebar.text_input(\"DB Database Name\", \"indiamart\")",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "db_cursor",
+        "kind": 5,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "db_cursor = None\ndb_table = \"apparel\" # Default table name from original script\nsave_db = \"MySQL\" in save_option\nif save_db:\n    st.sidebar.subheader(\"MySQL Database Credentials\")\n    db_host = st.sidebar.text_input(\"DB Host\", \"localhost\")\n    db_user = st.sidebar.text_input(\"DB User\", \"root\")\n    db_pass = st.sidebar.text_input(\"DB Password\", type=\"password\")\n    db_name = st.sidebar.text_input(\"DB Database Name\", \"indiamart\")\n    db_table = st.sidebar.text_input(\"DB Table Name\", \"apparel\", help=\"Ensure this table exists with the correct schema.\")",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "db_table",
+        "kind": 5,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "db_table = \"apparel\" # Default table name from original script\nsave_db = \"MySQL\" in save_option\nif save_db:\n    st.sidebar.subheader(\"MySQL Database Credentials\")\n    db_host = st.sidebar.text_input(\"DB Host\", \"localhost\")\n    db_user = st.sidebar.text_input(\"DB User\", \"root\")\n    db_pass = st.sidebar.text_input(\"DB Password\", type=\"password\")\n    db_name = st.sidebar.text_input(\"DB Database Name\", \"indiamart\")\n    db_table = st.sidebar.text_input(\"DB Table Name\", \"apparel\", help=\"Ensure this table exists with the correct schema.\")\n    # Check schema button?",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "save_db",
+        "kind": 5,
+        "importPath": "pages.indiamart_data_fetcher",
+        "description": "pages.indiamart_data_fetcher",
+        "peekOfCode": "save_db = \"MySQL\" in save_option\nif save_db:\n    st.sidebar.subheader(\"MySQL Database Credentials\")\n    db_host = st.sidebar.text_input(\"DB Host\", \"localhost\")\n    db_user = st.sidebar.text_input(\"DB User\", \"root\")\n    db_pass = st.sidebar.text_input(\"DB Password\", type=\"password\")\n    db_name = st.sidebar.text_input(\"DB Database Name\", \"indiamart\")\n    db_table = st.sidebar.text_input(\"DB Table Name\", \"apparel\", help=\"Ensure this table exists with the correct schema.\")\n    # Check schema button?\n    # st.sidebar.code(\"\"\"",
+        "detail": "pages.indiamart_data_fetcher",
+        "documentation": {}
+    },
+    {
+        "label": "get_aws_client",
+        "kind": 2,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "def get_aws_client(service_name, region_name, access_key, secret_key):\n    if not access_key or not secret_key:\n        st.error(\"AWS credentials missing. Cannot create client.\")\n        return None\n    if not region_name:\n        st.error(\"AWS Region is required but not provided. Cannot create client.\")\n        return None\n    try:\n        client = boto3.client(\n            service_name,",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "upload_to_s3",
+        "kind": 2,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "def upload_to_s3(s3_client, bucket_name, file_obj, object_name=None):\n    if s3_client is None:\n        st.error(\"S3 client is not available. Cannot upload.\")\n        return False, None\n    if object_name is None:\n        object_name = file_obj.name\n    try:\n        s3_client.upload_fileobj(file_obj, bucket_name, object_name)\n        s3_uri = f\"s3://{bucket_name}/{object_name}\"\n        logging.info(f\"File '{object_name}' uploaded successfully to bucket '{bucket_name}'. URI: {s3_uri}\")",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "start_bedrock_ingestion_job",
+        "kind": 2,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "def start_bedrock_ingestion_job(bedrock_agent_client, knowledge_base_id, data_source_id):\n    if bedrock_agent_client is None:\n        st.error(\"Bedrock Agent client is not available. Cannot start ingestion job.\")\n        return False, None\n    try:\n        response = bedrock_agent_client.start_ingestion_job(\n            knowledgeBaseId=knowledge_base_id,\n            dataSourceId=data_source_id\n        )\n        ingestion_job = response.get('ingestionJob', {})",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "SECRETS_FILE_PATH = \".streamlit/secrets.toml\"\n# --- Load AWS Credentials ---\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\n    AWS_ACCESS_KEY = secrets.get(\"access_key_id\")\n    AWS_SECRET_KEY = secrets.get(\"secret_access_key\")\n    AWS_REGION = secrets.get(\"region\")\nexcept Exception as e:\n    st.error(f\"Error loading secrets: {e}\")\n    AWS_ACCESS_KEY = None",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "default_region",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "default_region = AWS_REGION if AWS_REGION else os.environ.get(\"AWS_DEFAULT_REGION\", \"us-east-1\")\naws_region_input = st.sidebar.text_input(\"AWS Region\", default_region)\ns3_bucket_name = st.sidebar.text_input(\"S3 Bucket Name\")\nkb_id = st.sidebar.text_input(\"Knowledge Base ID\")\nds_id = st.sidebar.text_input(\"Data Source ID\")\nst.sidebar.header(\"File Upload\")\nuploaded_files = st.sidebar.file_uploader(\"Choose file(s) to upload\", accept_multiple_files=True)\n# --- Main Logic ---\nif st.sidebar.button(\"🚀 Upload and Start Sync\"):\n    valid_inputs = True",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "aws_region_input",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "aws_region_input = st.sidebar.text_input(\"AWS Region\", default_region)\ns3_bucket_name = st.sidebar.text_input(\"S3 Bucket Name\")\nkb_id = st.sidebar.text_input(\"Knowledge Base ID\")\nds_id = st.sidebar.text_input(\"Data Source ID\")\nst.sidebar.header(\"File Upload\")\nuploaded_files = st.sidebar.file_uploader(\"Choose file(s) to upload\", accept_multiple_files=True)\n# --- Main Logic ---\nif st.sidebar.button(\"🚀 Upload and Start Sync\"):\n    valid_inputs = True\n    if not aws_region_input:",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "s3_bucket_name",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "s3_bucket_name = st.sidebar.text_input(\"S3 Bucket Name\")\nkb_id = st.sidebar.text_input(\"Knowledge Base ID\")\nds_id = st.sidebar.text_input(\"Data Source ID\")\nst.sidebar.header(\"File Upload\")\nuploaded_files = st.sidebar.file_uploader(\"Choose file(s) to upload\", accept_multiple_files=True)\n# --- Main Logic ---\nif st.sidebar.button(\"🚀 Upload and Start Sync\"):\n    valid_inputs = True\n    if not aws_region_input:\n        st.error(\"AWS Region is required.\")",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "kb_id",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "kb_id = st.sidebar.text_input(\"Knowledge Base ID\")\nds_id = st.sidebar.text_input(\"Data Source ID\")\nst.sidebar.header(\"File Upload\")\nuploaded_files = st.sidebar.file_uploader(\"Choose file(s) to upload\", accept_multiple_files=True)\n# --- Main Logic ---\nif st.sidebar.button(\"🚀 Upload and Start Sync\"):\n    valid_inputs = True\n    if not aws_region_input:\n        st.error(\"AWS Region is required.\")\n        valid_inputs = False",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "ds_id",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "ds_id = st.sidebar.text_input(\"Data Source ID\")\nst.sidebar.header(\"File Upload\")\nuploaded_files = st.sidebar.file_uploader(\"Choose file(s) to upload\", accept_multiple_files=True)\n# --- Main Logic ---\nif st.sidebar.button(\"🚀 Upload and Start Sync\"):\n    valid_inputs = True\n    if not aws_region_input:\n        st.error(\"AWS Region is required.\")\n        valid_inputs = False\n    if not s3_bucket_name:",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "uploaded_files",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "uploaded_files = st.sidebar.file_uploader(\"Choose file(s) to upload\", accept_multiple_files=True)\n# --- Main Logic ---\nif st.sidebar.button(\"🚀 Upload and Start Sync\"):\n    valid_inputs = True\n    if not aws_region_input:\n        st.error(\"AWS Region is required.\")\n        valid_inputs = False\n    if not s3_bucket_name:\n        st.error(\"S3 Bucket Name is required.\")\n        valid_inputs = False",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "current_local_time",
+        "kind": 5,
+        "importPath": "pages.KB_sync",
+        "description": "pages.KB_sync",
+        "peekOfCode": "current_local_time = time.strftime('%Y-%m-%d %H:%M:%S %Z')\nst.sidebar.markdown(f\"App Time: {current_local_time}\")",
+        "detail": "pages.KB_sync",
+        "documentation": {}
+    },
+    {
+        "label": "connect_to_db",
+        "kind": 2,
+        "importPath": "pages.local_postgresql_db",
+        "description": "pages.local_postgresql_db",
+        "peekOfCode": "def connect_to_db():\n    \"\"\"Connects to the local PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=\"localhost\",\n            database=\"po_orders\",\n            user=\"po_user\",\n            password=\"postdb123\",\n            port=5432\n        )",
+        "detail": "pages.local_postgresql_db",
+        "documentation": {}
+    },
+    {
+        "label": "create_orders_table",
+        "kind": 2,
+        "importPath": "pages.local_postgresql_db",
+        "description": "pages.local_postgresql_db",
+        "peekOfCode": "def create_orders_table(conn):\n    \"\"\"Creates the 'orders' table if it doesn't exist.\"\"\"\n    with conn.cursor() as cursor: # Use context manager\n        cursor.execute(\"\"\"\n            CREATE TABLE IF NOT EXISTS orders (\n                id SERIAL PRIMARY KEY,\n                product_name TEXT,\n                category TEXT,\n                price REAL,\n                quantity INTEGER,",
+        "detail": "pages.local_postgresql_db",
+        "documentation": {}
+    },
+    {
+        "label": "store_order",
+        "kind": 2,
+        "importPath": "pages.local_postgresql_db",
+        "description": "pages.local_postgresql_db",
+        "peekOfCode": "def store_order(conn, order_details):\n    try:\n        with conn.cursor() as cursor:\n            columns = [\n                \"product_name\", \"category\", \"price\", \"quantity\", \"order_date\", \"delivery_date\",\n                \"customer_name\", \"customer_phone\", \"email\", \"address\", \"payment_method\",\n                \"payment_status\", \"order_status\", \"message_sent\"\n            ]\n            values = [\n                order_details[\"Product Name\"],",
+        "detail": "pages.local_postgresql_db",
+        "documentation": {}
+    },
+    {
+        "label": "extract_text_from_pdf",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def extract_text_from_pdf(pdf_file):\n    try:\n        pdf_reader = PyPDF2.PdfReader(pdf_file)\n        text = \"\".join(page.extract_text() for page in pdf_reader.pages if page.extract_text())\n        return text\n    except Exception as e:\n        st.error(f\"Error extracting text from PDF: {str(e)}\")\n        return \"\"\ndef format_phone_number(phone_str):\n    try:",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "format_phone_number",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def format_phone_number(phone_str):\n    try:\n        phone_number = phonenumbers.parse(phone_str, \"IN\")\n        if phonenumbers.is_valid_number(phone_number):\n            formatted = phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.E164)\n            return formatted\n        return None\n    except phonenumbers.phonenumberutil.NumberParseException:\n        return None\ndef parse_order_details(text):",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "parse_order_details",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def parse_order_details(text):\n    patterns = {\n        \"Order ID\": r\"Order ID:?\\s*([A-Z0-9-]+)\",\n        \"Product Name\": r\"Product(?: Name)?:?\\s*(.+)\",\n        \"Category\": r\"Category:?\\s*(.+)\",\n        \"Price\": r\"Price:?\\s*[₹$]?\\s*(\\d[\\d,]*\\.?\\d*)\",\n        \"Quantity\": r\"Quantity:?\\s*(\\d+)\",\n        \"Order Date\": r\"Order Date:?\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}(?::\\d{2})?)\",\n        \"Delivery Date\": r\"(?:Expected )?Delivery(?: Date)?:?\\s*(\\d{4}-\\d{2}-\\d{2})\",\n        \"Customer Name\": r\"Customer(?: Name)?:?\\s*(.+)\",",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "send_whatsapp_message",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def send_whatsapp_message(message, recipient_numbers):\n    status_container = st.empty()\n    if not isinstance(recipient_numbers, list):\n        status_container.error(\"Invalid recipient numbers format.  Must be a list.\")\n        return\n    if not recipient_numbers:\n        status_container.error(\"No valid recipient numbers provided.\")\n        return\n    webbrowser.open(\"https://web.whatsapp.com\")\n    time.sleep(15)",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_email_pdfs",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def fetch_email_pdfs(subject_query):\n    pdf_files_with_info = []\n    try:\n        mail = imaplib.IMAP4_SSL(IMAP_SERVER)\n        mail.login(EMAIL, PASSWORD)\n        mail.select(\"inbox\")\n        # Dynamic subject search\n        search_criteria = f'(UNSEEN SUBJECT \"{subject_query}\")'\n        status, messages = mail.search(None, search_criteria)\n        if status != \"OK\" or not messages[0]:",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "get_seller_team_recipients",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def get_seller_team_recipients(seller_team_recipients_str):\n    recipients = set()\n    if seller_team_recipients_str:\n        for phone in seller_team_recipients_str.split(\",\"):\n            formatted_seller = format_phone_number(phone.strip())\n            if formatted_seller:\n                recipients.add(formatted_seller)\n    return recipients\ndef get_pending_message_count():\n    conn = connect_to_db()",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "get_pending_message_count",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def get_pending_message_count():\n    conn = connect_to_db()\n    if not conn:\n        st.error(\"Failed to connect to database to get message count.\")\n        return 0\n    try:\n        with conn.cursor() as cursor:\n            cursor.execute(\"SELECT COUNT(*) FROM orders WHERE message_sent = FALSE\")\n            count = cursor.fetchone()[0]\n            return count",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "send_whatsapp_from_db",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def send_whatsapp_from_db():\n    status_container = st.empty()\n    conn = connect_to_db()\n    if not conn:\n        status_container.error(\"Failed to connect to the database.\")\n        return\n    try:\n        with conn.cursor() as cursor:\n            cursor.execute(\n                \"\"\"",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "process_and_store_email_orders",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def process_and_store_email_orders(subject_query):\n    status_container = st.empty()\n    status_container.info(\"Checking for new PO emails...\")\n    pdf_files_info = fetch_email_pdfs(subject_query)\n    if pdf_files_info:\n        processed_count = 0\n        conn = connect_to_db()\n        if not conn:\n            status_container.error(\"Failed to connect to the database.\")\n            return",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "check_and_process_emails_automatically",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def check_and_process_emails_automatically(subject_query):\n    process_and_store_email_orders(subject_query)\n    st.session_state[\"last_check_time\"] = datetime.now()\ndef run_scheduled_tasks():\n    while True:\n        schedule.run_pending()\n        time.sleep(1)\n# --- Streamlit UI ---\nst.set_page_config(page_title=\"PO Order Manager\", layout=\"wide\")\nst.title(\"🛒 PO Order Management Dashboard\")",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "run_scheduled_tasks",
+        "kind": 2,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "def run_scheduled_tasks():\n    while True:\n        schedule.run_pending()\n        time.sleep(1)\n# --- Streamlit UI ---\nst.set_page_config(page_title=\"PO Order Manager\", layout=\"wide\")\nst.title(\"🛒 PO Order Management Dashboard\")\n# --- Sidebar ---\nst.sidebar.header(\"Status & Configuration\")\nst.sidebar.metric(\"WhatsApp Sent (Session)\", st.session_state.whatsapp_sent_counter)",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "EMAIL = st.secrets[\"gmail_uname\"]\nPASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "PASSWORD",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "PASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),\n    \"auto_check_enabled\": True,",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),\n    \"auto_check_enabled\": True,\n    \"check_interval_minutes\": 30,",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "SELLER_TEAM_RECIPIENTS_STR",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "SELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),\n    \"auto_check_enabled\": True,\n    \"check_interval_minutes\": 30,\n    \"sending_in_progress\": False,",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "pending_count",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "pending_count = get_pending_message_count()\nst.sidebar.metric(\"Pending WhatsApp Messages\", pending_count)\nauto_check = st.sidebar.checkbox(\"Enable Auto-Check\", value=st.session_state[\"auto_check_enabled\"])\ninterval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "auto_check",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "auto_check = st.sidebar.checkbox(\"Enable Auto-Check\", value=st.session_state[\"auto_check_enabled\"])\ninterval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "interval",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "interval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    # Dynamic subject search input",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"auto_check_enabled\"]",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "st.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    # Dynamic subject search input\n    subject_query = st.text_input(",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"check_interval_minutes\"]",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "st.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    # Dynamic subject search input\n    subject_query = st.text_input(\n        \"Enter subject to search in emails\",",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "last_check_str",
+        "kind": 5,
+        "importPath": "pages.whatsapp",
+        "description": "pages.whatsapp",
+        "peekOfCode": "last_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    # Dynamic subject search input\n    subject_query = st.text_input(\n        \"Enter subject to search in emails\",\n        value=st.session_state.get(\"email_search_query\", \"Purchase Order\"),",
+        "detail": "pages.whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "connect_to_db",
+        "kind": 2,
+        "importPath": "utils.ec2_store",
+        "description": "utils.ec2_store",
+        "peekOfCode": "def connect_to_db():\n    \"\"\"Connects to the PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD\n        )\n        return conn\n    except psycopg2.Error as e:\n        print(f\"Database connection error: {e}\")\n        return None",
+        "detail": "utils.ec2_store",
+        "documentation": {}
+    },
+    {
+        "label": "create_orders_table",
+        "kind": 2,
+        "importPath": "utils.ec2_store",
+        "description": "utils.ec2_store",
+        "peekOfCode": "def create_orders_table(conn):\n    \"\"\"Creates the 'orders' table if it doesn't exist.\"\"\"\n    cursor = conn.cursor()\n    cursor.execute(\n        \"\"\"\n        CREATE TABLE IF NOT EXISTS orders (\n            id SERIAL PRIMARY KEY,\n            product_name TEXT,\n            price REAL,\n            quantity INTEGER,",
+        "detail": "utils.ec2_store",
+        "documentation": {}
+    },
+    {
+        "label": "store_order",
+        "kind": 2,
+        "importPath": "utils.ec2_store",
+        "description": "utils.ec2_store",
+        "peekOfCode": "def store_order(conn, order_details):\n    \"\"\"Stores order details in the 'orders' table.\"\"\"\n    cursor = conn.cursor()\n    try:\n        cursor.execute(\n            \"\"\"\n            INSERT INTO orders (product_name, price, quantity, order_date, delivery_date,\n                              customer_name, customer_phone, address, payment_method,\n                              payment_status, order_status)\n            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        "detail": "utils.ec2_store",
+        "documentation": {}
+    },
+    {
+        "label": "DB_HOST",
+        "kind": 5,
+        "importPath": "utils.ec2_store",
+        "description": "utils.ec2_store",
+        "peekOfCode": "DB_HOST = os.environ.get(\"DB_HOST\")\nDB_NAME = os.environ.get(\"DB_NAME\")\nDB_USER = os.environ.get(\"DB_USER\")\nDB_PASSWORD = os.environ.get(\"DB_PASSWORD\")\ndef connect_to_db():\n    \"\"\"Connects to the PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD\n        )",
+        "detail": "utils.ec2_store",
+        "documentation": {}
+    },
+    {
+        "label": "DB_NAME",
+        "kind": 5,
+        "importPath": "utils.ec2_store",
+        "description": "utils.ec2_store",
+        "peekOfCode": "DB_NAME = os.environ.get(\"DB_NAME\")\nDB_USER = os.environ.get(\"DB_USER\")\nDB_PASSWORD = os.environ.get(\"DB_PASSWORD\")\ndef connect_to_db():\n    \"\"\"Connects to the PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD\n        )\n        return conn",
+        "detail": "utils.ec2_store",
+        "documentation": {}
+    },
+    {
+        "label": "DB_USER",
+        "kind": 5,
+        "importPath": "utils.ec2_store",
+        "description": "utils.ec2_store",
+        "peekOfCode": "DB_USER = os.environ.get(\"DB_USER\")\nDB_PASSWORD = os.environ.get(\"DB_PASSWORD\")\ndef connect_to_db():\n    \"\"\"Connects to the PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD\n        )\n        return conn\n    except psycopg2.Error as e:",
+        "detail": "utils.ec2_store",
+        "documentation": {}
+    },
+    {
+        "label": "DB_PASSWORD",
+        "kind": 5,
+        "importPath": "utils.ec2_store",
+        "description": "utils.ec2_store",
+        "peekOfCode": "DB_PASSWORD = os.environ.get(\"DB_PASSWORD\")\ndef connect_to_db():\n    \"\"\"Connects to the PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD\n        )\n        return conn\n    except psycopg2.Error as e:\n        print(f\"Database connection error: {e}\")",
+        "detail": "utils.ec2_store",
+        "documentation": {}
+    },
+    {
+        "label": "extract_text_from_pdf",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def extract_text_from_pdf(pdf_file):\n    try:\n        pdf_reader = PyPDF2.PdfReader(pdf_file)\n        text = \"\".join(page.extract_text() for page in pdf_reader.pages if page.extract_text())\n        return text\n    except Exception as e:\n        st.error(f\"Error extracting text from PDF: {str(e)}\")\n        return \"\"\ndef format_phone_number(phone_str):\n    try:",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "format_phone_number",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def format_phone_number(phone_str):\n    try:\n        phone_number = phonenumbers.parse(phone_str, \"IN\")  # \"IN\" or appropriate region code if known\n        if phonenumbers.is_valid_number(phone_number):\n            formatted = phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.E164) # E.164 format!\n            return formatted # Returns a valid E.164 number or None\n        return None # Invalid number\n    except phonenumbers.phonenumberutil.NumberParseException:  # Handle parsing errors\n        return None\ndef parse_order_details(text):",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "parse_order_details",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def parse_order_details(text):\n    patterns = {\n        \"Order ID\": r\"Order ID:?\\s*([A-Z0-9-]+)\",\n        \"Product Name\": r\"Product(?: Name)?:?\\s*(.+)\",\n        \"Category\": r\"Category:?\\s*(.+)\",\n        \"Price\": r\"Price:?\\s*[₹$]?\\s*(\\d[\\d,]*\\.?\\d*)\",\n        \"Quantity\": r\"Quantity:?\\s*(\\d+)\",\n        \"Order Date\": r\"Order Date:?\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}(?::\\d{2})?)\",\n        \"Delivery Date\": r\"(?:Expected )?Delivery(?: Date)?:?\\s*(\\d{4}-\\d{2}-\\d{2})\",\n        \"Customer Name\": r\"Customer(?: Name)?:?\\s*(.+)\",",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "send_whatsapp_message",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def send_whatsapp_message(message, recipient_numbers):  # Modified function\n    \"\"\"Sends a WhatsApp message to a list of recipient numbers.\"\"\"\n    status_container = st.empty() # To show WhatsApp status message\n    if not recipient_numbers: # recipient_numbers should be a set() now\n        status_container.error(\"No valid recipient numbers provided.\")\n        return\n    webbrowser.open(\"https://web.whatsapp.com\")  # Open WhatsApp Web (once, before the loop)\n    time.sleep(15)  # Wait for WhatsApp Web to load\n    for recipient in recipient_numbers:\n        try:",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_email_pdfs",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def fetch_email_pdfs():\n    pdf_files_with_info = []\n    try:\n        mail = imaplib.IMAP4_SSL(IMAP_SERVER)\n        mail.login(EMAIL, PASSWORD)\n        mail.select(\"inbox\")\n        status, messages = mail.search(None, '(UNSEEN SUBJECT \"PO Dump\")')\n        if status != \"OK\" or not messages[0]:\n            mail.logout()\n            return []",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "get_seller_team_recipients",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def get_seller_team_recipients(seller_team_recipients_str):\n    recipients = set()\n    if seller_team_recipients_str:\n        for phone in seller_team_recipients_str.split(\",\"):\n            formatted_seller = format_phone_number(phone.strip())\n            if formatted_seller:\n                recipients.add(formatted_seller)\n    return recipients\ndef get_pending_message_count():  # New function\n    conn = connect_to_db()",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "get_pending_message_count",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def get_pending_message_count():  # New function\n    conn = connect_to_db()\n    if not conn:\n        st.error(\"Failed to connect to database to get message count.\")  # Show error in UI\n        return 0  # Handle the case where connection fails.\n    try:\n        with conn.cursor() as cursor:\n            cursor.execute(\"SELECT COUNT(*) FROM orders WHERE message_sent = FALSE\")\n            count = cursor.fetchone()[0]\n            return count",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "send_whatsapp_from_db",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def send_whatsapp_from_db():\n    \"\"\"Sends WhatsApp messages for pending orders to the configured seller team.\"\"\"\n    status_container = st.empty()\n    conn = connect_to_db()\n    if not conn:\n        status_container.error(\"Failed to connect to the database.\")\n        return\n    try:\n        with conn.cursor() as cursor:\n            cursor.execute(",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "process_and_store_email_orders",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def process_and_store_email_orders(): # Changed function name\n    \"\"\"Processes emails, extracts order details, and stores them in the database.\"\"\"\n    status_container = st.empty()\n    status_container.info(\"Checking for new PO emails...\")\n    pdf_files_info = fetch_email_pdfs()\n    if pdf_files_info:\n        processed_count = 0\n        conn = connect_to_db()\n        if not conn:\n            status_container.error(\"Failed to connect to the database.\")",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "check_and_process_emails_automatically",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def check_and_process_emails_automatically():\n    process_and_store_email_orders()  # Call the updated function\n    st.session_state[\"last_check_time\"] = datetime.now()\ndef run_scheduled_tasks():\n    while True:\n        schedule.run_pending()\n        time.sleep(1)\n# --- Streamlit UI ---\nst.set_page_config(page_title=\"PO Order Manager\", layout=\"wide\")\nst.title(\"🛒 PO Order Management Dashboard\")",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "run_scheduled_tasks",
+        "kind": 2,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "def run_scheduled_tasks():\n    while True:\n        schedule.run_pending()\n        time.sleep(1)\n# --- Streamlit UI ---\nst.set_page_config(page_title=\"PO Order Manager\", layout=\"wide\")\nst.title(\"🛒 PO Order Management Dashboard\")\n# --- Sidebar ---\nst.sidebar.header(\"Status & Configuration\")\nst.sidebar.metric(\"WhatsApp Sent (Session)\", st.session_state.whatsapp_sent_counter)",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "EMAIL = st.secrets[\"gmail_uname\"]\nPASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "PASSWORD",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "PASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),\n    \"auto_check_enabled\": True,",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),\n    \"auto_check_enabled\": True,\n    \"check_interval_minutes\": 30,",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "SELLER_TEAM_RECIPIENTS_STR",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "SELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session State Initialization ---\nfor key, default in {\n    \"whatsapp_sent_counter\": 0,\n    \"whatsapp_errors\": [],\n    \"manual_order_sent\": False,\n    \"last_check_time\": datetime.now(),\n    \"auto_check_enabled\": True,\n    \"check_interval_minutes\": 30,\n    \"sending_in_progress\": False,",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "pending_count",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "pending_count = get_pending_message_count()  # Get the count\nst.sidebar.metric(\"Pending WhatsApp Messages\", pending_count)  # Display it\nauto_check = st.sidebar.checkbox(\"Enable Auto-Check\", value=st.session_state[\"auto_check_enabled\"])\ninterval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "auto_check",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "auto_check = st.sidebar.checkbox(\"Enable Auto-Check\", value=st.session_state[\"auto_check_enabled\"])\ninterval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "interval",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "interval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    if st.button(\"Check Emails Now\"):",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"auto_check_enabled\"]",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "st.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    if st.button(\"Check Emails Now\"):\n        check_and_process_emails_automatically()",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"check_interval_minutes\"]",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "st.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    if st.button(\"Check Emails Now\"):\n        check_and_process_emails_automatically()\nwith tab2:",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "last_check_str",
+        "kind": 5,
+        "importPath": "utils.local_wp",
+        "description": "utils.local_wp",
+        "peekOfCode": "last_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    if st.button(\"Check Emails Now\"):\n        check_and_process_emails_automatically()\nwith tab2:\n    st.subheader(\"Manual Order Entry\")",
+        "detail": "utils.local_wp",
+        "documentation": {}
+    },
+    {
+        "label": "clean_filename",
+        "kind": 2,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "def clean_filename(filename):\n    \"\"\"Sanitize filename while preserving original extension if valid.\"\"\"\n    try:\n        decoded_name = decode_header(filename)[0][0]\n        if isinstance(decoded_name, bytes):\n            filename = decoded_name.decode(errors='ignore')\n        else:\n            filename = str(decoded_name)\n    except:\n        filename = \"po_document\"",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "is_valid_pdf",
+        "kind": 2,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "def is_valid_pdf(content):\n    \"\"\"Verify if content is a valid PDF.\"\"\"\n    try:\n        PdfReader(io.BytesIO(content))\n        return True\n    except (errors.PdfReadError, ValueError, TypeError):\n        return False\ndef file_exists_in_s3(bucket, key):\n    \"\"\"Check if a file exists in S3.\"\"\"\n    try:",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "file_exists_in_s3",
+        "kind": 2,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "def file_exists_in_s3(bucket, key):\n    \"\"\"Check if a file exists in S3.\"\"\"\n    try:\n        s3_client.head_object(Bucket=bucket, Key=key)\n        return True\n    except s3_client.exceptions.ClientError as e:\n        if e.response['Error']['Code'] == '404':\n            return False\n        logging.error(f\"S3 check error: {e}\")\n        return False",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "upload_to_s3",
+        "kind": 2,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "def upload_to_s3(file_content, bucket, key):\n    \"\"\"Upload file content directly to S3.\"\"\"\n    try:\n        s3_client.put_object(\n            Bucket=bucket,\n            Key=key,\n            Body=file_content,\n            ContentType='application/pdf'\n        )\n        logging.info(f\"Uploaded to S3: {key}\")",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_pdf_content",
+        "kind": 2,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "def process_pdf_content(file_content):\n    \"\"\"Extract and chunk text from valid PDF bytes.\"\"\"\n    text = \"\"\n    try:\n        if not is_valid_pdf(file_content):\n            raise errors.PdfReadError(\"Invalid PDF structure\")\n        pdf_file = io.BytesIO(file_content)\n        reader = PdfReader(pdf_file)\n        for page in reader.pages:\n            text += page.extract_text() or \"\"",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_po_emails",
+        "kind": 2,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "def process_po_emails():\n    \"\"\"Process PO Order emails and upload Excel attachments directly to S3.\"\"\"\n    try:\n        with imaplib.IMAP4_SSL(IMAP_SERVER) as mail:\n            mail.login(EMAIL_ACCOUNT, EMAIL_PASSWORD)\n            logging.info(\"Successfully authenticated with email server\")\n            # Select inbox and search for emails\n            mail.select(\"inbox\")\n            status, email_ids = mail.search(\n                None, 'OR OR (SUBJECT \"PO Order\") (SUBJECT \"Purchase Order\") (SUBJECT \"PO Dump\")'",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index_po",
+        "kind": 2,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "def create_faiss_index_po():\n    \"\"\"Create FAISS index from PDFs in S3 PO_Dump folder and upload to S3, skipping already processed files.\"\"\"\n    try:\n        response = s3_client.list_objects_v2(\n            Bucket=S3_BUCKET,\n            Prefix=PO_DUMP_FOLDER  # Fetch PDFs from PO folder\n        )\n        if 'Contents' not in response:\n            logging.info(\"No PDFs found in S3 PO_Dump folder\")\n            return",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "SECRETS_FILE_PATH = \".streamlit/secrets.toml\"\nIMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "S3_BUCKET",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "S3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "PO_DUMP_FOLDER",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "PO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "PO_INDEX_PATH",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "PO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDING_MODEL",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "EMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\n# Email and S3 credentials",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "secrets",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "secrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\n# Email and S3 credentials\nEMAIL_ACCOUNT = secrets[\"gmail_uname\"]\nEMAIL_PASSWORD = secrets[\"gmail_pwd\"]",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL_ACCOUNT",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "EMAIL_ACCOUNT = secrets[\"gmail_uname\"]\nEMAIL_PASSWORD = secrets[\"gmail_pwd\"]\nAWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL_PASSWORD",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "EMAIL_PASSWORD = secrets[\"gmail_pwd\"]\nAWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "AWS_ACCESS_KEY",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "AWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "AWS_SECRET_KEY",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "AWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "s3_client",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "s3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False})",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "embeddings",
+        "kind": 5,
+        "importPath": "utils.PO_s3store",
+        "description": "utils.PO_s3store",
+        "peekOfCode": "embeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False})\ndef clean_filename(filename):\n    \"\"\"Sanitize filename while preserving original extension if valid.\"\"\"\n    try:\n        decoded_name = decode_header(filename)[0][0]\n        if isinstance(decoded_name, bytes):\n            filename = decoded_name.decode(errors='ignore')",
+        "detail": "utils.PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "clean_filename",
+        "kind": 2,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "def clean_filename(filename):\n    \"\"\"Sanitize filename while preserving original extension if valid.\"\"\"\n    try:\n        # Decode header to handle potential encoding issues\n        decoded_parts = decode_header(filename)\n        decoded_name = \"\"\n        for part, encoding in decoded_parts:\n            if isinstance(part, bytes):\n                # If no encoding detected, try default encodings or ignore errors\n                decoded_name += part.decode(encoding or 'utf-8', errors='ignore')",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "is_valid_pdf",
+        "kind": 2,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "def is_valid_pdf(content):\n    \"\"\"Verify if content is a valid PDF by attempting to read it.\"\"\"\n    if not content:\n        logging.warning(\"PDF content is empty.\")\n        return False\n    try:\n        # Use BytesIO to treat the byte content like a file\n        pdf_file = io.BytesIO(content)\n        reader = PdfReader(pdf_file)\n        # Check if it has pages; an empty or severely corrupted PDF might not",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "file_exists_in_s3",
+        "kind": 2,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "def file_exists_in_s3(bucket, key):\n    \"\"\"Check if a file exists in S3.\"\"\"\n    try:\n        s3_client.head_object(Bucket=bucket, Key=key)\n        return True\n    except s3_client.exceptions.ClientError as e:\n        # If the error code is 404 (Not Found), then the file doesn't exist.\n        if e.response['Error']['Code'] == '404':\n            return False\n        # Log other S3 errors",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "upload_to_s3",
+        "kind": 2,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "def upload_to_s3(file_content, bucket, key):\n    \"\"\"Upload file content directly to S3.\"\"\"\n    try:\n        s3_client.put_object(\n            Bucket=bucket,\n            Key=key,\n            Body=file_content,\n            ContentType='application/pdf' # Assuming content is always PDF here\n        )\n        logging.info(f\"Uploaded to S3: s3://{bucket}/{key}\")",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_pdf_content",
+        "kind": 2,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "def process_pdf_content(file_content, filename_for_logging=\"\"):\n    \"\"\"Extract and chunk text from valid PDF bytes.\"\"\"\n    text = \"\"\n    pdf_log_name = f\"'{filename_for_logging}' \" if filename_for_logging else \"\"\n    try:\n        # Basic validation check (optional, as is_valid_pdf is called before)\n        if not file_content:\n             logging.warning(f\"Skipping processing for {pdf_log_name}due to empty content.\")\n             return []\n        pdf_file = io.BytesIO(file_content)",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_po_emails",
+        "kind": 2,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "def process_po_emails():\n    \"\"\"Process PO emails, upload valid PDF attachments to S3, avoiding duplicates.\"\"\"\n    processed_files = 0\n    skipped_duplicates = 0\n    skipped_invalid = 0\n    skipped_empty = 0\n    email_count = 0\n    total_attachments = 0\n    try:\n        logging.info(\"Connecting to IMAP server...\")",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index_po",
+        "kind": 2,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "def create_faiss_index_po():\n    \"\"\"Create/Update FAISS index from new PDFs in S3 PO_Dump folder and upload to S3.\"\"\"\n    all_new_chunks = []\n    processed_new_pdfs = 0\n    uploaded_index_files = 0\n    s3_index_exists = False\n    existing_vector_store = None\n    try:\n        # --- Step 1: Check for and Load Existing FAISS Index from S3 ---\n        logging.info(f\"Checking for existing FAISS index in S3 at: s3://{S3_BUCKET}/{PO_INDEX_PATH}\")",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "SECRETS_FILE_PATH = \".streamlit/secrets.toml\"\n# --- MODIFIED: Path to your LOCAL embedding model ---\n# >>> IMPORTANT: Update this path to the actual location of your ge-base-en-v1.5 model directory <<<\nLOCAL_EMBEDDING_MODEL_PATH = \"bge-base-en-v1.5\"\n# e.g., \"C:/ai_models/ge-base-en-v1.5\" or \"/home/user/models/ge-base-en-v1.5\"\n# ---\nIMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"proforma_invoice/\"\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "LOCAL_EMBEDDING_MODEL_PATH",
+        "kind": 5,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "LOCAL_EMBEDDING_MODEL_PATH = \"bge-base-en-v1.5\"\n# e.g., \"C:/ai_models/ge-base-en-v1.5\" or \"/home/user/models/ge-base-en-v1.5\"\n# ---\nIMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"proforma_invoice/\"\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"\n# Load secrets from secrets.toml\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"proforma_invoice/\"\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"\n# Load secrets from secrets.toml\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\nexcept FileNotFoundError:\n    logging.error(f\"Secrets file not found at: {SECRETS_FILE_PATH}\")\n    raise",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "S3_BUCKET",
+        "kind": 5,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "S3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"proforma_invoice/\"\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"\n# Load secrets from secrets.toml\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\nexcept FileNotFoundError:\n    logging.error(f\"Secrets file not found at: {SECRETS_FILE_PATH}\")\n    raise\nexcept Exception as e:",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "PO_DUMP_FOLDER",
+        "kind": 5,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "PO_DUMP_FOLDER = \"proforma_invoice/\"\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"\n# Load secrets from secrets.toml\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\nexcept FileNotFoundError:\n    logging.error(f\"Secrets file not found at: {SECRETS_FILE_PATH}\")\n    raise\nexcept Exception as e:\n    logging.error(f\"Error loading secrets file: {e}\")",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "PO_INDEX_PATH",
+        "kind": 5,
+        "importPath": "utils.proforma_s3store",
+        "description": "utils.proforma_s3store",
+        "peekOfCode": "PO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"\n# Load secrets from secrets.toml\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\nexcept FileNotFoundError:\n    logging.error(f\"Secrets file not found at: {SECRETS_FILE_PATH}\")\n    raise\nexcept Exception as e:\n    logging.error(f\"Error loading secrets file: {e}\")\n    raise",
+        "detail": "utils.proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "extract_text_from_pdf",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def extract_text_from_pdf(pdf_file):\n    try:\n        pdf_reader = PyPDF2.PdfReader(pdf_file)\n        text = \"\".join(page.extract_text() for page in pdf_reader.pages if page.extract_text())\n        return text\n    except Exception as e:\n        st.error(f\"Error extracting text from PDF: {str(e)}\")\n        return \"\"\ndef format_phone_number(phone_str):\n    try:",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "format_phone_number",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def format_phone_number(phone_str):\n    try:\n        phone_number = phonenumbers.parse(phone_str)\n        if phonenumbers.is_valid_number(phone_number):\n            return phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)\n        return None\n    except phonenumbers.phonenumberutil.NumberParseException:\n        return None\ndef parse_order_details(text):\n    patterns = {",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "parse_order_details",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def parse_order_details(text):\n    patterns = {\n        \"Order ID\": r\"Order ID:?\\s*([A-Z0-9-]+)\",\n        \"Product Name\": r\"Product(?: Name)?:?\\s*(.+)\",\n        \"Category\": r\"Category:?\\s*(.+)\",\n        \"Price\": r\"Price:?\\s*[₹$]?\\s*(\\d[\\d,]\\.?\\d)\",\n        \"Quantity\": r\"Quantity:?\\s*(\\d+)\",\n        \"Order Date\": r\"Order Date:?\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}(?::\\d{2})?)\",\n        \"Delivery Date\": r\"(?:Expected )?Delivery(?: Date)?:?\\s*(\\d{4}-\\d{2}-\\d{2})\",\n        \"Customer Name\": r\"Customer(?: Name)?:?\\s*(.+)\",",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_email_pdfs",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def fetch_email_pdfs():\n    pdf_files_with_info = []\n    try:\n        mail = imaplib.IMAP4_SSL(IMAP_SERVER)\n        mail.login(EMAIL, PASSWORD)\n        mail.select(\"inbox\")\n        status, messages = mail.search(None, '(UNSEEN SUBJECT \"PO Dump\")')\n        if status != \"OK\" or not messages[0]:\n            mail.logout()\n            return []",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "get_seller_team_recipients",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def get_seller_team_recipients(seller_team_recipients_str):\n    recipients = set()\n    if seller_team_recipients_str:\n        for phone in seller_team_recipients_str.split(','):\n            formatted_seller = format_phone_number(phone.strip())\n            if formatted_seller:\n                recipients.add(formatted_seller)\n    return recipients\ndef send_whatsapp_bulk(recipients, message):\n    if st.session_state[\"sending_in_progress\"]:",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "send_whatsapp_bulk",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def send_whatsapp_bulk(recipients, message):\n    if st.session_state[\"sending_in_progress\"]:\n        return False\n    st.session_state[\"sending_in_progress\"] = True\n    status_container = st.empty()\n    try:\n        recipient_list = list(recipients)\n        total = len(recipient_list)\n        success_count = 0\n        webbrowser.open(\"https://web.whatsapp.com\")",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "check_and_process_emails_automatically",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def check_and_process_emails_automatically():\n    if st.session_state[\"sending_in_progress\"]:\n        return\n    status_container = st.empty()\n    status_container.info(\"Checking for new PO emails...\")\n    pdf_files_info = fetch_email_pdfs()\n    if pdf_files_info:\n        seller_team_numbers = get_seller_team_recipients(SELLER_TEAM_RECIPIENTS_STR)\n        if not seller_team_numbers:\n            status_container.error(\"No valid Seller Team numbers configured.\")",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "run_scheduled_tasks",
+        "kind": 2,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "def run_scheduled_tasks():\n    while True:\n        schedule.run_pending()\n        time.sleep(1)\n# --- Streamlit App Layout ---\nst.set_page_config(page_title=\"PO Order Manager\", layout=\"wide\")\nst.title(\"🛒 PO Order Management Dashboard\")\n# --- Sidebar ---\nst.sidebar.header(\"Status & Configuration\")\nst.sidebar.metric(\"WhatsApp Sent (Session)\", st.session_state.whatsapp_sent_counter)",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "EMAIL = st.secrets[\"gmail_uname\"]\nPASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session state ---\nif \"whatsapp_sent_counter\" not in st.session_state:\n    st.session_state[\"whatsapp_sent_counter\"] = 0\nif \"whatsapp_errors\" not in st.session_state:\n    st.session_state[\"whatsapp_errors\"] = []\nif \"manual_order_sent\" not in st.session_state:",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "PASSWORD",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "PASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session state ---\nif \"whatsapp_sent_counter\" not in st.session_state:\n    st.session_state[\"whatsapp_sent_counter\"] = 0\nif \"whatsapp_errors\" not in st.session_state:\n    st.session_state[\"whatsapp_errors\"] = []\nif \"manual_order_sent\" not in st.session_state:\n    st.session_state[\"manual_order_sent\"] = False",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session state ---\nif \"whatsapp_sent_counter\" not in st.session_state:\n    st.session_state[\"whatsapp_sent_counter\"] = 0\nif \"whatsapp_errors\" not in st.session_state:\n    st.session_state[\"whatsapp_errors\"] = []\nif \"manual_order_sent\" not in st.session_state:\n    st.session_state[\"manual_order_sent\"] = False\nif \"last_check_time\" not in st.session_state:",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "SELLER_TEAM_RECIPIENTS_STR",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "SELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\n# --- Session state ---\nif \"whatsapp_sent_counter\" not in st.session_state:\n    st.session_state[\"whatsapp_sent_counter\"] = 0\nif \"whatsapp_errors\" not in st.session_state:\n    st.session_state[\"whatsapp_errors\"] = []\nif \"manual_order_sent\" not in st.session_state:\n    st.session_state[\"manual_order_sent\"] = False\nif \"last_check_time\" not in st.session_state:\n    st.session_state[\"last_check_time\"] = datetime.now()",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "auto_check",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "auto_check = st.sidebar.checkbox(\"Enable Auto-Check\", value=st.session_state[\"auto_check_enabled\"])\ninterval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nif st.session_state[\"last_check_time\"]:\n    st.sidebar.info(f\"Last Check: {st.session_state['last_check_time'].strftime('%H:%M:%S')}\")\nif st.session_state[\"sending_in_progress\"]:\n    st.sidebar.warning(\"Sending in Progress...\")\nif st.session_state[\"whatsapp_errors\"]:\n    st.sidebar.error(\"Errors Occurred\")",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "interval",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "interval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nif st.session_state[\"last_check_time\"]:\n    st.sidebar.info(f\"Last Check: {st.session_state['last_check_time'].strftime('%H:%M:%S')}\")\nif st.session_state[\"sending_in_progress\"]:\n    st.sidebar.warning(\"Sending in Progress...\")\nif st.session_state[\"whatsapp_errors\"]:\n    st.sidebar.error(\"Errors Occurred\")\n    with st.sidebar.expander(\"View Errors\"):",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"auto_check_enabled\"]",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "st.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nif st.session_state[\"last_check_time\"]:\n    st.sidebar.info(f\"Last Check: {st.session_state['last_check_time'].strftime('%H:%M:%S')}\")\nif st.session_state[\"sending_in_progress\"]:\n    st.sidebar.warning(\"Sending in Progress...\")\nif st.session_state[\"whatsapp_errors\"]:\n    st.sidebar.error(\"Errors Occurred\")\n    with st.sidebar.expander(\"View Errors\"):\n        for error in st.session_state[\"whatsapp_errors\"][-10:]:",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"check_interval_minutes\"]",
+        "kind": 5,
+        "importPath": "utils.temp_whatsapp",
+        "description": "utils.temp_whatsapp",
+        "peekOfCode": "st.session_state[\"check_interval_minutes\"] = interval\nif st.session_state[\"last_check_time\"]:\n    st.sidebar.info(f\"Last Check: {st.session_state['last_check_time'].strftime('%H:%M:%S')}\")\nif st.session_state[\"sending_in_progress\"]:\n    st.sidebar.warning(\"Sending in Progress...\")\nif st.session_state[\"whatsapp_errors\"]:\n    st.sidebar.error(\"Errors Occurred\")\n    with st.sidebar.expander(\"View Errors\"):\n        for error in st.session_state[\"whatsapp_errors\"][-10:]:\n            st.write(f\"- {error}\")",
+        "detail": "utils.temp_whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "verify_password",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def verify_password(username, password):\n    \"\"\"Verify the password for a given username\"\"\"\n    if username not in CREDENTIALS:\n        logging.warning(f\"Login attempt for non-existent user: {username}\")\n        return False\n    # Get the pre-hashed password stored in the credentials\n    stored_hashed_password = CREDENTIALS[username][\"password\"]\n    # Hash the password *provided by the user during login*\n    input_password_hash = hashlib.sha256(password.encode()).hexdigest()\n    # --- Debugging Output (Optional - remove/log in production) ---",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_info",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def get_user_info(username):\n    \"\"\"Get user info for a given username\"\"\"\n    return CREDENTIALS[username][\"name\"] if username in CREDENTIALS else None\n# --- Initialize S3 client ---\n@st.cache_resource  # Cache S3 client resource across reruns\ndef get_s3_client():\n    try:\n        s3 = boto3.client(\n            \"s3\",\n            aws_access_key_id=AWS_ACCESS_KEY,",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "get_s3_client",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def get_s3_client():\n    try:\n        s3 = boto3.client(\n            \"s3\",\n            aws_access_key_id=AWS_ACCESS_KEY,\n            aws_secret_access_key=AWS_SECRET_KEY,\n        )\n        # Quick check to verify credentials\n        s3.list_buckets()\n        logging.info(\"S3 client initialized successfully.\")",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "get_embeddings_model",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def get_embeddings_model():\n    \"\"\"\n    Loads the HuggingFace embeddings model from a local directory.\n    Sets the TRANSFORMERS_CACHE environment variable to help the library find the files.\n    \"\"\"\n    model_path = MODEL_DIRECTORY  # Relative path to the local model directory\n    # --- Crucial Step: Check if local model directory exists ---\n    if not os.path.isdir(model_path):\n        st.error(f\"Local model directory not found at '{os.path.abspath(model_path)}'. \"\n                 f\"Please ensure the directory '{MODEL_DIRECTORY}' exists in the same \"",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "get_gemini_model",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def get_gemini_model():\n    try:\n        llm = ChatGoogleGenerativeAI(\n            model=GEMINI_MODEL,\n            google_api_key=GEMINI_API_KEY,\n            temperature=0.3,  # Lower temperature for more factual answers based on context\n            convert_system_message_to_human=True  # Good practice for some models\n        )\n        logging.info(f\"Gemini model {GEMINI_MODEL} initialized.\")\n        return llm",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "download_and_load_faiss_index",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):\n    \"\"\"\n    Downloads the FAISS index files (index.faiss, index.pkl) from S3\n    to a temporary local directory and loads them.\n    Uses Streamlit's caching.\n    Requires allow_dangerous_deserialization=True for FAISS.load_local.\n    \"\"\"\n    # --- Added Check: Ensure embeddings model is loaded ---\n    if not _embeddings:\n        st.error(\"Embeddings model failed to load. Cannot load FAISS index.\")",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "query_faiss_index",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):\n    \"\"\"\n    Query the FAISS index. Returns a list of LangChain Document objects.\n    k: Number of results to return. Start with 5-10.\n    use_mmr: Set to True to use Maximal Marginal Relevance for potentially more diverse results.\n    \"\"\"\n    if not vector_store:\n        logging.warning(\"query_faiss_index called but vector_store is None.\")\n        return []\n    try:",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "generate_llm_response",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def generate_llm_response(llm, query_text, retrieved_docs):\n    \"\"\"\n    Generate a response using the Gemini LLM, providing retrieved documents as context.\n    \"\"\"\n    if not llm:\n        logging.error(\"generate_llm_response called but llm is None.\")\n        return \"LLM model is not available.\"\n    if retrieved_docs:\n        # --- Context Preparation ---\n        context = \"\\n\\n---\\n\\n\".join([doc.page_content for doc in retrieved_docs])  # Separate chunks clearly",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "login_page",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def login_page():\n    st.title(\"📄 Proforma Invoice Assistant - Login\")\n    # Center the login form with custom styling\n    col1, col2, col3 = st.columns([1, 2, 1])\n    with col2:\n        st.markdown(\"### Login to Access the System\")\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        login_button = st.button(\"Login\", use_container_width=True)\n        if login_button:",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "main_app",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def main_app():\n    # Add logout button in sidebar\n    with st.sidebar:\n        st.write(f\"Welcome, {st.session_state.name}\")\n        if st.button(\"Logout\"):\n            st.session_state.authenticated = False\n            st.session_state.username = None\n            st.session_state.name = None\n            st.rerun()  # Refresh the page after logout\n    # Main app UI",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "def main():\n    # Initialize session state for authentication\n    if 'authenticated' not in st.session_state:\n        st.session_state.authenticated = False\n        st.session_state.username = None\n        st.session_state.name = None\n    # Show login page or main app based on authentication status\n    if not st.session_state.authenticated:\n        login_page()\n    else:",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "utils.test_app",
+        "description": "utils.test_app",
+        "peekOfCode": "SECRETS_FILE_PATH = \".streamlit/secrets.toml\"\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\n    # Core application settings\n    S3_BUCKET = \"kalika-rag\"  # Ensure this matches the indexer script\n    S3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index\"  # Base path (no trailing slash)\n    MODEL_DIRECTORY = \"BAAI/BAAI-bge-base-en-v1.5\"\n    AWS_ACCESS_KEY = secrets[\"access_key_id\"]\n    AWS_SECRET_KEY = secrets[\"secret_access_key\"]\n    GEMINI_MODEL = \"gemini-1.5-pro\"  # Or other suitable Gemini model",
+        "detail": "utils.test_app",
+        "documentation": {}
+    },
+    {
+        "label": "get_s3_client",
+        "kind": 2,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "def get_s3_client():\n    try:\n        s3 = boto3.client(\n            \"s3\",\n            aws_access_key_id=AWS_ACCESS_KEY,\n            aws_secret_access_key=AWS_SECRET_KEY,\n        )\n        # Quick check to verify credentials\n        s3.list_buckets()\n        logging.info(\"S3 client initialized successfully.\")",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "get_embeddings_model",
+        "kind": 2,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "def get_embeddings_model():\n    \"\"\"\n    Loads the HuggingFace embeddings model from a local directory.\n    Sets the TRANSFORMERS_CACHE environment variable to help the library find the files.\n    \"\"\"\n    model_path = MODEL_DIRECTORY # Relative path to the local model directory\n    # --- Crucial Step: Check if local model directory exists ---\n    if not os.path.isdir(model_path):\n        st.error(f\"Local model directory not found at '{os.path.abspath(model_path)}'. \"\n                 f\"Please ensure the directory '{MODEL_DIRECTORY}' exists in the same \"",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "get_gemini_model",
+        "kind": 2,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "def get_gemini_model():\n    try:\n        llm = ChatGoogleGenerativeAI(\n            model=GEMINI_MODEL,\n            google_api_key=GEMINI_API_KEY,\n            temperature=0.3,  # Lower temperature for more factual answers based on context\n            convert_system_message_to_human=True  # Good practice for some models\n        )\n        logging.info(f\"Gemini model {GEMINI_MODEL} initialized.\")\n        return llm",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "download_and_load_faiss_index",
+        "kind": 2,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):\n    \"\"\"\n    Downloads the FAISS index files (index.faiss, index.pkl) from S3\n    to a temporary local directory and loads them.\n    Uses Streamlit's caching.\n    Requires allow_dangerous_deserialization=True for FAISS.load_local.\n    \"\"\"\n    # --- Added Check: Ensure embeddings model is loaded ---\n    if not _embeddings:\n        st.error(\"Embeddings model failed to load. Cannot load FAISS index.\")",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "query_faiss_index",
+        "kind": 2,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "def query_faiss_index(vector_store, query_text, k=10, use_mmr=False):\n    \"\"\"\n    Query the FAISS index. Returns a list of LangChain Document objects.\n    k: Number of results to return. Start with 5-10.\n    use_mmr: Set to True to use Maximal Marginal Relevance for potentially more diverse results.\n    \"\"\"\n    if not vector_store:\n        logging.warning(\"query_faiss_index called but vector_store is None.\")\n        return []\n    try:",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "generate_llm_response",
+        "kind": 2,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "def generate_llm_response(llm, query_text, retrieved_docs):\n    \"\"\"\n    Generate a response using the Gemini LLM, providing retrieved documents as context.\n    \"\"\"\n    if not llm:\n        logging.error(\"generate_llm_response called but llm is None.\")\n        return \"LLM model is not available.\"\n    if retrieved_docs:\n        # --- Context Preparation ---\n        context = \"\\n\\n---\\n\\n\".join([doc.page_content for doc in retrieved_docs])  # Separate chunks clearly",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "SECRETS_FILE_PATH = \".streamlit/secrets.toml\"\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\n    S3_BUCKET = \"kalika-rag\"  # Ensure this matches the indexer script\n    S3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index\"  # Base path (no trailing slash)\n    # IMPORTANT: Ensure this directory exists relative to where you run the script\n    MODEL_DIRECTORY = \"BAAI/BAAI-bge-base-en-v1.5\"\n    AWS_ACCESS_KEY = secrets[\"access_key_id\"]\n    AWS_SECRET_KEY = secrets[\"secret_access_key\"]\n    GEMINI_MODEL = \"gemini-1.5-pro\"  # Or other suitable Gemini model",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "s3_client",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "s3_client = get_s3_client()\n# --- Initialize Embeddings Model ---\n@st.cache_resource  # Cache embeddings model\ndef get_embeddings_model():\n    \"\"\"\n    Loads the HuggingFace embeddings model from a local directory.\n    Sets the TRANSFORMERS_CACHE environment variable to help the library find the files.\n    \"\"\"\n    model_path = MODEL_DIRECTORY # Relative path to the local model directory\n    # --- Crucial Step: Check if local model directory exists ---",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "embeddings",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "embeddings = get_embeddings_model()\n# --- Initialize Gemini LLM ---\n@st.cache_resource  # Cache LLM model\ndef get_gemini_model():\n    try:\n        llm = ChatGoogleGenerativeAI(\n            model=GEMINI_MODEL,\n            google_api_key=GEMINI_API_KEY,\n            temperature=0.3,  # Lower temperature for more factual answers based on context\n            convert_system_message_to_human=True  # Good practice for some models",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "gemini_model",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "gemini_model = get_gemini_model()\n# --- FAISS Index Loading ---\n@st.cache_resource(ttl=3600)  # Cache the loaded index for 1 hour\ndef download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):\n    \"\"\"\n    Downloads the FAISS index files (index.faiss, index.pkl) from S3\n    to a temporary local directory and loads them.\n    Uses Streamlit's caching.\n    Requires allow_dangerous_deserialization=True for FAISS.load_local.\n    \"\"\"",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "s3_status",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "s3_status = \"✅ S3 Client Initialized\" if s3_client else \"❌ S3 Client Failed\"\nembeddings_status = \"✅ Embeddings Model Loaded\" if embeddings else \"❌ Embeddings Model Failed\"\ngemini_status = \"✅ Gemini LLM Initialized\" if gemini_model else \"❌ Gemini LLM Failed\"\nwith st.status(\"Initializing resources...\", expanded=False) as status_container:\n    st.write(s3_status)\n    st.write(embeddings_status)\n    st.write(gemini_status)\n    # Check if core components failed\n    if not s3_client or not embeddings or not gemini_model:\n        st.error(\"Core components failed to initialize. Application cannot proceed. Check logs for details.\")",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "embeddings_status",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "embeddings_status = \"✅ Embeddings Model Loaded\" if embeddings else \"❌ Embeddings Model Failed\"\ngemini_status = \"✅ Gemini LLM Initialized\" if gemini_model else \"❌ Gemini LLM Failed\"\nwith st.status(\"Initializing resources...\", expanded=False) as status_container:\n    st.write(s3_status)\n    st.write(embeddings_status)\n    st.write(gemini_status)\n    # Check if core components failed\n    if not s3_client or not embeddings or not gemini_model:\n        st.error(\"Core components failed to initialize. Application cannot proceed. Check logs for details.\")\n        status_container.update(label=\"Initialization Failed!\", state=\"error\")",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "gemini_status",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "gemini_status = \"✅ Gemini LLM Initialized\" if gemini_model else \"❌ Gemini LLM Failed\"\nwith st.status(\"Initializing resources...\", expanded=False) as status_container:\n    st.write(s3_status)\n    st.write(embeddings_status)\n    st.write(gemini_status)\n    # Check if core components failed\n    if not s3_client or not embeddings or not gemini_model:\n        st.error(\"Core components failed to initialize. Application cannot proceed. Check logs for details.\")\n        status_container.update(label=\"Initialization Failed!\", state=\"error\")\n        st.stop() # Stop execution if core components fail",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "query_text",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "query_text = st.text_input(\"Enter your query:\",\n                            placeholder=\"e.g., What is the total amount for invoice [filename]? or List all products in [filename].\",\n                            key=\"query_input\", # Add key for potential state management\n                            disabled=not vector_store) # Disable input if index failed\n# --- Advanced Settings (Optional Sidebar) ---\n# Consider moving these to a sidebar if the main interface gets crowded\n# with st.sidebar:\n#     st.header(\"Query Settings\")\n#     k_results = st.slider(\"Number of context chunks (k):\", min_value=1, max_value=50, value=15, step=1,\n#                           help=\"How many relevant text snippets to retrieve for context. More snippets can provide more context but increase LLM processing time.\")",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "k_results",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "k_results = 15  # Increased default K value for potentially better context\nuse_mmr_search = False # Default search type\nif query_text and vector_store: # Ensure vector_store is available\n    # 1. Query FAISS index\n    with st.spinner(f\"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})...\"):\n        retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)\n    # 2. Generate LLM response\n    with st.spinner(\"🧠 Synthesizing answer using retrieved context...\"):\n        response = generate_llm_response(gemini_model, query_text, retrieved_docs)\n    # 3. Display response",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "use_mmr_search",
+        "kind": 5,
+        "importPath": "utils.test_code",
+        "description": "utils.test_code",
+        "peekOfCode": "use_mmr_search = False # Default search type\nif query_text and vector_store: # Ensure vector_store is available\n    # 1. Query FAISS index\n    with st.spinner(f\"Searching knowledge base for relevant info (k={k_results}, MMR={use_mmr_search})...\"):\n        retrieved_docs = query_faiss_index(vector_store, query_text, k=k_results, use_mmr=use_mmr_search)\n    # 2. Generate LLM response\n    with st.spinner(\"🧠 Synthesizing answer using retrieved context...\"):\n        response = generate_llm_response(gemini_model, query_text, retrieved_docs)\n    # 3. Display response\n    st.markdown(\"### Response:\")",
+        "detail": "utils.test_code",
+        "documentation": {}
+    },
+    {
+        "label": "verify_password",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def verify_password(username, password):\n    \"\"\"Verify the password for a given username\"\"\"\n    if username not in CREDENTIALS:\n        logging.warning(f\"Login attempt for non-existent user: {username}\")\n        return False\n    stored_hashed_password = CREDENTIALS[username][\"password\"]\n    input_password_hash = hashlib.sha256(password.encode()).hexdigest()\n    st.write(f\"Input Hash (from typed password): {input_password_hash}\")\n    is_match = input_password_hash == stored_hashed_password\n    if not is_match:",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_info",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_user_info(username):\n    \"\"\"Get user info for a given username\"\"\"\n    return CREDENTIALS[username][\"name\"] if username in CREDENTIALS else None\n# --- Initialize S3 client ---\n@st.cache_resource\ndef get_s3_client():\n    try:\n        s3 = boto3.client(\n            \"s3\",\n            aws_access_key_id=AWS_ACCESS_KEY,",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "get_s3_client",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_s3_client():\n    try:\n        s3 = boto3.client(\n            \"s3\",\n            aws_access_key_id=AWS_ACCESS_KEY,\n            aws_secret_access_key=AWS_SECRET_KEY,\n        )\n        s3.list_buckets()\n        logging.info(\"S3 client initialized successfully.\")\n        return s3",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "get_embeddings_model",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_embeddings_model():\n    model_path = MODEL_DIRECTORY\n    if not os.path.isdir(model_path):\n        st.error(f\"Local model directory not found at '{os.path.abspath(model_path)}'. \"\n                 f\"Please ensure the directory '{MODEL_DIRECTORY}' exists in the same \"\n                 f\"location as the Streamlit script or provide the correct path.\")\n        logging.error(f\"Model directory {model_path} not found.\")\n        return None\n    try:\n        cache_dir = os.path.abspath('.')",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "get_gemini_model",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_gemini_model():\n    try:\n        llm = ChatGoogleGenerativeAI(\n            model=GEMINI_MODEL,\n            google_api_key=GEMINI_API_KEY,\n            temperature=0.3,\n            convert_system_message_to_human=True\n        )\n        logging.info(f\"Gemini model {GEMINI_MODEL} initialized.\")\n        return llm",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "download_and_load_faiss_index",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def download_and_load_faiss_index(_s3_client, _embeddings, bucket, prefix):\n    if not _embeddings:\n        st.error(\"Embeddings model failed to load. Cannot load FAISS index.\")\n        logging.error(\"Attempted to load FAISS index, but embeddings are not available.\")\n        return None\n    if not _s3_client:\n        st.error(\"S3 client not initialized. Cannot load index.\")\n        return None\n    s3_index_key = f\"{prefix}.faiss\"\n    s3_pkl_key = f\"{prefix}.pkl\"",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "query_faiss_index",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def query_faiss_index(vector_store, query_text,k=10, use_mmr=False):\n    if not vector_store:\n        logging.warning(\"query_faiss_index called but vector_store is None.\")\n        return []\n    try:\n        search_kwargs = {'k': k}\n        search_type = 'similarity'\n        if use_mmr:\n            search_type = 'mmr'\n        logging.info(f\"Performing {search_type} search with k={k} for query: '{query_text}'\")",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "generate_follow_up_questions",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def generate_follow_up_questions(llm, query_text, response_text, retrieved_docs):\n    if not llm:\n        logging.error(\"generate_follow_up_questions called but llm is None.\")\n        return []\n    context = \"\"\n    if retrieved_docs:\n        context = \"\\n\\n\".join([doc.page_content for doc in retrieved_docs[:5]])\n    try:\n        follow_up_prompt = f\"\"\"Based on the following user query and the response provided, \n        generate 3 specific, relevant follow-up questions the user might want to ask next.",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "generate_llm_response",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def generate_llm_response(llm, query_text, retrieved_docs):\n    if not llm:\n        logging.error(\"generate_llm_response called but llm is None.\")\n        return \"LLM model is not available.\"\n    if retrieved_docs:\n        context = \"\\n\\n---\\n\\n\".join([doc.page_content for doc in retrieved_docs])\n        context_sources = \", \".join(list(set(doc.metadata.get('source', 'N/A') for doc in retrieved_docs if hasattr(doc, 'metadata') and 'source' in doc.metadata)))\n        context_log_msg = f\"Context from sources: {context_sources}\" if context_sources else \"Context from retrieved chunks.\"\n        system_prompt = f\"\"\"You are an AI assistant specialized in answering questions about Proforma Invoices based *only* on the provided context documents.\n        Analyze the user's query and the following context documents carefully.",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "login_page",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def login_page():\n    st.title(\"📄 Proforma Invoice Assistant - Login\")\n    col1, col2, col3 = st.columns([1, 2, 1])\n    with col2:\n        st.markdown(\"### Login to Access the System\")\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        login_button = st.button(\"Login\", use_container_width=True)\n        if login_button:\n            if verify_password(username, password):",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "main_app",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def main_app():\n    # Sidebar with New Chat and Logout\n    with st.sidebar:\n        st.write(f\"Welcome, {st.session_state.name}\")\n        # Initialize chat sessions\n        if 'chat_sessions' not in st.session_state:\n            st.session_state.chat_sessions = {}\n            st.session_state.current_chat_id = \"chat_1\"\n            st.session_state.chat_counter = 1\n            st.session_state.chat_sessions[\"chat_1\"] = {",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def main():\n    if 'authenticated' not in st.session_state:\n        st.session_state.authenticated = False\n        st.session_state.username = None\n        st.session_state.name = None\n    if not st.session_state.authenticated:\n        login_page()\n    else:\n        main_app()\nif __name__ == \"__main__\":",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "SECRETS_FILE_PATH = \".streamlit/secrets.toml\"\ntry:\n    secrets = toml.load(SECRETS_FILE_PATH)\n    # Core application settings\n    S3_BUCKET = \"kalika-rag\"\n    S3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/index\"\n    MODEL_DIRECTORY = \"bge-base-en-v1.5\"\n    AWS_ACCESS_KEY = secrets[\"access_key_id\"]\n    AWS_SECRET_KEY = secrets[\"secret_access_key\"]\n    GEMINI_MODEL = \"gemini-1.5-pro\"",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "initialize_s3_client",
+        "kind": 2,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "def initialize_s3_client(aws_access_key, aws_secret_key):\n    \"\"\"Initialize and return an S3 client with provided credentials.\"\"\"\n    return boto3.client(\n        \"s3\",\n        aws_access_key_id=aws_access_key,\n        aws_secret_access_key=aws_secret_key,\n    )\n# Initialize embeddings model (must match the one used to create the index)\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "load_faiss_index_from_s3",
+        "kind": 2,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "def load_faiss_index_from_s3(s3_client, bucket, index_prefix):\n    \"\"\"\n    Load a FAISS index from S3 into memory and count the number of files loaded.\n    Args:\n        s3_client: Initialized boto3 S3 client\n        bucket (str): S3 bucket name\n        index_prefix (str): S3 prefix where FAISS index files are stored\n    Returns:\n        tuple: (FAISS vector store object or None, number of files loaded)\n    \"\"\"",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "load_all_indexes",
+        "kind": 2,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "def load_all_indexes(s3_client):\n    \"\"\"\n    Load both PO and proforma FAISS indexes from S3 and return file counts.\n    Args:\n        s3_client: Initialized boto3 S3 client\n    Returns:\n        tuple: (po_vector_store, po_file_count, proforma_vector_store, proforma_file_count)\n    \"\"\"\n    po_vector_store, po_file_count = load_faiss_index_from_s3(s3_client, S3_BUCKET, PO_INDEX_PATH)\n    proforma_vector_store, proforma_file_count = load_faiss_index_from_s3(s3_client, S3_BUCKET, PROFORMA_INDEX_PATH)",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "S3_BUCKET",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "S3_BUCKET = \"kalika-rag\"\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # Matches PO_s3store.py\nPROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"  # Matches proforma_s3store.py\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "PO_INDEX_PATH",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "PO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # Matches PO_s3store.py\nPROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"  # Matches proforma_s3store.py\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\ndef initialize_s3_client(aws_access_key, aws_secret_key):",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "PROFORMA_INDEX_PATH",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"  # Matches proforma_s3store.py\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\ndef initialize_s3_client(aws_access_key, aws_secret_key):\n    \"\"\"Initialize and return an S3 client with provided credentials.\"\"\"",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDING_MODEL",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "EMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\ndef initialize_s3_client(aws_access_key, aws_secret_key):\n    \"\"\"Initialize and return an S3 client with provided credentials.\"\"\"\n    return boto3.client(",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "embeddings",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "embeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False}\n)\ndef load_faiss_index_from_s3(s3_client, bucket, index_prefix):\n    \"\"\"\n    Load a FAISS index from S3 into memory and count the number of files loaded.\n    Args:\n        s3_client: Initialized boto3 S3 client",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "run_jobs",
+        "kind": 2,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "def run_jobs():\n    \"\"\"Runs the scheduled tasks: fetches new PO and proforma emails, processes them, and updates FAISS index.\"\"\"\n    jobs = [\n        (process_po_emails, \"Processing PO Emails\"),\n        (create_faiss_index_po, \"Updating PO FAISS Index\"),\n        (process_proforma_emails, \"Processing Proforma Emails\"),\n        (create_faiss_index, \"Updating Proforma FAISS Index\")\n    ]\n    for job, desc in jobs:\n        try:",
+        "detail": "scheduler",
+        "documentation": {}
+    },
+    {
+        "label": "run_scheduler",
+        "kind": 2,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "def run_scheduler():\n    \"\"\"Sets up and runs the scheduler at midnight (12:00 AM) and checks for new emails every 10 minutes.\"\"\"\n    schedule.every().day.at(\"00:00\").do(run_jobs)  # Main job at midnight\n    schedule.every(10).minutes.do(run_jobs)  # Check for new emails every 10 minutes\n    logging.info(\"Scheduler started, running at 12:00 AM daily and every 10 minutes...\")\n    while True:\n        schedule.run_pending()\n        time.sleep(60)\ndef start_scheduler():\n    \"\"\"Starts the scheduler thread if not already running.\"\"\"",
+        "detail": "scheduler",
+        "documentation": {}
+    },
+    {
+        "label": "start_scheduler",
+        "kind": 2,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "def start_scheduler():\n    \"\"\"Starts the scheduler thread if not already running.\"\"\"\n    global scheduler_thread\n    if not scheduler_thread or not scheduler_thread.is_alive():\n        scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)\n        scheduler_thread.start()\n        logging.info(\"Scheduler thread started.\")\n        return True\n    return False\nif __name__ == \"__main__\":",
+        "detail": "scheduler",
+        "documentation": {}
+    },
+    {
+        "label": "scheduler_thread",
+        "kind": 5,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "scheduler_thread = None\ndef run_jobs():\n    \"\"\"Runs the scheduled tasks: fetches new PO and proforma emails, processes them, and updates FAISS index.\"\"\"\n    jobs = [\n        (process_po_emails, \"Processing PO Emails\"),\n        (create_faiss_index_po, \"Updating PO FAISS Index\"),\n        (process_proforma_emails, \"Processing Proforma Emails\"),\n        (create_faiss_index, \"Updating Proforma FAISS Index\")\n    ]\n    for job, desc in jobs:",
+        "detail": "scheduler",
+        "documentation": {}
+    },
+    {
+        "label": "connect_to_db",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def connect_to_db():\n    \"\"\"Connects to the local PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=\"localhost\",\n            database=\"po_orders\",\n            user=\"po_user\",\n            password=\"postdb123\",\n            port=5432\n        )",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "create_orders_table",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def create_orders_table(conn):\n    \"\"\"Creates the 'orders' table if it doesn't exist.\"\"\"\n    with conn.cursor() as cursor:\n        cursor.execute(\"\"\"\n            CREATE TABLE IF NOT EXISTS orders (\n                id SERIAL PRIMARY KEY,\n                product_name TEXT,\n                category TEXT,\n                price REAL,\n                quantity INTEGER,",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "store_order",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def store_order(conn, order_details):\n    try:\n        with conn.cursor() as cursor:\n            columns = [\n                \"product_name\", \"category\", \"price\", \"quantity\", \"order_date\", \"delivery_date\",\n                \"customer_name\", \"customer_phone\", \"email\", \"address\", \"payment_method\",\n                \"payment_status\", \"order_status\", \"message_sent\"\n            ]\n            values = [\n                order_details[\"Product Name\"],",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "extract_text_from_pdf",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def extract_text_from_pdf(pdf_file):\n    try:\n        pdf_reader = PyPDF2.PdfReader(pdf_file)\n        text = \"\".join(page.extract_text() for page in pdf_reader.pages if page.extract_text())\n        return text\n    except Exception as e:\n        st.error(f\"Error extracting text from PDF: {str(e)}\")\n        return \"\"\ndef format_phone_number(phone_str):\n    try:",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "format_phone_number",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def format_phone_number(phone_str):\n    try:\n        phone_number = phonenumbers.parse(phone_str, \"IN\")\n        if phonenumbers.is_valid_number(phone_number):\n            formatted = phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.E164)\n            return formatted\n        return None\n    except phonenumbers.phonenumberutil.NumberParseException:\n        return None\ndef parse_order_details(text):",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "parse_order_details",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def parse_order_details(text):\n    patterns = {\n        \"Order ID\": r\"Order ID:?\\s*([A-Z0-9-]+)\",\n        \"Product Name\": r\"Product(?: Name)?:?\\s*(.+)\",\n        \"Category\": r\"Category:?\\s*(.+)\",\n        \"Price\": r\"Price:?\\s*[₹$]?\\s*(\\d[\\d,]*\\.?\\d*)\",\n        \"Quantity\": r\"Quantity:?\\s*(\\d+)\",\n        \"Order Date\": r\"Order Date:?\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}(?::\\d{2})?)\",\n        \"Delivery Date\": r\"(?:Expected )?Delivery(?: Date)?:?\\s*(\\d{4}-\\d{2}-\\d{2})\",\n        \"Customer Name\": r\"Customer(?: Name)?:?\\s*(.+)\",",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "send_whatsapp_message",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def send_whatsapp_message(message, recipient_numbers):\n    status_container = st.empty()\n    if not isinstance(recipient_numbers, (list, set)):\n        status_container.error(\"Invalid recipient numbers format. Must be a list or set.\")\n        return\n    if not recipient_numbers:\n        status_container.error(\"No valid recipient numbers provided.\")\n        return\n    webbrowser.open(\"https://web.whatsapp.com\")\n    time.sleep(15)",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_email_pdfs",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def fetch_email_pdfs(subject_query):\n    pdf_files_with_info = []\n    try:\n        mail = imaplib.IMAP4_SSL(IMAP_SERVER)\n        mail.login(EMAIL, PASSWORD)\n        mail.select(\"inbox\")\n        search_criteria = f'(UNSEEN SUBJECT \"{subject_query}\")'\n        status, messages = mail.search(None, search_criteria)\n        if status != \"OK\" or not messages[0]:\n            mail.logout()",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "get_seller_team_recipients",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def get_seller_team_recipients(seller_team_recipients):\n    recipients = set()\n    if seller_team_recipients:\n        if isinstance(seller_team_recipients, str):\n            # Handle string input, split by commas\n            for phone in seller_team_recipients.split(\",\"):\n                formatted_seller = format_phone_number(phone.strip())\n                if formatted_seller:\n                    recipients.add(formatted_seller)\n        elif isinstance(seller_team_recipients, list):",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "get_pending_message_count",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def get_pending_message_count():\n    conn = connect_to_db()\n    if not conn:\n        st.error(\"Failed to connect to database to get message count.\")\n        return 0\n    try:\n        with conn.cursor() as cursor:\n            cursor.execute(\"SELECT COUNT(*) FROM orders WHERE message_sent = FALSE\")\n            count = cursor.fetchone()[0]\n            return count",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "send_whatsapp_from_db",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def send_whatsapp_from_db():\n    status_container = st.empty()\n    conn = connect_to_db()\n    if not conn:\n        status_container.error(\"Failed to connect to the database.\")\n        return\n    try:\n        with conn.cursor() as cursor:\n            cursor.execute(\n                \"\"\"",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "process_and_store_email_orders",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def process_and_store_email_orders(subject_query):\n    status_container = st.empty()\n    status_container.info(\"Checking for new PO emails...\")\n    pdf_files_info = fetch_email_pdfs(subject_query)\n    if pdf_files_info:\n        processed_count = 0\n        conn = connect_to_db()\n        if not conn:\n            status_container.error(\"Failed to connect to the database.\")\n            return",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "check_and_process_emails_automatically",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def check_and_process_emails_automatically(subject_query):\n    process_and_store_email_orders(subject_query)\n    st.session_state[\"last_check_time\"] = datetime.now()\ndef run_scheduled_tasks():\n    while True:\n        schedule.run_pending()\n        time.sleep(1)\n# --- Streamlit UI ---\nst.set_page_config(page_title=\"PO Order Manager\", layout=\"wide\")\nst.title(\"🛒 PO Order Management Dashboard\")",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "run_scheduled_tasks",
+        "kind": 2,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "def run_scheduled_tasks():\n    while True:\n        schedule.run_pending()\n        time.sleep(1)\n# --- Streamlit UI ---\nst.set_page_config(page_title=\"PO Order Manager\", layout=\"wide\")\nst.title(\"🛒 PO Order Management Dashboard\")\n# --- Sidebar ---\nst.sidebar.header(\"Status & Configuration\")\nst.sidebar.metric(\"WhatsApp Sent (Session)\", st.session_state.whatsapp_sent_counter)",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "EMAIL = st.secrets[\"gmail_uname\"]\nPASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\ndef connect_to_db():\n    \"\"\"Connects to the local PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=\"localhost\",\n            database=\"po_orders\",",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "PASSWORD",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "PASSWORD = st.secrets[\"gmail_pwd\"]\nIMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\ndef connect_to_db():\n    \"\"\"Connects to the local PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=\"localhost\",\n            database=\"po_orders\",\n            user=\"po_user\",",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nSELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\ndef connect_to_db():\n    \"\"\"Connects to the local PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=\"localhost\",\n            database=\"po_orders\",\n            user=\"po_user\",\n            password=\"postdb123\",",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "SELLER_TEAM_RECIPIENTS_STR",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "SELLER_TEAM_RECIPIENTS_STR = st.secrets.get(\"ADDITIONAL_WHATSAPP_RECIPIENTS\")\ndef connect_to_db():\n    \"\"\"Connects to the local PostgreSQL database.\"\"\"\n    try:\n        conn = psycopg2.connect(\n            host=\"localhost\",\n            database=\"po_orders\",\n            user=\"po_user\",\n            password=\"postdb123\",\n            port=5432",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "pending_count",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "pending_count = get_pending_message_count()\nst.sidebar.metric(\"Pending WhatsApp Messages\", pending_count)\nauto_check = st.sidebar.checkbox(\"Enable Auto-Check\", value=st.session_state[\"auto_check_enabled\"])\ninterval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "auto_check",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "auto_check = st.sidebar.checkbox(\"Enable Auto-Check\", value=st.session_state[\"auto_check_enabled\"])\ninterval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "interval",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "interval = st.sidebar.slider(\"Check Interval (min)\", 5, 120, st.session_state[\"check_interval_minutes\"], 5)\nst.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    subject_query = st.text_input(",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"auto_check_enabled\"]",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "st.session_state[\"auto_check_enabled\"] = auto_check\nst.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    subject_query = st.text_input(\n        \"Enter subject to search in emails\",",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "st.session_state[\"check_interval_minutes\"]",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "st.session_state[\"check_interval_minutes\"] = interval\nlast_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    subject_query = st.text_input(\n        \"Enter subject to search in emails\",\n        value=st.session_state.get(\"email_search_query\", \"Purchase Order\"),",
+        "detail": "whatsapp",
+        "documentation": {}
+    },
+    {
+        "label": "last_check_str",
+        "kind": 5,
+        "importPath": "whatsapp",
+        "description": "whatsapp",
+        "peekOfCode": "last_check_str = st.session_state[\"last_check_time\"].strftime(\"%Y-%m-%d %H:%M:%S\")\nst.sidebar.text(f\"Last Email Check: {last_check_str}\")\n# --- Main Tabs ---\ntab1, tab2 = st.tabs([\"📬 Email PO Summary\", \"📝 Manual PO + Alerts\"])\nwith tab1:  # Email PO Summary Tab\n    st.subheader(\"📧 Email Order Extraction\")\n    subject_query = st.text_input(\n        \"Enter subject to search in emails\",\n        value=st.session_state.get(\"email_search_query\", \"Purchase Order\"),\n        key=\"email_search_query\"",
+        "detail": "whatsapp",
+        "documentation": {}
+    }
+]
