@@ -1,0 +1,1079 @@
+[
+    {
+        "label": "streamlit",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "psycopg2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "psycopg2",
+        "description": "psycopg2",
+        "detail": "psycopg2",
+        "documentation": {}
+    },
+    {
+        "label": "OperationalError",
+        "importPath": "psycopg2",
+        "description": "psycopg2",
+        "isExtraImport": true,
+        "detail": "psycopg2",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "FAISS",
+        "importPath": "langchain_community.vectorstores",
+        "description": "langchain_community.vectorstores",
+        "isExtraImport": true,
+        "detail": "langchain_community.vectorstores",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "HuggingFaceEmbeddings",
+        "importPath": "langchain_huggingface",
+        "description": "langchain_huggingface",
+        "isExtraImport": true,
+        "detail": "langchain_huggingface",
+        "documentation": {}
+    },
+    {
+        "label": "ChatGoogleGenerativeAI",
+        "importPath": "langchain_google_genai",
+        "description": "langchain_google_genai",
+        "isExtraImport": true,
+        "detail": "langchain_google_genai",
+        "documentation": {}
+    },
+    {
+        "label": "ChatGoogleGenerativeAI",
+        "importPath": "langchain_google_genai",
+        "description": "langchain_google_genai",
+        "isExtraImport": true,
+        "detail": "langchain_google_genai",
+        "documentation": {}
+    },
+    {
+        "label": "HumanMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "SystemMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "HumanMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "SystemMessage",
+        "importPath": "langchain_core.messages",
+        "description": "langchain_core.messages",
+        "isExtraImport": true,
+        "detail": "langchain_core.messages",
+        "documentation": {}
+    },
+    {
+        "label": "boto3",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "boto3",
+        "description": "boto3",
+        "detail": "boto3",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "tempfile",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tempfile",
+        "description": "tempfile",
+        "detail": "tempfile",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "imaplib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "imaplib",
+        "description": "imaplib",
+        "detail": "imaplib",
+        "documentation": {}
+    },
+    {
+        "label": "email",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "email",
+        "description": "email",
+        "detail": "email",
+        "documentation": {}
+    },
+    {
+        "label": "io",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "io",
+        "description": "io",
+        "detail": "io",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "decode_header",
+        "importPath": "email.header",
+        "description": "email.header",
+        "isExtraImport": true,
+        "detail": "email.header",
+        "documentation": {}
+    },
+    {
+        "label": "toml",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "toml",
+        "description": "toml",
+        "detail": "toml",
+        "documentation": {}
+    },
+    {
+        "label": "PdfReader",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "errors",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "PdfReader",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "errors",
+        "importPath": "PyPDF2",
+        "description": "PyPDF2",
+        "isExtraImport": true,
+        "detail": "PyPDF2",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterTextSplitter",
+        "importPath": "langchain.text_splitter",
+        "description": "langchain.text_splitter",
+        "isExtraImport": true,
+        "detail": "langchain.text_splitter",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterTextSplitter",
+        "importPath": "langchain.text_splitter",
+        "description": "langchain.text_splitter",
+        "isExtraImport": true,
+        "detail": "langchain.text_splitter",
+        "documentation": {}
+    },
+    {
+        "label": "pdfplumber",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pdfplumber",
+        "description": "pdfplumber",
+        "detail": "pdfplumber",
+        "documentation": {}
+    },
+    {
+        "label": "schedule",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "schedule",
+        "description": "schedule",
+        "detail": "schedule",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "process_po_emails",
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "isExtraImport": true,
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index_po",
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "isExtraImport": true,
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_proforma_emails",
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "isExtraImport": true,
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index",
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "isExtraImport": true,
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "get_pg_conn",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_pg_conn():\n    pg = st.secrets[\"postgres\"]\n    try:\n        conn = psycopg2.connect(\n            host=pg[\"host\"],\n            port=pg[\"port\"],\n            dbname=pg[\"dbname\"],\n            user=pg[\"user\"],\n            password=pg[\"password\"],\n            client_encoding=[\"UTF8\"]",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "test_db_connection",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def test_db_connection():\n    st.info(\"Testing database connection...\")\n    conn = get_pg_conn()\n    if conn:\n        st.success(\"✅ Database connection successful!\")\n        print(\"✅ Database connection successful!\")\n        conn.close()\n    else:\n        st.error(\"❌ Database connection failed! Check credentials and server.\")\n        print(\"❌ Database connection failed! Check credentials and server.\")",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "save_chat",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def save_chat(username, user_query, assistant_response):\n    try:\n        conn = get_pg_conn()\n        if not conn:\n            st.warning(\"No database connection. Chat not saved.\")\n            print(\"No database connection. Chat not saved.\")\n            return\n        cur = conn.cursor()\n        print(f\"Inserting: {username}, {user_query}, {assistant_response[:40]}\")\n        cur.execute(",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "login",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def login():\n    users = st.secrets[\"users\"]\n    if \"logged_in\" not in st.session_state:\n        st.session_state[\"logged_in\"] = False\n    if \"username\" not in st.session_state:\n        st.session_state[\"username\"] = \"\"\n    if not st.session_state[\"logged_in\"]:\n        st.markdown(\"\"\"\n            <style>\n            .login-card {",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "get_embeddings_model",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_embeddings_model():\n    embeddings = HuggingFaceEmbeddings(\n        model_name=MODEL_DIRECTORY,\n        model_kwargs={'device': 'cpu'},\n        encode_kwargs={'normalize_embeddings': True}\n    )\n    return embeddings\n# ---- Gemini LLM ----\n@st.cache_resource\ndef get_gemini_model():",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "get_gemini_model",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_gemini_model():\n    return ChatGoogleGenerativeAI(\n        model=GEMINI_MODEL,\n        google_api_key=GEMINI_API_KEY,\n        temperature=0.3,\n        convert_system_message_to_human=True\n    )\n# ---- FAISS Index Loader ----\n@st.cache_resource(ttl=3600)\ndef load_local_faiss_index(_embeddings, folder_path):",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "load_local_faiss_index",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def load_local_faiss_index(_embeddings, folder_path):\n    return FAISS.load_local(\n        folder_path=folder_path,\n        embeddings=_embeddings,\n        allow_dangerous_deserialization=True\n    )\n# ---- Similarity Search with k=50 ----\ndef get_similar_docs(vector_store, query):\n    return vector_store.similarity_search(query, k=50)\n# ---- Response Generation ----",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "get_similar_docs",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def get_similar_docs(vector_store, query):\n    return vector_store.similarity_search(query, k=50)\n# ---- Response Generation ----\ndef generate_response(llm, query, docs):\n    if not docs:\n        return \"No relevant documents found\"\n    context = \"\\n\\n---\\n\\n\".join([doc.page_content for doc in docs])\n    messages = [\n        SystemMessage(content=f\"Answer using this context:\\n{context[:20000]}\"),\n        HumanMessage(content=query)",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "generate_response",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def generate_response(llm, query, docs):\n    if not docs:\n        return \"No relevant documents found\"\n    context = \"\\n\\n---\\n\\n\".join([doc.page_content for doc in docs])\n    messages = [\n        SystemMessage(content=f\"Answer using this context:\\n{context[:20000]}\"),\n        HumanMessage(content=query)\n    ]\n    return llm.invoke(messages).content\n# ---- Follow-up Question Generation ----",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "generate_followup_questions",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def generate_followup_questions(llm, query, answer):\n    prompt = (\n        f\"Given the user's question: \\\"{query}\\\" and the answer: \\\"{answer}\\\", \"\n        \"generate 3 concise, relevant follow-up questions the user might ask next about proforma invoices. \"\n        \"Return only the questions as a numbered list.\"\n    )\n    messages = [HumanMessage(content=prompt)]\n    try:\n        followup_text = llm.invoke(messages).content\n        questions = []",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "chat_message",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def chat_message(message, is_user=False):\n    if is_user:\n        st.markdown(\n            f\"\"\"\n            <div style='display:flex;justify-content:flex-start;'>\n                <div style='background:linear-gradient(90deg,#232526 0%,#414345 100%);color:#fff;padding:14px 20px;border-radius:18px 18px 18px 5px;margin-bottom:10px;max-width:70%;box-shadow:0 2px 8px #1976d230;font-size:1.08rem;'>\n                    <b style='color:#90caf9;'>You:</b> {message}\n                </div>\n            </div>\n            \"\"\", unsafe_allow_html=True",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "def main():\n    st.set_page_config(page_title=\"Invoice Assistant\", page_icon=\"📄\", layout=\"wide\")\n    # ---- TEST DATABASE CONNECTION ----\n    test_db_connection()\n    # Custom CSS for sticky input, dark modern UI\n    st.markdown(\"\"\"\n        <style>\n        .block-container {padding-top: 1.5rem;}\n        body, [data-testid=\"stAppViewContainer\"] {\n            background: #181A1B !important;",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "MODEL_DIRECTORY",
+        "kind": 5,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "MODEL_DIRECTORY = \"bge-base-en-v1.5\"\nLOCAL_FAISS_INDEX_DIR = \"C:/rag_with_api/faiss_index\"\nGEMINI_MODEL = \"gemini-1.5-pro\"\nGEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- POSTGRESQL CONNECTION ----\ndef get_pg_conn():\n    pg = st.secrets[\"postgres\"]\n    try:\n        conn = psycopg2.connect(\n            host=pg[\"host\"],",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "LOCAL_FAISS_INDEX_DIR",
+        "kind": 5,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "LOCAL_FAISS_INDEX_DIR = \"C:/rag_with_api/faiss_index\"\nGEMINI_MODEL = \"gemini-1.5-pro\"\nGEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- POSTGRESQL CONNECTION ----\ndef get_pg_conn():\n    pg = st.secrets[\"postgres\"]\n    try:\n        conn = psycopg2.connect(\n            host=pg[\"host\"],\n            port=pg[\"port\"],",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "GEMINI_MODEL",
+        "kind": 5,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "GEMINI_MODEL = \"gemini-1.5-pro\"\nGEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- POSTGRESQL CONNECTION ----\ndef get_pg_conn():\n    pg = st.secrets[\"postgres\"]\n    try:\n        conn = psycopg2.connect(\n            host=pg[\"host\"],\n            port=pg[\"port\"],\n            dbname=pg[\"dbname\"],",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "GEMINI_API_KEY",
+        "kind": 5,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "GEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- POSTGRESQL CONNECTION ----\ndef get_pg_conn():\n    pg = st.secrets[\"postgres\"]\n    try:\n        conn = psycopg2.connect(\n            host=pg[\"host\"],\n            port=pg[\"port\"],\n            dbname=pg[\"dbname\"],\n            user=pg[\"user\"],",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "initialize_s3_client",
+        "kind": 2,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "def initialize_s3_client(aws_access_key, aws_secret_key):\n    \"\"\"Initialize and return an S3 client with provided credentials.\"\"\"\n    return boto3.client(\n        \"s3\",\n        aws_access_key_id=aws_access_key,\n        aws_secret_access_key=aws_secret_key,\n    )\n# Initialize embeddings model (must match the one used to create the index)\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "load_faiss_index_from_s3",
+        "kind": 2,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "def load_faiss_index_from_s3(s3_client, bucket, index_prefix):\n    \"\"\"\n    Load a FAISS index from S3 into memory and count the number of files loaded.\n    Args:\n        s3_client: Initialized boto3 S3 client\n        bucket (str): S3 bucket name\n        index_prefix (str): S3 prefix where FAISS index files are stored\n    Returns:\n        tuple: (FAISS vector store object or None, number of files loaded)\n    \"\"\"",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "load_all_indexes",
+        "kind": 2,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "def load_all_indexes(s3_client):\n    \"\"\"\n    Load both PO and proforma FAISS indexes from S3 and return file counts.\n    Args:\n        s3_client: Initialized boto3 S3 client\n    Returns:\n        tuple: (po_vector_store, po_file_count, proforma_vector_store, proforma_file_count)\n    \"\"\"\n    po_vector_store, po_file_count = load_faiss_index_from_s3(s3_client, S3_BUCKET, PO_INDEX_PATH)\n    proforma_vector_store, proforma_file_count = load_faiss_index_from_s3(s3_client, S3_BUCKET, PROFORMA_INDEX_PATH)",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "S3_BUCKET",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "S3_BUCKET = \"kalika-rag\"\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # Matches PO_s3store.py\nPROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"  # Matches proforma_s3store.py\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "PO_INDEX_PATH",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "PO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # Matches PO_s3store.py\nPROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"  # Matches proforma_s3store.py\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\ndef initialize_s3_client(aws_access_key, aws_secret_key):",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "PROFORMA_INDEX_PATH",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"  # Matches proforma_s3store.py\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\ndef initialize_s3_client(aws_access_key, aws_secret_key):\n    \"\"\"Initialize and return an S3 client with provided credentials.\"\"\"",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDING_MODEL",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "EMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\ndef initialize_s3_client(aws_access_key, aws_secret_key):\n    \"\"\"Initialize and return an S3 client with provided credentials.\"\"\"\n    return boto3.client(",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "embeddings",
+        "kind": 5,
+        "importPath": "load_faiss_from_s3",
+        "description": "load_faiss_from_s3",
+        "peekOfCode": "embeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False}\n)\ndef load_faiss_index_from_s3(s3_client, bucket, index_prefix):\n    \"\"\"\n    Load a FAISS index from S3 into memory and count the number of files loaded.\n    Args:\n        s3_client: Initialized boto3 S3 client",
+        "detail": "load_faiss_from_s3",
+        "documentation": {}
+    },
+    {
+        "label": "clean_filename",
+        "kind": 2,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "def clean_filename(filename):\n    \"\"\"Sanitize filename while preserving original extension if valid.\"\"\"\n    try:\n        decoded_name = decode_header(filename)[0][0]\n        if isinstance(decoded_name, bytes):\n            filename = decoded_name.decode(errors='ignore')\n        else:\n            filename = str(decoded_name)\n    except:\n        filename = \"po_document\"",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "is_valid_pdf",
+        "kind": 2,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "def is_valid_pdf(content):\n    \"\"\"Verify if content is a valid PDF.\"\"\"\n    try:\n        PdfReader(io.BytesIO(content))\n        return True\n    except (errors.PdfReadError, ValueError, TypeError):\n        return False\ndef file_exists_in_s3(bucket, key):\n    \"\"\"Check if a file exists in S3.\"\"\"\n    try:",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "file_exists_in_s3",
+        "kind": 2,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "def file_exists_in_s3(bucket, key):\n    \"\"\"Check if a file exists in S3.\"\"\"\n    try:\n        s3_client.head_object(Bucket=bucket, Key=key)\n        return True\n    except s3_client.exceptions.ClientError as e:\n        if e.response['Error']['Code'] == '404':\n            return False\n        logging.error(f\"S3 check error: {e}\")\n        return False",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "upload_to_s3",
+        "kind": 2,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "def upload_to_s3(file_content, bucket, key):\n    \"\"\"Upload file content directly to S3.\"\"\"\n    try:\n        s3_client.put_object(\n            Bucket=bucket,\n            Key=key,\n            Body=file_content,\n            ContentType='application/pdf'\n        )\n        logging.info(f\"Uploaded to S3: {key}\")",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_pdf_content",
+        "kind": 2,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "def process_pdf_content(file_content):\n    \"\"\"Extract and chunk text from valid PDF bytes.\"\"\"\n    text = \"\"\n    try:\n        if not is_valid_pdf(file_content):\n            raise errors.PdfReadError(\"Invalid PDF structure\")\n        pdf_file = io.BytesIO(file_content)\n        reader = PdfReader(pdf_file)\n        for page in reader.pages:\n            text += page.extract_text() or \"\"",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_po_emails",
+        "kind": 2,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "def process_po_emails():\n    \"\"\"Process PO Order emails and upload Excel attachments directly to S3.\"\"\"\n    try:\n        with imaplib.IMAP4_SSL(IMAP_SERVER) as mail:\n            mail.login(EMAIL_ACCOUNT, EMAIL_PASSWORD)\n            logging.info(\"Successfully authenticated with email server\")\n            # Select inbox and search for emails\n            mail.select(\"inbox\")\n            status, email_ids = mail.search(\n                None, 'OR OR (SUBJECT \"PO Order\") (SUBJECT \"Purchase Order\") (SUBJECT \"PO Dump\")'",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index_po",
+        "kind": 2,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "def create_faiss_index_po():\n    \"\"\"Create FAISS index from PDFs in S3 PO_Dump folder and upload to S3, skipping already processed files.\"\"\"\n    try:\n        response = s3_client.list_objects_v2(\n            Bucket=S3_BUCKET,\n            Prefix=PO_DUMP_FOLDER  # Fetch PDFs from PO folder\n        )\n        if 'Contents' not in response:\n            logging.info(\"No PDFs found in S3 PO_Dump folder\")\n            return",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "SECRETS_FILE_PATH = \"C:/Users/Admin/.vscode/s3/.streamlit/secrets.toml\"\nIMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "S3_BUCKET",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "S3_BUCKET = \"kalika-rag\"\nPO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "PO_DUMP_FOLDER",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "PO_DUMP_FOLDER = \"PO_Dump/\"  # Changed folder name\nPO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "PO_INDEX_PATH",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "PO_INDEX_PATH = \"faiss_indexes/po_faiss_index/\"  # New path for PO FAISS index\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDING_MODEL",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "EMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\n# Email and S3 credentials",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "secrets",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "secrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\n# Email and S3 credentials\nEMAIL_ACCOUNT = secrets[\"gmail_uname\"]\nEMAIL_PASSWORD = secrets[\"gmail_pwd\"]",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL_ACCOUNT",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "EMAIL_ACCOUNT = secrets[\"gmail_uname\"]\nEMAIL_PASSWORD = secrets[\"gmail_pwd\"]\nAWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL_PASSWORD",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "EMAIL_PASSWORD = secrets[\"gmail_pwd\"]\nAWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "AWS_ACCESS_KEY",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "AWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "AWS_SECRET_KEY",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "AWS_SECRET_KEY = secrets[\"secret_access_key\"]\n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "s3_client",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "s3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=AWS_ACCESS_KEY,\n    aws_secret_access_key=AWS_SECRET_KEY,\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False})",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "embeddings",
+        "kind": 5,
+        "importPath": "PO_s3store",
+        "description": "PO_s3store",
+        "peekOfCode": "embeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False})\ndef clean_filename(filename):\n    \"\"\"Sanitize filename while preserving original extension if valid.\"\"\"\n    try:\n        decoded_name = decode_header(filename)[0][0]\n        if isinstance(decoded_name, bytes):\n            filename = decoded_name.decode(errors='ignore')",
+        "detail": "PO_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "clean_filename",
+        "kind": 2,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "def clean_filename(filename):\n    \"\"\"Sanitize filename while preserving original extension if valid.\"\"\"\n    try:\n        decoded_name = decode_header(filename)[0][0]\n        if isinstance(decoded_name, bytes):\n            filename = decoded_name.decode(errors='ignore')\n        else:\n            filename = str(decoded_name)\n    except:\n        filename = \"proforma_invoice\"",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "is_valid_pdf",
+        "kind": 2,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "def is_valid_pdf(content):\n    \"\"\"Verify if content is a valid PDF.\"\"\"\n    try:\n        PdfReader(io.BytesIO(content), strict=False) \n        return True\n    except (errors.PdfReadError, ValueError, TypeError):\n        return False\ndef file_exists_in_s3(bucket, key):\n    \"\"\"Check if a file exists in S3.\"\"\"\n    try:",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "file_exists_in_s3",
+        "kind": 2,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "def file_exists_in_s3(bucket, key):\n    \"\"\"Check if a file exists in S3.\"\"\"\n    try:\n        s3_client.head_object(Bucket=bucket, Key=key)\n        return True\n    except s3_client.exceptions.ClientError as e:\n        if e.response['Error']['Code'] == '404':\n            return False\n        logging.error(f\"S3 check error: {e}\")\n        return False",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "upload_to_s3",
+        "kind": 2,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "def upload_to_s3(file_content, bucket, key):\n    \"\"\"Upload file content directly to S3.\"\"\"\n    try:\n        s3_client.put_object(\n            Bucket=bucket,\n            Key=key,\n            Body=file_content,\n            ContentType='application/pdf'\n        )\n        logging.info(f\"Uploaded to S3: {key}\")",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_pdf_content",
+        "kind": 2,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "def process_pdf_content(file_content):\n    \"\"\"Extract and chunk text from valid PDF bytes using pdfplumber.\"\"\"\n    text = \"\"\n    try:\n        if not is_valid_pdf(file_content):\n            raise errors.PdfReadError(\"Invalid PDF structure\")\n        with pdfplumber.open(io.BytesIO(file_content)) as pdf:\n            for page in pdf.pages:\n                extracted_text = page.extract_text()\n                if extracted_text:",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "process_proforma_emails",
+        "kind": 2,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "def process_proforma_emails():\n    \"\"\"Process emails with improved PDF validation and error handling.\"\"\"\n    try:\n        with imaplib.IMAP4_SSL(IMAP_SERVER) as mail:\n            mail.login(EMAIL_ACCOUNT, EMAIL_PASSWORD)\n            logging.info(\"Successfully authenticated with email server\")\n            mail.select(\"inbox\")\n            search_criteria = '(OR SUBJECT \"Proforma_Invoice\" SUBJECT \"proforma_invoice\" SUBJECT \"proforma pdf\" SUBJECT \"Proforma\")'\n            status, email_ids = mail.search(None, search_criteria)\n            if status != \"OK\":",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "create_faiss_index",
+        "kind": 2,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "def create_faiss_index():\n    \"\"\"Create FAISS index from unprocessed PDFs in S3 proforma folder and upload to S3.\"\"\"\n    try:\n        response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_FOLDER)\n        if 'Contents' not in response:\n            logging.info(\"No PDFs found in S3 proforma folder\")\n            return\n        all_chunks = []\n        processed_pdfs = 0\n        uploaded_index_files = 0",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "SECRETS_FILE_PATH",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "SECRETS_FILE_PATH = \"C:/Users/Admin/.vscode/s3/.streamlit/secrets.toml\"\nIMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nS3_FOLDER = \"proforma_invoice/\"\nS3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\nPROCESSED_SUFFIX = \"_processed\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "IMAP_SERVER",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "IMAP_SERVER = \"imap.gmail.com\"\nS3_BUCKET = \"kalika-rag\"\nS3_FOLDER = \"proforma_invoice/\"\nS3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\nPROCESSED_SUFFIX = \"_processed\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "S3_BUCKET",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "S3_BUCKET = \"kalika-rag\"\nS3_FOLDER = \"proforma_invoice/\"\nS3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\nPROCESSED_SUFFIX = \"_processed\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "S3_FOLDER",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "S3_FOLDER = \"proforma_invoice/\"\nS3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\nPROCESSED_SUFFIX = \"_processed\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "S3_PROFORMA_INDEX_PATH",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "S3_PROFORMA_INDEX_PATH = \"faiss_indexes/proforma_faiss_index/\"\nEMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\nPROCESSED_SUFFIX = \"_processed\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDING_MODEL",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "EMBEDDING_MODEL = \"sentence-transformers/all-MiniLM-L6-v2\"\nPROCESSED_SUFFIX = \"_processed\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "PROCESSED_SUFFIX",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "PROCESSED_SUFFIX = \"_processed\"\n# Load secrets from secrets.toml\nsecrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\n# Email and S3 credentials",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "secrets",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "secrets = toml.load(SECRETS_FILE_PATH)\n# Set up logging\nlogging.basicConfig(\n    level=logging.INFO,\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    handlers=[logging.StreamHandler()]\n)\n# Email and S3 credentials\nEMAIL_ACCOUNT = secrets[\"gmail_uname\"]\nEMAIL_PASSWORD = secrets[\"gmail_pwd\"]",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL_ACCOUNT",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "EMAIL_ACCOUNT = secrets[\"gmail_uname\"]\nEMAIL_PASSWORD = secrets[\"gmail_pwd\"]\nAWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"] \n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=secrets[\"access_key_id\"],\n    aws_secret_access_key=secrets[\"secret_access_key\"],\n)",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "EMAIL_PASSWORD",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "EMAIL_PASSWORD = secrets[\"gmail_pwd\"]\nAWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"] \n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=secrets[\"access_key_id\"],\n    aws_secret_access_key=secrets[\"secret_access_key\"],\n)\n# Initialize embeddings model",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "AWS_ACCESS_KEY",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "AWS_ACCESS_KEY = secrets[\"access_key_id\"]\nAWS_SECRET_KEY = secrets[\"secret_access_key\"] \n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=secrets[\"access_key_id\"],\n    aws_secret_access_key=secrets[\"secret_access_key\"],\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "AWS_SECRET_KEY",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "AWS_SECRET_KEY = secrets[\"secret_access_key\"] \n# Initialize S3 client\ns3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=secrets[\"access_key_id\"],\n    aws_secret_access_key=secrets[\"secret_access_key\"],\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "s3_client",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "s3_client = boto3.client(\n    \"s3\",\n    aws_access_key_id=secrets[\"access_key_id\"],\n    aws_secret_access_key=secrets[\"secret_access_key\"],\n)\n# Initialize embeddings model\nembeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False})",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "embeddings",
+        "kind": 5,
+        "importPath": "proforma_s3store",
+        "description": "proforma_s3store",
+        "peekOfCode": "embeddings = HuggingFaceEmbeddings(\n    model_name=EMBEDDING_MODEL,\n    model_kwargs={'device': 'cpu'},\n    encode_kwargs={'normalize_embeddings': False})\ndef clean_filename(filename):\n    \"\"\"Sanitize filename while preserving original extension if valid.\"\"\"\n    try:\n        decoded_name = decode_header(filename)[0][0]\n        if isinstance(decoded_name, bytes):\n            filename = decoded_name.decode(errors='ignore')",
+        "detail": "proforma_s3store",
+        "documentation": {}
+    },
+    {
+        "label": "get_embeddings_model",
+        "kind": 2,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "def get_embeddings_model():\n    embeddings = HuggingFaceEmbeddings(\n        model_name=MODEL_DIRECTORY,\n        model_kwargs={'device': 'cpu'},\n        encode_kwargs={'normalize_embeddings': True}\n    )\n    return embeddings\n# ---- Gemini LLM ----\n@st.cache_resource\ndef get_gemini_model():",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "get_gemini_model",
+        "kind": 2,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "def get_gemini_model():\n    return ChatGoogleGenerativeAI(\n        model=GEMINI_MODEL,\n        google_api_key=GEMINI_API_KEY,\n        temperature=0.3,\n        convert_system_message_to_human=True\n    )\n# ---- FAISS Index Loader ----\n@st.cache_resource(ttl=3600)\ndef load_local_faiss_index(_embeddings, folder_path):",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "load_local_faiss_index",
+        "kind": 2,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "def load_local_faiss_index(_embeddings, folder_path):\n    return FAISS.load_local(\n        folder_path=folder_path,\n        embeddings=_embeddings,\n        allow_dangerous_deserialization=True\n    )\n# ---- Similarity Search with k=50 ----\ndef get_similar_docs(vector_store, query):\n    return vector_store.similarity_search(query, k=50)\n# ---- Response Generation ----",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "get_similar_docs",
+        "kind": 2,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "def get_similar_docs(vector_store, query):\n    return vector_store.similarity_search(query, k=50)\n# ---- Response Generation ----\ndef generate_response(llm, query, docs):\n    if not docs:\n        return \"No relevant documents found\"\n    context = \"\\n\\n---\\n\\n\".join([doc.page_content for doc in docs])\n    messages = [\n        SystemMessage(content=f\"Answer using this context:\\n{context[:20000]}\"),\n        HumanMessage(content=query)",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "generate_response",
+        "kind": 2,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "def generate_response(llm, query, docs):\n    if not docs:\n        return \"No relevant documents found\"\n    context = \"\\n\\n---\\n\\n\".join([doc.page_content for doc in docs])\n    messages = [\n        SystemMessage(content=f\"Answer using this context:\\n{context[:20000]}\"),\n        HumanMessage(content=query)\n    ]\n    return llm.invoke(messages).content\n# ---- Main App ----",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "def main():\n    st.set_page_config(page_title=\"Invoice Assistant\", page_icon=\"📄\", layout=\"wide\")\n    st.header(\"Proforma Invoice Q&A (k=50 Semantic Search)\")\n    # Initialize components\n    embeddings = get_embeddings_model()\n    llm = get_gemini_model()\n    vector_store = load_local_faiss_index(embeddings, LOCAL_FAISS_INDEX_DIR)\n    # Query interface\n    query = st.text_input(\"Ask about proforma invoices:\")\n    if query:",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "MODEL_DIRECTORY",
+        "kind": 5,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "MODEL_DIRECTORY = \"sentence-transformers/all-MiniLM-L6-v2\"\nLOCAL_FAISS_INDEX_DIR = \"C:/rag_with_api\"\nGEMINI_MODEL = \"gemini-1.5-pro\"\nGEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- Embeddings Model ----\n@st.cache_resource\ndef get_embeddings_model():\n    embeddings = HuggingFaceEmbeddings(\n        model_name=MODEL_DIRECTORY,\n        model_kwargs={'device': 'cpu'},",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "LOCAL_FAISS_INDEX_DIR",
+        "kind": 5,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "LOCAL_FAISS_INDEX_DIR = \"C:/rag_with_api\"\nGEMINI_MODEL = \"gemini-1.5-pro\"\nGEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- Embeddings Model ----\n@st.cache_resource\ndef get_embeddings_model():\n    embeddings = HuggingFaceEmbeddings(\n        model_name=MODEL_DIRECTORY,\n        model_kwargs={'device': 'cpu'},\n        encode_kwargs={'normalize_embeddings': True}",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "GEMINI_MODEL",
+        "kind": 5,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "GEMINI_MODEL = \"gemini-1.5-pro\"\nGEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- Embeddings Model ----\n@st.cache_resource\ndef get_embeddings_model():\n    embeddings = HuggingFaceEmbeddings(\n        model_name=MODEL_DIRECTORY,\n        model_kwargs={'device': 'cpu'},\n        encode_kwargs={'normalize_embeddings': True}\n    )",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "GEMINI_API_KEY",
+        "kind": 5,
+        "importPath": "rag_app",
+        "description": "rag_app",
+        "peekOfCode": "GEMINI_API_KEY = st.secrets[\"gemini_api_key\"]\n# ---- Embeddings Model ----\n@st.cache_resource\ndef get_embeddings_model():\n    embeddings = HuggingFaceEmbeddings(\n        model_name=MODEL_DIRECTORY,\n        model_kwargs={'device': 'cpu'},\n        encode_kwargs={'normalize_embeddings': True}\n    )\n    return embeddings",
+        "detail": "rag_app",
+        "documentation": {}
+    },
+    {
+        "label": "run_jobs",
+        "kind": 2,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "def run_jobs():\n    \"\"\"Runs the scheduled tasks: fetches new PO and proforma emails, processes them, and updates FAISS index.\"\"\"\n    jobs = [\n        (process_po_emails, \"Processing PO Emails\"),\n        (create_faiss_index_po, \"Updating PO FAISS Index\"),\n        (process_proforma_emails, \"Processing Proforma Emails\"),\n        (create_faiss_index, \"Updating Proforma FAISS Index\")\n    ]\n    for job, desc in jobs:\n        try:",
+        "detail": "scheduler",
+        "documentation": {}
+    },
+    {
+        "label": "run_scheduler",
+        "kind": 2,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "def run_scheduler():\n    \"\"\"Sets up and runs the scheduler at midnight (12:00 AM) and checks for new emails every 10 minutes.\"\"\"\n    schedule.every().day.at(\"00:00\").do(run_jobs)  # Main job at midnight\n    schedule.every(10).minutes.do(run_jobs)  # Check for new emails every 10 minutes\n    logging.info(\"Scheduler started, running at 12:00 AM daily and every 10 minutes...\")\n    while True:\n        schedule.run_pending()\n        time.sleep(60)\ndef start_scheduler():\n    \"\"\"Starts the scheduler thread if not already running.\"\"\"",
+        "detail": "scheduler",
+        "documentation": {}
+    },
+    {
+        "label": "start_scheduler",
+        "kind": 2,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "def start_scheduler():\n    \"\"\"Starts the scheduler thread if not already running.\"\"\"\n    global scheduler_thread\n    if not scheduler_thread or not scheduler_thread.is_alive():\n        scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)\n        scheduler_thread.start()\n        logging.info(\"Scheduler thread started.\")\n        return True\n    return False\nif __name__ == \"__main__\":",
+        "detail": "scheduler",
+        "documentation": {}
+    },
+    {
+        "label": "scheduler_thread",
+        "kind": 5,
+        "importPath": "scheduler",
+        "description": "scheduler",
+        "peekOfCode": "scheduler_thread = None\ndef run_jobs():\n    \"\"\"Runs the scheduled tasks: fetches new PO and proforma emails, processes them, and updates FAISS index.\"\"\"\n    jobs = [\n        (process_po_emails, \"Processing PO Emails\"),\n        (create_faiss_index_po, \"Updating PO FAISS Index\"),\n        (process_proforma_emails, \"Processing Proforma Emails\"),\n        (create_faiss_index, \"Updating Proforma FAISS Index\")\n    ]\n    for job, desc in jobs:",
+        "detail": "scheduler",
+        "documentation": {}
+    }
+]
