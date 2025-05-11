@@ -9,7 +9,15 @@
 
 
 ### RAG
+If you forgot password
+scram-sha-256 to trust
+CREATE DATABASE po_orders;
+CREATE USER po_user WITH PASSWORD 'postdb123';
+GRANT ALL PRIVILEGES ON DATABASE po_orders TO po_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO po_user;
 
+CREATE TABLE IF NOT EXISTS orders (id SERIAL PRIMARY KEY,product_name TEXT,category TEXT,price REAL,quantity INTEGER,order_date TIMESTAMP,delivery_date DATE,customer_name TEXT,customer_phone TEXT,email TEXT,address TEXT,payment_method TEXT,payment_status TEXT,order_status TEXT,message_sent BOOLEAN DEFAULT FALSE);
+GRANT INSERT, UPDATE, DELETE,SELECT ON TABLE orders TO po_user;
 #### Basic RAG Architecture
  ![rag_image](https://www.clarifai.com/hs-fs/hubfs/rag-query-drawio%20(1)-png-2.png?width=2056&height=1334&name=rag-query-drawio%20(1)-png-2.png)
 
