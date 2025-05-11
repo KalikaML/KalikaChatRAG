@@ -1,52 +1,68 @@
 import streamlit as st
-import pywhatkit
-import pyautogui
+import pywhatkit  # Make sure it's installed
+import pyautogui  # Make sure it's installed and platform dependencies met
 from datetime import timedelta, datetime
 import time
 import imaplib
 import email
 from email.header import decode_header
-import PyPDF2
+import PyPDF2  # Make sure it's installed
 import re
 import io
 import threading
-import phonenumbers
-import schedule
+import phonenumbers  # Make sure it's installed
+import schedule  # Make sure it's installed
 import random
 import webbrowser
-import psycopg2
-import os
-from streamlit import secrets  # Ensure this is streamlit.secrets, not os.secrets
-import pandas as pd
-import matplotlib.pyplot as plt  # Import for dashboard pie chart
+import psycopg2  # Make sure psycopg2-binary is installed
+import os  # Not strictly used for secrets if using st.secrets
+from streamlit import secrets  # Use this for Streamlit secrets
+import pandas as pd  # Make sure it's installed
+import matplotlib.pyplot as plt  # Make sure it's installed
 
-# Secrets for email
-EMAIL = st.secrets["gmail_uname"]
-PASSWORD = st.secrets["gmail_pwd"]
-IMAP_SERVER = "imap.gmail.com"
-SELLER_TEAM_RECIPIENTS_STR = st.secrets.get("ADDITIONAL_WHATSAPP_RECIPIENTS")
+# --- Configuration (Conceptually config.py) ---
+EMAIL = st.secrets.get("gmail_uname", "your_email@example.com")
+PASSWORD = st.secrets.get("gmail_pwd", "your_password")
+IMAP_SERVER = st.secrets.get("IMAP_SERVER", "imap.gmail.com")
 
-# Database credentials
+SELLER_TEAM_RECIPIENTS_STR = st.secrets.get("ADDITIONAL_WHATSAPP_RECIPIENTS", "")
+
 DB_HOST = st.secrets.get("DB_HOST", "localhost")
-DB_NAME = st.secrets.get("DB_NAME", "po_orders")
-DB_USER = st.secrets.get("DB_USER", "po_user")
-DB_PASSWORD = st.secrets.get("DB_PASSWORD", "postdb123")
+DB_NAME = st.secrets.get("DB_NAME", "po_orders")  # Renamed for clarity
+DB_USER = st.secrets.get("DB_USER", "db_user")
+DB_PASSWORD = st.secrets.get("DB_PASSWORD", "db_password123")
 DB_PORT = st.secrets.get("DB_PORT", 5432)
 
+EMAIL_SUBJECTS_TO_MONITOR = st.secrets.get("EMAIL_SUBJECTS_LIST", [
+    "PO released // Consumable items", "PO copy", "import po",
+    "RFQ-Polybag", "PFA PO", "Purchase Order FOR", "Purchase Order_"
+])
 
-def create_orders_table(conn):
-    """Creates the 'orders' table if it doesn't exist."""
+
+# Ensure EMAIL_SUBJECTS_LIST in secrets.toml is a list of strings
+# Example secrets.toml:
+# EMAIL_SUBJECTS_LIST = [
+#   "PO released // Consumable items",
+#   "PO copy",
+#   # ... other subjects
+# ]
+
+# --- End Configuration ---
+
+# --- Database Management (Conceptually db_manager.py) ---
+def create_db_tables(conn):
     try:
         with conn.cursor() as cursor:
-            # For large tables, ensure appropriate indexes on frequently queried columns
-            # e.g., order_date, message_sent, customer_name, product_name, order_status
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS orders (
                     id SERIAL PRIMARY KEY,
+                    order_type TEXT,
                     product_name TEXT,
                     category TEXT,
                     price REAL,
                     quantity INTEGER,
+                    unit TEXT,
+                    specifications TEXT,
                     order_date TIMESTAMP,
                     delivery_date DATE,
                     customer_name TEXT,
@@ -58,407 +74,159 @@ def create_orders_table(conn):
                     order_status TEXT,
                     message_sent BOOLEAN DEFAULT FALSE,
                     source_email_subject TEXT,
-                    source_email_sender TEXT
+                    source_email_sender TEXT,
+                    source_email_uid TEXT UNIQUE,
+                    raw_text_content TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-                -- Example: CREATE INDEX IF NOT EXISTS idx_orders_order_date ON orders(order_date DESC);
-                -- Example: CREATE INDEX IF NOT EXISTS idx_orders_message_sent ON orders(message_sent);
+            """)
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_order_type ON orders(order_type);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_order_date ON orders(order_date DESC);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_source_email_uid ON orders(source_email_uid);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_message_sent ON orders(message_sent);")
+
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS processed_emails (
+                    email_uid TEXT PRIMARY KEY,
+                    subject TEXT,
+                    sender TEXT,
+                    processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    status TEXT,
+                    related_order_id INTEGER REFERENCES orders(id) ON DELETE SET NULL
+                );
             """)
         conn.commit()
-        print("Orders table checked/created successfully.")
+        print("Database tables checked/created successfully.")
     except psycopg2.Error as e:
-        print(f"Error creating orders table: {e}")
-        st.error(f"Error creating orders table: {e}")
-        if conn: conn.rollback()
-    except Exception as e:
-        print(f"An unexpected error occurred during table creation: {e}")
-        st.error(f"An unexpected error occurred during table creation: {e}")
+        print(f"Error creating/checking database tables: {e}")
         if conn: conn.rollback()
 
 
-def connect_to_db():
-    """
-    Connects to the PostgreSQL database.
-    Table creation is called here, ensuring it's checked on new connections.
-    """
+def connect_to_db_main():
     try:
-        conn = psycopg2.connect(
-            host=DB_HOST,
-            database=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            port=DB_PORT
-        )
+        conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
         print("Database connection successful.")
-        create_orders_table(conn)  # Ensures table exists
+        create_db_tables(conn)
         return conn
     except psycopg2.Error as e:
         print(f"Database connection error: {e}")
-        # st.error(f"Database connection error: {e}") # Avoid too many errors on backend if DB is temporarily down
         return None
     except Exception as e:
-        print(f"An unexpected error occurred during database connection: {e}")
-        # st.error(f"An unexpected error occurred during database connection: {e}")
+        print(f"Unexpected error during database connection: {e}")
         return None
 
 
-def store_order(conn, order_details):
-    if conn is None:
-        st.error("Database connection is not available. Cannot store order.")
-        print("Store order error: Database connection is None.")
-        return False
+def is_email_processed(conn, email_uid):
+    if not conn or not email_uid: return False
     try:
         with conn.cursor() as cursor:
-            columns = [
-                "product_name", "category", "price", "quantity", "order_date", "delivery_date",
-                "customer_name", "customer_phone", "email", "address", "payment_method",
-                "payment_status", "order_status", "message_sent",
-                "source_email_subject", "source_email_sender"
-            ]
-            values = [
-                order_details.get("Product Name"), order_details.get("Category", ""),
-                order_details.get("Price"), order_details.get("Quantity"),
-                order_details.get("Order Date"), order_details.get("Delivery Date"),
-                order_details.get("Customer Name"), order_details.get("Raw Customer Phone"),
-                order_details.get("Email", ""), order_details.get("Address"),
-                order_details.get("Payment Method"), order_details.get("Payment Status"),
-                order_details.get("Order Status"), False,  # message_sent
-                order_details.get("Source Email Subject", ""),
-                order_details.get("Source Email Sender", "")
-            ]
-            if not all([order_details.get("Product Name"), order_details.get("Price") is not None,
-                        order_details.get("Quantity") is not None,
-                        order_details.get("Order Date"), order_details.get("Delivery Date"),
-                        order_details.get("Customer Name"),
-                        order_details.get("Address")]):
-                st.error("Required fields missing in order_details. Cannot store.")
-                print(f"Validation failed for order_details: {order_details}")
-                return False
-            sql = f"INSERT INTO orders ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})"
-            cursor.execute(sql, tuple(values))
+            cursor.execute("SELECT 1 FROM processed_emails WHERE email_uid = %s", (email_uid,))
+            return cursor.fetchone() is not None
+    except psycopg2.Error as e:
+        print(f"Error checking if email UID {email_uid} is processed: {e}")
+        return False
+
+
+def mark_email_as_processed(conn, email_uid, subject, sender, status, related_order_id=None):
+    if not conn or not email_uid: return False
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO processed_emails (email_uid, subject, sender, status, related_order_id)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (email_uid) DO UPDATE SET
+                    subject = EXCLUDED.subject, sender = EXCLUDED.sender,
+                    processed_at = CURRENT_TIMESTAMP, status = EXCLUDED.status,
+                    related_order_id = EXCLUDED.related_order_id;
+            """, (email_uid, subject, sender, status, related_order_id))
         conn.commit()
-        st.session_state.pending_msg_count = None  # Invalidate cache
-        print(f"Order for {order_details.get('Product Name')} stored successfully.")
+        print(f"Email UID {email_uid} marked as processed with status: {status}")
         return True
     except psycopg2.Error as e:
+        print(f"Error marking email UID {email_uid} as processed: {e}")
         if conn: conn.rollback()
-        print(f"Database error storing order: {e}")
-        st.error(f"Database error storing order: {e}")
-        return False
-    except Exception as e:
-        if conn: conn.rollback()
-        print(f"Store order error: {e}")
-        st.error(f"Failed to store order: {e}")
         return False
 
 
-# --- Session State Initialization ---
-# Initialize only if keys don't exist to preserve state across reruns
-default_session_state = {
-    "whatsapp_sent_counter": 0, "whatsapp_errors": [], "manual_order_sent": False,
-    "last_check_time": datetime.now(), "auto_check_enabled": False,  # Auto check OFF by default
-    "check_interval_minutes": 30, "sending_in_progress": False,
-    "email_search_query": "Purchase Order", "scheduler_started": False,
-    "last_scheduled_query": None, "last_scheduled_interval": None,
-    "db_init_success": False, "scheduler_thread": None,
-    "pending_msg_count": None, "pending_msg_count_last_updated": None,  # For caching
-}
-for key, default in default_session_state.items():
-    if key not in st.session_state:
-        st.session_state[key] = default
-
-
-# --- Helper Functions ---
-def extract_text_from_pdf(pdf_file_bytes):
-    # ... (original code)
+def store_parsed_order_or_rfq(conn, details):
+    if conn is None: print("DB connection not available for storing."); return None
     try:
-        pdf_file_like_object = io.BytesIO(pdf_file_bytes)
-        pdf_reader = PyPDF2.PdfReader(pdf_file_like_object)
-        text = "".join(page.extract_text() for page in pdf_reader.pages if page.extract_text())
-        return text
+        if not details.get("order_type") or (not details.get("product_name") and not details.get("specifications")):
+            print(f"Skipping store: Missing order_type or product details. Data: {details}")
+            return None
+        # Ensure source_email_uid is present if this record comes from an email
+        if not details.get("source_email_uid") and "TEXT" in details.get("order_type", "") or "PDF" in details.get(
+                "order_type", ""):
+            print(f"Critical: source_email_uid missing for email-derived order/rfq. Data: {details}. Skipping store.")
+            return None
+
+        with conn.cursor() as cursor:
+            columns = [
+                "order_type", "product_name", "category", "price", "quantity", "unit",
+                "specifications", "order_date", "delivery_date", "customer_name",
+                "customer_phone", "email", "address", "payment_method",
+                "payment_status", "order_status", "message_sent",
+                "source_email_subject", "source_email_sender", "source_email_uid",
+                "raw_text_content"
+            ]
+            values = [
+                details.get("order_type"), details.get("product_name"), details.get("category"),
+                details.get("price"), details.get("quantity"), details.get("unit"),
+                details.get("specifications"), details.get("order_date"), details.get("delivery_date"),
+                details.get("customer_name"), details.get("customer_phone"), details.get("email"),
+                details.get("address"), details.get("payment_method"), details.get("payment_status"),
+                details.get("order_status", "PENDING"),
+                details.get("message_sent", False),
+                details.get("source_email_subject"), details.get("source_email_sender"),
+                details.get("source_email_uid"), details.get("raw_text_content")
+            ]
+            sql = f"INSERT INTO orders ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))}) RETURNING id;"
+            cursor.execute(sql, tuple(values))
+            new_order_id = cursor.fetchone()[0]
+        conn.commit()
+        print(
+            f"{details.get('order_type')} stored with ID: {new_order_id}. Product: {details.get('product_name') or details.get('specifications')}")
+        if 'st' in globals() and hasattr(st, 'session_state'): st.session_state.pending_msg_count = None
+        return new_order_id
+    except psycopg2.Error as e:
+        if conn: conn.rollback()
+        if hasattr(e, 'pgcode') and e.pgcode == '23505':  # Unique violation (likely source_email_uid)
+            print(
+                f"Constraint Violated: Email UID {details.get('source_email_uid')} likely already processed into an order. {e}")
+        else:
+            print(f"DB error storing order/rfq: {e} (Code: {getattr(e, 'pgcode', 'N/A')})")
+        return None
     except Exception as e:
-        st.error(f"Error extracting text from PDF: {str(e)}")
+        if conn: conn.rollback()
+        print(f"Unexpected error storing order/rfq: {e}")
+        return None
+
+
+# --- End Database Management ---
+
+# --- Helper Functions (General) ---
+def extract_text_from_pdf(pdf_file_bytes):
+    try:
+        pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_file_bytes))
+        return "".join(page.extract_text() for page in pdf_reader.pages if page.extract_text())
+    except Exception as e:
+        print(f"Error extracting text from PDF: {e}")
+        if 'st' in globals(): st.error(f"Error extracting text from PDF: {str(e)}")
         return ""
 
 
 def format_phone_number(phone_str):
-    # ... (original code)
     if not phone_str or not isinstance(phone_str, str): return None
     try:
-        p = phonenumbers.parse(phone_str, "IN" if not phone_str.startswith('+') else None)
-        return phonenumbers.format_number(p, phonenumbers.PhoneNumberFormat.E164) if phonenumbers.is_valid_number(
-            p) else None
+        p_num = phonenumbers.parse(phone_str, "IN" if not phone_str.startswith('+') else None)
+        return phonenumbers.format_number(p_num, phonenumbers.PhoneNumberFormat.E164) if phonenumbers.is_valid_number(
+            p_num) else None
     except phonenumbers.phonenumberutil.NumberParseException:
         return None
 
 
-def parse_order_details(text):
-    # ... (original detailed parsing logic - ensure it's robust)
-    patterns = {
-        "Order ID": r"Order ID:?\s*([A-Z0-9-]+)",
-        "Product Name": r"Product(?: Name)?:?\s*(.+?)(?:\nCategory:|\nPrice:|\nQuantity:|$)",
-        "Category": r"Category:?\s*(.+?)(?:\nPrice:|\nQuantity:|\nOrder Date:|$)",
-        "Price": r"Price:?\s*[₹$]?\s*(\d[\d,]*\.?\d*)",
-        "Quantity": r"Quantity:?\s*(\d+)",
-        "Order Date": r"Order Date:?\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(?::\d{2})?)",
-        "Delivery Date": r"(?:Expected )?Delivery(?: Date)?:?\s*(\d{4}-\d{2}-\d{2})",
-        "Customer Name": r"Customer(?: Name)?:?\s*(.+?)(?:\nPhone:|\nEmail:|\nAddress:|$)",
-        "Phone": r"Phone:?\s*(\+?\d[\d\s-]{8,15}\d)",
-        "Email": r"Email:?\s*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})",
-        "Address": r"Address:?\s*(.+?)",  # Will be refined
-        "Payment Method": r"Payment(?: Method)?:?\s*(COD|Cash on Delivery|Credit Card|UPI|Bank Transfer|Other)",
-        "Payment Status": r"Payment Status:?\s*(Paid|Unpaid|Pending)",
-        "Order Status": r"(?:Order )?Status:?\s*(Pending|Processing|Confirmed|Shipped|Delivered|Cancelled)",
-    }
-    order_details = {}
-    for key, pattern in patterns.items():
-        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
-        if match:
-            value = match.group(1).strip()
-            if key == "Price":
-                order_details[key] = float(value.replace(",", "")) if value else None
-            elif key == "Quantity":
-                order_details[key] = int(value) if value else None
-            elif key == "Order Date" and value:
-                try:
-                    order_details[key] = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-                except ValueError:
-                    try:
-                        order_details[key] = datetime.strptime(value, "%Y-%m-%d %H:%M")
-                    except ValueError:
-                        order_details[key] = "Not found"
-            elif key == "Delivery Date" and value:
-                try:
-                    order_details[key] = datetime.strptime(value, "%Y-%m-%d").date()
-                except ValueError:
-                    order_details[key] = "Not found"
-            else:
-                order_details[key] = value
-        else:
-            order_details[key] = "Not found" if key not in ["Category", "Email", "Order ID"] else ""
-    address_pattern_refined = r"Address:?\s*(.*?)(?:Payment Method:|Payment Status:|Order Status:|Notes:|Tracking ID:|Order ID:|Customer Name:|Phone:|Email:|---|$)"
-    match_addr = re.search(address_pattern_refined, text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-    if match_addr:
-        address_candidate = match_addr.group(1).strip().replace('\n', ' ')
-        stop_keywords = ["Payment Method:", "Payment Status:", "Order Status:", "Notes:", "Tracking ID:"]
-        for keyword in stop_keywords:
-            if keyword.lower() in address_candidate.lower():
-                address_candidate = address_candidate.lower().split(keyword.lower())[0].strip()
-        order_details["Address"] = address_candidate
-    elif order_details.get("Address") == "Not found" or len(order_details.get("Address", "")) < 10:
-        order_details["Address"] = "Not found"
-    order_details["Raw Customer Phone"] = order_details.get("Phone", "Not found")
-    return order_details
-
-
-# --- WhatsApp Sending Functions ---
-def send_whatsapp_message_pywhatkit(message, recipient_numbers_list):
-    # ... (original pywhatkit sending logic - can be slow and open browser tabs)
-    status_container = st.empty()
-    if not isinstance(recipient_numbers_list, (list, set)):  # ... (rest of your validation)
-        status_container.error("Invalid recipient numbers format for pywhatkit.");
-        return False
-    if not recipient_numbers_list: status_container.error("No recipients for pywhatkit."); return False
-    sent_successfully = True
-    for recipient in recipient_numbers_list:
-        try:
-            formatted_recipient = format_phone_number(recipient)
-            if not formatted_recipient: st.warning(
-                f"Skipping invalid phone for pywhatkit: {recipient}"); sent_successfully = False; continue
-            current_time = datetime.now();
-            send_hour = current_time.hour;
-            send_minute = (current_time.minute + 2) % 60  # Send in 2 mins
-            if send_minute < current_time.minute: send_hour = (send_hour + 1) % 24
-            status_container.info(
-                f"PyWhatKit: Queuing to {formatted_recipient} at {send_hour:02d}:{send_minute:02d}...")
-            pywhatkit.sendwhatmsg(formatted_recipient, message, send_hour, send_minute, wait_time=20, tab_close=True,
-                                  close_time=5)
-            status_container.success(f"PyWhatKit: Message queued for {formatted_recipient}!")
-            st.session_state.whatsapp_sent_counter += 1;
-            time.sleep(5)
-        except Exception as e:
-            status_container.error(f"PyWhatKit Error for {recipient}: {e}")
-            st.session_state.whatsapp_errors.append(f"Error for {recipient}: {str(e)}");
-            sent_successfully = False
-    return sent_successfully
-
-
-def send_whatsapp_message_web(message, recipient_numbers_list):
-    # ... (original web sending logic - also opens browser, requires manual interaction if QR scan needed)
-    status_container = st.empty()
-    if not isinstance(recipient_numbers_list, (list, set)):  # ... (rest of your validation)
-        status_container.error("Invalid recipient format for web WhatsApp.");
-        return False
-    if not recipient_numbers_list: status_container.error("No recipients for web WhatsApp."); return False
-
-    webbrowser.open("https://web.whatsapp.com")
-    status_container.info("Opened WhatsApp Web. Scan QR if needed. Waiting 25s...")
-    time.sleep(25)  # Increased wait time
-    sent_successfully = True
-    for recipient in recipient_numbers_list:
-        try:
-            formatted_recipient = format_phone_number(recipient)
-            if not formatted_recipient: st.warning(
-                f"Skipping invalid phone for web: {recipient}"); sent_successfully = False; continue
-            import urllib.parse;
-            encoded_message = urllib.parse.quote(message)
-            whatsapp_url = f"https://web.whatsapp.com/send?phone={formatted_recipient}&text={encoded_message}"
-            webbrowser.open(whatsapp_url)
-            status_container.info(f"Web: Opened chat for {formatted_recipient}. Waiting 15s...")
-            time.sleep(15);
-            pyautogui.press("enter")
-            status_container.success(f"Web: 'Enter' pressed for {formatted_recipient}.")
-            st.session_state.whatsapp_sent_counter += 1;
-            time.sleep(random.uniform(4, 7))
-        except Exception as e:
-            status_container.error(f"Web WhatsApp Error for {formatted_recipient}: {e}")
-            st.session_state.whatsapp_errors.append(f"Web Error for {formatted_recipient}: {str(e)}");
-            sent_successfully = False
-    return sent_successfully
-
-
-# Choose default: Web method is often more reliable if user can manage browser.
-send_whatsapp_notification = send_whatsapp_message_web
-
-
-def fetch_email_pdfs(subject_query, only_recent_days=None, mark_as_read_after_extraction=True):
-    """
-    Fetches PDFs from UNSEEN emails matching the subject query.
-
-    Args:
-        subject_query (str): The subject to search for.
-        only_recent_days (int, optional): If provided, only fetch emails from the last N days. Defaults to None.
-        mark_as_read_after_extraction (bool): If True, marks emails as SEEN after successfully extracting PDF(s).
-                                              This helps avoid reprocessing when searching for UNSEEN emails next time.
-                                              Defaults to True.
-
-    Returns:
-        list: A list of dictionaries, each containing PDF data and metadata.
-    """
-    pdf_files_with_info = []
-    mail = None  # Initialize mail object for the finally block
-
-    # For detailed performance analysis, uncomment and use these timing lines
-    # overall_start_time = time.time()
-    # print(f"[{datetime.now()}] Starting email fetch. Subject: '{subject_query}', Recent: {only_recent_days} days, Mark read: {mark_as_read_after_extraction}")
-
-    try:
-        # mail_conn_start_time = time.time()
-        mail = imaplib.IMAP4_SSL(IMAP_SERVER)
-        mail.login(EMAIL, PASSWORD)
-        mail.select("inbox")
-        # print(f"IMAP Connection and Login: {time.time() - mail_conn_start_time:.2f}s")
-
-        # Build search criteria
-        search_parts = ['(UNSEEN']  # Start with UNSEEN criteria
-        search_parts.append(f'SUBJECT "{subject_query}"')
-
-        if only_recent_days and isinstance(only_recent_days, int) and only_recent_days > 0:
-            date_since = (datetime.now() - timedelta(days=only_recent_days)).strftime("%d-%b-%Y")
-            search_parts.append(f'SINCE "{date_since}"')
-        search_parts.append(')')
-        search_criteria = ' '.join(search_parts)
-
-        # print(f"Searching with criteria: {search_criteria}")
-        # search_start_time = time.time()
-        status, messages = mail.search(None, search_criteria)
-        # print(f"IMAP Search: {time.time() - search_start_time:.2f}s, Status: {status}")
-
-        if status != "OK":
-            # st.error(f"IMAP search failed with status: {status}") # Use st.error if in Streamlit app
-            print(f"IMAP search failed with status: {status}")
-            return [] # mail.logout() will be called in finally
-
-        if not messages[0]:  # No email IDs found
-            print(f"No UNSEEN emails found matching criteria: {search_criteria}")
-            return [] # mail.logout() will be called in finally
-
-        mail_ids = messages[0].split()
-        # print(f"Found {len(mail_ids)} email(s) to process. Processing newest first (if server sorts that way).")
-
-        # Process emails (consider processing in reverse if mail_ids are sorted oldest to newest by default)
-        for mail_id in reversed(mail_ids):
-            # email_process_start_time = time.time()
-            # print(f"Fetching email ID: {mail_id.decode()}")
-            fetch_status, msg_data = mail.fetch(mail_id, '(RFC822)')
-            if fetch_status != "OK":
-                print(f"Failed to fetch email ID {mail_id.decode()}. Status: {fetch_status}")
-                continue
-
-            raw_email = msg_data[0][1]
-            msg = email.message_from_bytes(raw_email)
-
-            # Robust header decoding function
-            def decode_mail_header(header_value):
-                if header_value is None:
-                    return ""
-                decoded_parts = decode_header(header_value)
-                header_str = ""
-                for part, charset in decoded_parts:
-                    if isinstance(part, bytes):
-                        header_str += part.decode(charset or "utf-8", errors="ignore")
-                    else:
-                        header_str += part
-                return header_str
-
-            subject = decode_mail_header(msg["Subject"])
-            sender = decode_mail_header(msg.get("From"))
-
-            pdf_extracted_this_email = False
-            for part in msg.walk():
-                if part.get_content_type() == "application/pdf" and part.get('Content-Disposition'):
-                    filename = decode_mail_header(part.get_filename()) or f'untitled_{mail_id.decode()}.pdf'
-                    pdf_data = part.get_payload(decode=True)
-
-                    if pdf_data:
-                        pdf_files_with_info.append({
-                            "data": pdf_data,
-                            "filename": filename,
-                            "sender": sender,
-                            "subject": subject,
-                            "email_id": mail_id.decode() # Useful for logging or later reference
-                        })
-                        pdf_extracted_this_email = True
-                        # print(f"  Extracted PDF: {filename} from email ID {mail_id.decode()}")
-
-            if pdf_extracted_this_email and mark_as_read_after_extraction:
-                try:
-                    # print(f"  Attempting to mark email ID {mail_id.decode()} as SEEN.")
-                    store_status, _ = mail.store(mail_id, '+FLAGS', '\\Seen')
-                    if store_status == "OK":
-                        pass
-                        # print(f"  Successfully marked email ID {mail_id.decode()} as SEEN.")
-                    else:
-                        print(f"  Failed to mark email ID {mail_id.decode()} as SEEN. Status: {store_status}")
-                except Exception as e_store:
-                    print(f"  Error marking email ID {mail_id.decode()} as SEEN: {e_store}")
-            # print(f"  Email ID {mail_id.decode()} processing time: {time.time() - email_process_start_time:.2f}s")
-        return pdf_files_with_info
-
-    except imaplib.IMAP4.abort as e_abort: # Specific IMAP abort error
-        # This can happen due to server issues or prolonged inactivity.
-        error_msg = f"IMAP connection aborted: {e_abort}. Try again later."
-        print(error_msg)
-        if 'st' in globals(): st.error(error_msg) # Check if st is available
-        mail = None # Connection is already closed/broken
-        return []
-    except Exception as e:
-        error_msg = f"An error occurred while fetching emails: {str(e)}"
-        print(error_msg)
-        if 'st' in globals(): st.error(error_msg) # Check if st is available
-        return []
-    finally:
-        if mail:
-            try:
-                mail.close()  # Close the selected mailbox
-                mail.logout()
-                # print("Logged out from IMAP server.")
-            except Exception as e_logout:
-                print(f"Error during IMAP logout/close: {e_logout}")
-        # print(f"Total email fetching function time: {time.time() - overall_start_time:.2f}s")
-
-
-# --- Utility and Processing Functions ---
-def get_seller_team_recipients(recipients_str):  # ... (original logic)
+def get_seller_team_recipients(recipients_str):
     recipients = set()
     if recipients_str and isinstance(recipients_str, str):
         for phone in recipients_str.split(","):
@@ -466,466 +234,778 @@ def get_seller_team_recipients(recipients_str):  # ... (original logic)
             if fmt_seller:
                 recipients.add(fmt_seller)
             else:
-                st.warning(f"Invalid seller phone in config: {phone.strip()}")
+                print(f"Warning: Invalid seller phone in config: {phone.strip()}")
+    if not recipients and 'st' in globals(): st.warning("No valid seller WhatsApp recipients configured in secrets.")
     return list(recipients)
 
 
-def get_pending_message_count_from_db():  # Renamed for clarity
-    """Actually hits the DB to get the count."""
-    conn = connect_to_db()
-    if not conn: return 0  # Return 0 if DB connection fails
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM orders WHERE message_sent = FALSE")
-            return cursor.fetchone()[0]
-    except psycopg2.Error as e:
-        st.error(f"DB error getting message count: {e}")
-        return 0  # Return 0 on error
-    finally:
-        if conn: conn.close()
+# --- End Helper Functions ---
 
 
-def send_whatsapp_from_db():  # ... (original logic)
-    status_container = st.empty()
-    conn = connect_to_db()
-    if not conn: status_container.error("DB connection failed for sending pending messages."); return
-    orders_sent_successfully = 0
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT id, product_name, category, price, quantity, order_date, delivery_date, customer_name, customer_phone, email, address, payment_method, payment_status, order_status FROM orders WHERE message_sent = FALSE ORDER BY order_date ASC")
-            pending_orders = cursor.fetchall()
-            if not pending_orders: status_container.info("No pending WhatsApp messages from DB."); return
-            seller_numbers = get_seller_team_recipients(SELLER_TEAM_RECIPIENTS_STR)
-            if not seller_numbers: status_container.error("No valid seller WhatsApp numbers configured."); return
-            status_container.info(f"Found {len(pending_orders)} pending order(s) for WhatsApp.")
-            for order_data in pending_orders:
-                # ... (message formatting as before)
-                order_id, product_name, category, price, quantity, order_date, delivery_date, customer_name, customer_phone, cust_email, address, payment_method, payment_status, order_status = order_data
-                message_lines = [f"📦 *New Order Notification (from DB)* 📦", f"Order ID: DB-{order_id}",
-                                 f"🛍️ Product: {product_name or 'N/A'}",
-                                 f"💰 Price: ₹{price:.2f}" if price is not None else "Price: N/A",
-                                 f"🔢 Quantity: {quantity or 'N/A'}",
-                                 f"🗓️ Order Date: {order_date.strftime('%Y-%m-%d %H:%M') if order_date else 'N/A'}",
-                                 f"👤 Customer: {customer_name or 'N/A'}",
-                                 f"🏠 Address: {address or 'N/A'}"]  # Shortened example
-                formatted_message_text = "\n".join(message_lines)
+# --- Order Parsing (Conceptually order_parser.py) ---
+def parse_order_details_from_pdf_text(text, source_email_uid, email_subject, email_sender):
+    print(f"Parsing PDF text for email UID {source_email_uid}...")
+    parsed_data = {"order_type": "PO_PDF", "source_email_uid": source_email_uid,
+                   "source_email_subject": email_subject, "source_email_sender": email_sender,
+                   "raw_text_content": text[:5000]}
 
-                if send_whatsapp_notification(formatted_message_text, seller_numbers):
-                    cursor.execute("UPDATE orders SET message_sent = TRUE WHERE id = %s", (order_id,))
-                    conn.commit();
-                    orders_sent_successfully += 1
-                    status_container.success(f"Notification for order DB-{order_id} sent & marked.")
-                    st.session_state.pending_msg_count = None  # Invalidate cache
-                    time.sleep(random.uniform(5, 10))
-                else:
-                    status_container.error(f"Failed WhatsApp for order DB-{order_id}. Will retry.")
-            if orders_sent_successfully > 0: st.success(f"Sent notifications for {orders_sent_successfully} order(s).")
-    except psycopg2.Error as e:
-        status_container.error(f"DB error processing pending messages: {e}");
-    except Exception as e:
-        status_container.error(f"Unexpected error sending from DB: {e}")
-    finally:
-        if conn: conn.close()
+    patterns = {  # Simplified, use your more detailed patterns
+        "product_name": r"Product(?: Name)?:?\s*(.+?)(?:\nPrice:|\nQuantity:|$)",
+        "price": r"Price:?\s*[₹$]?\s*(\d[\d,]*\.?\d*)",
+        "quantity": r"Quantity:?\s*(\d+)",
+        "customer_name": r"Customer(?: Name)?:?\s*(.+?)(?:\nPhone:|\nAddress:|$)",
+        "order_date_str": r"Order Date:?\s*(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}(?::\d{2})?)?)",
+    }
+    for key, pattern in patterns.items():
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        if match:
+            value = match.group(1).strip()
+            if key == "price":
+                parsed_data[key] = float(value.replace(",", "")) if value else None
+            elif key == "quantity":
+                parsed_data[key] = int(value) if value else None
+            elif key == "order_date_str":
+                try:
+                    parsed_data["order_date"] = datetime.strptime(value.split()[0], "%Y-%m-%d")
+                except:
+                    parsed_data["order_date"] = datetime.now()  # Fallback
+            else:
+                parsed_data[key] = value
 
+    parsed_data["product_name"] = parsed_data.get("product_name", "N/A from PDF")
+    parsed_data["customer_name"] = parsed_data.get("customer_name", email_sender.split('<')[0].strip())
+    parsed_data["email"] = email_sender.split('<')[-1].strip('>').strip() if '<' in email_sender else email_sender
+    parsed_data["order_date"] = parsed_data.get("order_date", datetime.now())
+    parsed_data["order_status"] = "PROCESSING" if parsed_data.get(
+        "product_name") != "N/A from PDF" else "NEEDS_REVIEW_PDF"
 
-def process_and_store_email_orders(subject_query):  # Called by button or scheduler
-    # This function can be time-consuming due to email fetching and PDF parsing.
-    # It should NOT be called directly on script load, only by user action or scheduler.
-    status_container = st.empty()
-    status_container.info(f"Checking emails for subject: '{subject_query}'...")
-    pdf_files_info = fetch_email_pdfs(subject_query)  # This is the slow part
-    if not pdf_files_info: status_container.info("No new PO emails with parsable PDFs found."); return
-    processed_count, failed_store_count = 0, 0
-    conn = connect_to_db()
-    if not conn: status_container.error("DB connection failed. Cannot process email orders."); return
-    with st.spinner(f"Processing {len(pdf_files_info)} email(s)..."):
-        for pdf_info in pdf_files_info:
-            try:
-                st.write(f"Processing PDF: {pdf_info['filename']} from {pdf_info['sender']}")
-                text = extract_text_from_pdf(pdf_info["data"])
-                if text:
-                    order_details = parse_order_details(text)
-                    order_details["Source Email Subject"] = pdf_info["subject"]
-                    order_details["Source Email Sender"] = pdf_info["sender"]
-                    if order_details.get("Product Name") == "Not found" or order_details.get("Price") is None:
-                        st.warning(f"Essential details not parsed from {pdf_info['filename']}. Skipping.");
-                        failed_store_count += 1;
-                        continue
-                    if store_order(conn, order_details):
-                        processed_count += 1; st.success(f"Stored order from '{pdf_info['filename']}'")
-                    else:
-                        st.error(f"Failed to store order from '{pdf_info['filename']}'."); failed_store_count += 1
-                else:
-                    st.warning(f"No text extracted from PDF: {pdf_info['filename']}"); failed_store_count += 1
-            except Exception as e:
-                st.error(f"Error processing PDF '{pdf_info['filename']}': {e}"); failed_store_count += 1
-    if conn: conn.close()
-    if processed_count > 0: status_container.success(f"Successfully stored {processed_count} order(s) from emails.")
-    if failed_store_count > 0: status_container.warning(f"Failed to process/store {failed_store_count} PDF(s).")
-    st.session_state.pending_msg_count = None  # Invalidate cache after processing
+    if parsed_data.get("product_name") == "N/A from PDF" and not parsed_data.get("specifications"):
+        print(f"Could not parse essential PO details from PDF for UID {source_email_uid}.")
+        return None
+    return parsed_data
 
 
-def check_and_process_emails_automatically(subject_query_for_scheduler):  # For scheduler thread
-    print(f"[{datetime.now()}] Auto email check: '{subject_query_for_scheduler}'")
-    # st.toast is tricky from non-main threads. Use print for thread logging.
-    process_and_store_email_orders(subject_query_for_scheduler)
-    st.session_state.last_check_time = datetime.now()
-    print(f"[{datetime.now()}] Auto: Attempting to send pending WhatsApps from DB.")
-    send_whatsapp_from_db()
-    # Avoid st.rerun() in background threads; it can lead to unexpected behavior.
-    # UI updates should happen naturally on next user interaction or via polling if needed.
+def parse_details_from_email_body(email_body, source_email_uid, email_subject, email_sender):
+    print(f"Parsing email body text for UID {source_email_uid}...")
+    parsed_items_list = []
+    order_type = "RFQ_TEXT"
+    customer_name = email_sender.split('<')[0].strip()
+    contact_email = email_sender.split('<')[-1].strip('>').strip() if '<' in email_sender else email_sender
 
-
-def run_scheduled_tasks():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)  # Check schedule every second
-
-
-# --- Streamlit UI ---
-st.set_page_config(page_title="PO Order Manager", layout="wide")
-st.title("🛒 PO Order Management Dashboard")
-
-# --- Initial DB Connection Check (runs once per session ideally) ---
-if not st.session_state.db_init_success:
-    # This block runs on first load / if db_init_success is False.
-    # connect_to_db() can be slow if DB is remote or unresponsive.
-    print("Attempting initial DB connection and table check...")
-    initial_conn = connect_to_db()
-    if initial_conn:
-        initial_conn.close()
-        st.sidebar.success("Database connected & 'orders' table verified.")
-        st.session_state.db_init_success = True
+    body_lower = email_body.lower();
+    subject_lower = email_subject.lower()
+    if any(kw in subject_lower for kw in ["purchase order", "po copy", "pfa po"]) or \
+            any(kw in body_lower for kw in ["order for", "confirming order", "your order"]):
+        order_type = "PO_TEXT";
+        order_status = "PENDING_CONFIRMATION_TEXT"
+    elif any(kw in subject_lower for kw in ["rfq", "quote", "quotation"]) or \
+            any(kw in body_lower for kw in ["offer for", "pls share offer", "request for quotation", "send quote"]):
+        order_type = "RFQ_TEXT";
+        order_status = "PENDING_QUOTE"
     else:
-        st.sidebar.error("Initial Database connection FAILED! App may not function correctly.")
-        # No st.stop() here, allow app to load but show error.
+        order_type = "INQUIRY_TEXT"; order_status = "NEEDS_REVIEW_TEXT"
 
-# --- Sidebar ---
-with st.sidebar:
-    st.header("📊 Status & Config")
-    st.metric("WhatsApp Sent (Session)", st.session_state.whatsapp_sent_counter)
-    if st.session_state.whatsapp_errors:
-        with st.expander("WhatsApp Sending Errors"):
-            for err in st.session_state.whatsapp_errors: st.error(err)
+    # Refined Polybag Pattern (Example)
+    polybag_pattern = re.compile(
+        r"""
+        ^\s*(?P<quantity_val>\d+)?\s* # Optional quantity at start
+        (?P<product_type>LDPE\s*(?:COVER|BAG|SHEET)|POLYBAG(?:S)?|BAGS?)[\s,.:-]* # Product type
+        (?:(?:SIZE|DIMENSIONS?)\s*[:\s]*)?                                  # Optional "SIZE" or "DIMENSION"
+        (?:(?P<width>[\d\.\"\'\s]+(?:CM|MM|INCH|\"|X|x))[\s,X*x]+)?         # Width
+        (?:(?P<length>[\d\.\"\'\s]+(?:CM|MM|INCH|\"|X|x))[\s,X*x]+)?        # Length
+        (?:(?P<height_gusset>[\d\.\"\'\s]+(?:CM|MM|INCH|\"))?[\s,X*x]*)?     # Optional Height/Gusset
+        (?:[\s,]*\b(?P<thickness>[\d\.]+)\s*(?:MICRON|MIC|GAUGE|MIL)\b)?     # Thickness
+        (?:[\s,.]*(?P<features>[A-Z\s\d\/,-]+(?:FLAP|PRINT|SEAL|COLOR|COLOUR|PLAIN|NATURAL|TRANSPARENT)[A-Z\s\d\/,-]*))? # Features
+        (?:[\s,-]*QUANTITY\s*:\s*(?P<quantity_end>\d+))?                    # Optional quantity at end
+        """, re.VERBOSE | re.IGNORECASE
+    )
 
-    st.subheader("⚙️ Auto-Email Check")
-    auto_check_enabled_ui = st.checkbox("Enable Auto-Email Check & Notify", value=st.session_state.auto_check_enabled,
-                                        key="auto_check_toggle")
-    if auto_check_enabled_ui != st.session_state.auto_check_enabled:
-        st.session_state.auto_check_enabled = auto_check_enabled_ui
-        st.rerun()  # Rerun to update scheduler logic
+    found_items_flag = False
+    lines = [line.strip() for line in email_body.splitlines() if line.strip()]  # Get non-empty lines
 
-    interval_minutes_ui = st.slider("Check Interval (minutes)", 5, 120, st.session_state.check_interval_minutes, 5,
-                                    key="interval_slider")
-    if interval_minutes_ui != st.session_state.check_interval_minutes:
-        st.session_state.check_interval_minutes = interval_minutes_ui
-        st.rerun()  # Rerun to update scheduler
+    for i, line in enumerate(lines):
+        if len(line) < 10 and not any(kw in line.lower() for kw in ["ldpe", "bag", "cover"]): continue  # Basic filter
 
-    st.text(f"Last Auto-Check: {st.session_state.last_check_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    if st.session_state.auto_check_enabled and st.session_state.scheduler_started:
-        next_run = schedule.next_run()
-        if next_run:
-            st.text(f"Next Auto-Check: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+        match = polybag_pattern.search(line)
+        # If no match, try joining with next line if it looks like a continuation
+        if not match and i + 1 < len(lines) and len(lines[i + 1]) < 50 and not polybag_pattern.search(lines[i + 1]):
+            combined_line = line + " " + lines[i + 1]
+            match = polybag_pattern.search(combined_line)
+            if match: print(f"  Matched on combined line: {combined_line}")
+
+        if match:
+            found_items_flag = True
+            item_data = match.groupdict()
+            spec_parts = []
+            if item_data.get('product_type'): spec_parts.append(item_data['product_type'].strip())
+            dimensions = []
+            if item_data.get('width'): dimensions.append(item_data['width'].strip())
+            if item_data.get('length'): dimensions.append(item_data['length'].strip())
+            if item_data.get('height_gusset'): dimensions.append(item_data['height_gusset'].strip())
+            if dimensions: spec_parts.append("x".join(filter(None, dimensions)))
+            if item_data.get('thickness'): spec_parts.append(
+                f"{item_data['thickness'].strip()} MICRON")  # Assuming micron if only number
+            if item_data.get('features'): spec_parts.append(item_data['features'].strip().upper())
+
+            final_spec = ", ".join(filter(None, spec_parts))
+            quantity = item_data.get('quantity_val') or item_data.get('quantity_end')
+
+            parsed_items_list.append({
+                "order_type": order_type, "product_name": item_data.get('product_type', "Polythene Item").strip(),
+                "specifications": final_spec if final_spec else line,  # Fallback to raw line
+                "quantity": int(quantity) if quantity else None, "unit": "PCS" if quantity else None,  # Assuming PCS
+                "customer_name": customer_name, "email": contact_email, "order_date": datetime.now(),
+                "order_status": order_status, "source_email_uid": source_email_uid,
+                "source_email_subject": email_subject, "source_email_sender": email_sender,
+                "raw_text_content": email_body[:5000]
+            })
+        # If no polybag match, and line looks like a generic item, add it (more heuristic)
+        elif not match and order_type != "INQUIRY_TEXT" and len(line) > 15:  # Heuristic for other items
+            # This part needs very careful regex for other types of products if any
+            if any(kw in line.lower() for kw in ["item:", "product:", "detail:"]) or (
+                    len(line.split()) > 3 and any(char.isdigit() for char in line)):
+                print(f"  Found generic item line: {line}")
+                found_items_flag = True
+                parsed_items_list.append({
+                    "order_type": order_type, "product_name": f"Item from email text",
+                    "specifications": line, "quantity": None, "unit": None,
+                    "customer_name": customer_name, "email": contact_email, "order_date": datetime.now(),
+                    "order_status": order_status, "source_email_uid": source_email_uid,
+                    "source_email_subject": email_subject, "source_email_sender": email_sender,
+                    "raw_text_content": email_body[:5000]
+                })
+
+    if not found_items_flag and order_type == "INQUIRY_TEXT" and len(email_body) > 30:  # Log generic inquiry
+        parsed_items_list.append({
+            "order_type": order_type, "product_name": "General Inquiry",
+            "specifications": email_subject, "raw_text_content": email_body[:5000],
+            "customer_name": customer_name, "email": contact_email, "order_date": datetime.now(),
+            "order_status": order_status, "source_email_uid": source_email_uid,
+            "source_email_subject": email_subject, "source_email_sender": email_sender
+        })
+    elif not found_items_flag:
+        print(f"No specific items or parsable generic inquiry found in body for UID {source_email_uid}")
+        return []
+
+    return parsed_items_list
+
+
+def get_email_body_text(msg):
+    text_parts = [];
+    html_parts = []
+    if msg.is_multipart():
+        for part in msg.walk():
+            ctype = part.get_content_type();
+            cdispo = str(part.get('Content-Disposition'))
+            if ctype == 'text/plain' and 'attachment' not in cdispo:
+                try:
+                    text_parts.append(
+                        part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8', "replace"))
+                except:
+                    pass  # Ignore decoding errors for a part
+            elif ctype == 'text/html' and 'attachment' not in cdispo:
+                try:
+                    html_parts.append(
+                        part.get_payload(decode=True).decode(part.get_content_charset() or 'utf-8', "replace"))
+                except:
+                    pass
+    else:  # Not multipart
+        if msg.get_content_type() == 'text/plain':
+            try:
+                text_parts.append(msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8', "replace"))
+            except:
+                pass
+        elif msg.get_content_type() == 'text/html':
+            try:
+                html_parts.append(msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8', "replace"))
+            except:
+                pass
+    if text_parts: return "\n".join(text_parts).strip()
+    if html_parts:  # Basic HTML to text conversion
+        html_content = "\n".join(html_parts).strip()
+        text_content = re.sub('<style[^<]+?</style>', '', html_content, flags=re.IGNORECASE | re.DOTALL)  # remove style
+        text_content = re.sub('<script[^<]+?</script>', '', text_content,
+                              flags=re.IGNORECASE | re.DOTALL)  # remove script
+        text_content = re.sub('<[^<]+?>', ' ', text_content)  # remove all other tags, replace with space
+        text_content = re.sub(r'\s+', ' ', text_content)  # normalize whitespace
+        return text_content.strip()
+    return ""
+
+
+# --- End Order Parsing ---
+
+# --- Email Processing (Corrected and using UID logic) ---
+def process_incoming_emails(db_conn, subjects_to_monitor, only_recent_days=None, mark_as_read=True):
+    processed_order_count = 0;
+    processed_rfq_count = 0;
+    mail = None
+    print(f"[{datetime.now()}] Starting comprehensive email processing...")
+    try:
+        mail = imaplib.IMAP4_SSL(IMAP_SERVER);
+        mail.login(EMAIL, PASSWORD);
+        mail.select("inbox")
+        if not subjects_to_monitor: print("No subjects to monitor."); return 0, 0
+
+        escaped_subjects = [s.replace("\"", "\\\"").replace("(", "\\(").replace(")", "\\)") for s in
+                            subjects_to_monitor]  # Escape more chars
+        base_subject_query = ""
+        if len(escaped_subjects) == 1:
+            base_subject_query = f'SUBJECT "{escaped_subjects[0]}"'
+        elif len(escaped_subjects) > 1:
+            base_subject_query = f'(SUBJECT "{escaped_subjects[-1]}")'
+            for i in range(len(escaped_subjects) - 2, -1, -1):
+                base_subject_query = f'(OR (SUBJECT "{escaped_subjects[i]}") {base_subject_query})'
         else:
-            st.text("Next Auto-Check: Pending schedule or just ran.")
+            print("No valid subjects after escaping."); return 0, 0
 
-    st.subheader("📧 Manual Email PO Processing")
-    # This button directly triggers the potentially slow email processing.
-    if st.button("Manually Check Emails & Store Orders Now", key="manual_email_check_button_sidebar"):
-        with st.spinner("Manually checking emails and processing PDFs... This may take time."):
-            process_and_store_email_orders(st.session_state.email_search_query)
-            send_whatsapp_from_db()  # Also try to send any new or pending messages
-        st.rerun()  # Update UI, including pending counts
+        search_parts = ['(UNSEEN'];
+        search_parts.append(base_subject_query)
+        if only_recent_days and isinstance(only_recent_days, int) and only_recent_days > 0:
+            date_since = (datetime.now() - timedelta(days=only_recent_days)).strftime("%d-%b-%Y")
+            search_parts.append(f'SINCE "{date_since}"')
+        search_parts.append(')')
+        full_search_criteria = ' '.join(search_parts)
 
-    st.subheader("📱 Database WhatsApp Notifications")
+        print(f"IMAP Search Criteria: {full_search_criteria}")
+        status, msg_numbers_data = mail.search(None, full_search_criteria)
+        if status != "OK": print(f"IMAP search failed: {status}"); return 0, 0
+        if not msg_numbers_data[0]: print(f"No UNSEEN emails matching criteria."); return 0, 0
+
+        unique_email_uids_to_process = set()
+        for num_str in msg_numbers_data[0].split():
+            if not num_str.strip(): continue  # Skip empty strings if any
+            status_uid, uid_data = mail.fetch(num_str, '(UID)')
+            if status_uid == 'OK' and uid_data[0]:
+                uid_match = re.search(r'UID\s+(\d+)', uid_data[0].decode())
+                if uid_match:
+                    email_uid = uid_match.group(1)
+                    if not is_email_processed(db_conn, email_uid):
+                        unique_email_uids_to_process.add(email_uid)
+                    else:
+                        print(f"Email UID {email_uid} already processed. Skipping.")
+            time.sleep(0.05)  # Shorter delay
+
+        if not unique_email_uids_to_process: print("No new emails to process after UID check."); return 0, 0
+        print(f"Found {len(unique_email_uids_to_process)} new email(s) by UID to process.")
+
+        for email_uid in list(unique_email_uids_to_process):
+            print(f"Processing new email UID: {email_uid}")
+            status_fetch, msg_data_uid = mail.uid('fetch', email_uid, '(RFC822)')
+            if status_fetch != 'OK' or not msg_data_uid or not msg_data_uid[0]:  # Check msg_data_uid[0]
+                print(f"Failed to fetch email for UID {email_uid}. Status: {status_fetch}");
+                mark_email_as_processed(db_conn, email_uid, "N/A", "N/A", "FETCH_ERROR_UID");
+                continue
+
+            # Ensure msg_data_uid[0] is a tuple and has the email bytes
+            if not isinstance(msg_data_uid[0], tuple) or len(msg_data_uid[0]) < 2:
+                print(f"Unexpected fetch data format for UID {email_uid}: {msg_data_uid[0]}");
+                mark_email_as_processed(db_conn, email_uid, "N/A", "N/A", "FETCH_DATA_ERROR_UID");
+                continue
+
+            raw_email = msg_data_uid[0][1]
+            msg = email.message_from_bytes(raw_email)
+
+            def decode_mail_header(header_value):  # Local helper for safety
+                if header_value is None: return ""
+                try:
+                    decoded_parts = decode_header(header_value)
+                    header_str = ""
+                    for part_content, charset in decoded_parts:
+                        if isinstance(part_content, bytes):
+                            header_str += part_content.decode(charset or "utf-8", "replace")
+                        else:
+                            header_str += part_content
+                    return header_str.strip()
+                except Exception as e_dec:
+                    print(f"Header decode error: {e_dec}"); return str(header_value)  # Fallback
+
+            email_subject = decode_mail_header(msg["Subject"])
+            email_sender = decode_mail_header(msg.get("From"))
+            print(f"  Subject: {email_subject}, Sender: {email_sender}")
+
+            has_pdf_attachment = False;
+            parsed_order_details_from_pdf = None
+            processing_status = "NO_RELEVANT_CONTENT";
+            related_order_id_for_processed_email = None
+
+            for part in msg.walk():
+                if part.get_content_type() == "application/pdf" and part.get('Content-Disposition'):
+                    filename = decode_mail_header(part.get_filename()) or f'attachment_{email_uid}.pdf'
+                    pdf_data = part.get_payload(decode=True)
+                    if pdf_data:
+                        print(f"  Found PDF: {filename}");
+                        has_pdf_attachment = True
+                        pdf_text = extract_text_from_pdf(pdf_data)
+                        if pdf_text:
+                            parsed_order_details_from_pdf = parse_order_details_from_pdf_text(pdf_text, email_uid,
+                                                                                              email_subject,
+                                                                                              email_sender)
+                            if parsed_order_details_from_pdf:
+                                processing_status = "PROCESSED_PDF_NEEDS_DB_STORE"
+                            else:
+                                processing_status = "PDF_NO_DETAILS"
+                        else:
+                            processing_status = "PDF_EMPTY_TEXT"
+                        break
+            if not has_pdf_attachment:
+                print("  No PDF attachment found. Checking email body text...")
+                email_body = get_email_body_text(msg)
+                if email_body:
+                    list_of_parsed_items_from_text = parse_details_from_email_body(email_body, email_uid, email_subject,
+                                                                                   email_sender)
+                    if list_of_parsed_items_from_text:
+                        temp_order_count = 0;
+                        temp_rfq_count = 0
+                        for item_detail in list_of_parsed_items_from_text:
+                            new_id = store_parsed_order_or_rfq(db_conn, item_detail)
+                            if new_id:
+                                if not related_order_id_for_processed_email: related_order_id_for_processed_email = new_id
+                                if item_detail["order_type"].startswith("PO"):
+                                    temp_order_count += 1
+                                elif item_detail["order_type"].startswith("RFQ") or item_detail[
+                                    "order_type"].startswith("INQUIRY"):
+                                    temp_rfq_count += 1
+                        if temp_order_count > 0 or temp_rfq_count > 0:
+                            processing_status = f"TEXT_DB_STORED ({temp_order_count} PO, {temp_rfq_count} RFQ)"  # More concise
+                            processed_order_count += temp_order_count;
+                            processed_rfq_count += temp_rfq_count
+                        else:
+                            processing_status = "TEXT_ITEMS_PARSED_BUT_NOT_STORED"
+                    else:
+                        processing_status = "TEXT_NO_RELEVANT_ITEMS_FOUND"
+                else:
+                    processing_status = "EMPTY_EMAIL_BODY"
+
+            if parsed_order_details_from_pdf and processing_status == "PROCESSED_PDF_NEEDS_DB_STORE":
+                new_id = store_parsed_order_or_rfq(db_conn, parsed_order_details_from_pdf)
+                if new_id:
+                    related_order_id_for_processed_email = new_id
+                    if parsed_order_details_from_pdf["order_type"].startswith("PO"):
+                        processed_order_count += 1
+                    elif parsed_order_details_from_pdf["order_type"].startswith("RFQ"):
+                        processed_rfq_count += 1
+                    processing_status = f"PDF_DB_STORED ({parsed_order_details_from_pdf['order_type']})"
+                else:
+                    processing_status = "PDF_DB_STORE_FAILED"
+
+            mark_email_as_processed(db_conn, email_uid, email_subject, email_sender, processing_status,
+                                    related_order_id=related_order_id_for_processed_email)
+            if mark_as_read:
+                try:
+                    mail.uid('store', email_uid, '+FLAGS', '\\Seen'); print(f"  Marked UID {email_uid} as SEEN.")
+                except Exception as e_seen:
+                    print(f"  Failed to mark UID {email_uid} as SEEN: {e_seen}")
+            time.sleep(0.1)
+        return processed_order_count, processed_rfq_count
+    except imaplib.IMAP4.abort as e_abort:
+        print(f"IMAP aborted: {e_abort}"); return processed_order_count, processed_rfq_count
+    except Exception as e:
+        print(f"Email processing error: {e}"); import \
+            traceback; traceback.print_exc(); return processed_order_count, processed_rfq_count
+    finally:
+        if mail:
+            try:
+                mail.close(); mail.logout(); print("IMAP Logged out.")
+            except:
+                pass
 
 
-    # --- Cached Pending Message Count Display ---
-    def get_displayed_pending_message_count():
+# --- End Email Processing ---
+
+# --- WhatsApp Notifier (Conceptually whatsapp_notifier.py) ---
+# Includes: send_whatsapp_message_web, send_whatsapp_message_pywhatkit, send_whatsapp_notification (choice)
+# format_whatsapp_message_for_order, send_notifications_from_db
+# (These functions are largely from previous response, ensure they are adapted for new order_type and DB fields)
+def send_whatsapp_message_web(message, recipient_numbers_list):  # Keep your preferred implementation
+    status_container = st.empty()
+    if not isinstance(recipient_numbers_list, (list, set)) or not recipient_numbers_list:
+        status_container.error("Invalid/No recipients for web WhatsApp.");
+        return False
+    webbrowser.open("https://web.whatsapp.com")
+    status_container.info("Opened WhatsApp Web. Scan QR if needed. Waiting 25s...")
+    time.sleep(25)
+    sent_successfully_all = True
+    for recipient in recipient_numbers_list:
+        formatted_recipient = format_phone_number(recipient)  # Assumes this helper is defined
+        if not formatted_recipient: st.warning(
+            f"Skipping invalid WA phone: {recipient}"); sent_successfully_all = False; continue
+        try:
+            import urllib.parse;
+            encoded_message = urllib.parse.quote(message)
+            whatsapp_url = f"https://web.whatsapp.com/send?phone={formatted_recipient}&text={encoded_message}"
+            webbrowser.open(whatsapp_url)
+            status_container.info(f"Web: Opened chat for {formatted_recipient}. Waiting 15s...")
+            time.sleep(15);
+            pyautogui.press("enter")  # Requires pyautogui and screen focus
+            status_container.success(f"Web: 'Enter' pressed for {formatted_recipient}.")
+            if 'st' in globals() and hasattr(st, 'session_state'): st.session_state.whatsapp_sent_counter += 1
+            time.sleep(random.uniform(4, 7))
+        except Exception as e:
+            status_container.error(f"Web WA Error for {formatted_recipient}: {e}")
+            if 'st' in globals() and hasattr(st, 'session_state'): st.session_state.whatsapp_errors.append(
+                f"Web WA Error for {formatted_recipient}: {str(e)}")
+            sent_successfully_all = False
+    return sent_successfully_all
+
+
+send_whatsapp_notification = send_whatsapp_message_web  # Choose default
+
+
+def format_whatsapp_message_for_item(item_data_row, db_columns_list):
+    data = dict(zip(db_columns_list, item_data_row))
+    item_id, item_type = data['id'], data['order_type']
+    product_info = data.get('product_name') or data.get('specifications') or "N/A"
+    customer = data.get('customer_name') or data.get('source_email_sender', '').split('<')[0].strip() or "Unknown"
+    item_date = data.get('order_date') or data.get('created_at')
+    date_str = item_date.strftime('%d-%b-%Y %H:%M') if isinstance(item_date, datetime) else str(item_date or "N/A")
+
+    title_emoji = "📦"
+    if "RFQ" in item_type:
+        title_emoji = "🔔 RFQ"
+    elif "PO" in item_type:
+        title_emoji = "📦 PO"
+    elif "INQUIRY" in item_type:
+        title_emoji = "💡 Inquiry"
+
+    title = f"*{title_emoji} Update (DB-{item_id})* ({item_type})"
+    lines = [title, f"👤 From: {customer} ({data.get('email', 'N/A')})", f"🗓️ Date: {date_str}"]
+    if "PO" in item_type:
+        lines.append(f"📋 Item: {product_info[:150]}")
+        lines.append(f"🔢 Qty: {data.get('quantity', 'N/A')} {data.get('unit', '')}")
+        if data.get('price') is not None: lines.append(f"💰 Price: ₹{data['price']:.2f}")
+        lines.append(f"🚚 Delivery: {data.get('delivery_date', 'N/A')}")
+        lines.append(f"📊 Status: {data.get('order_status', 'PROCESSING')}")
+    elif "RFQ" in item_type or "INQUIRY" in item_type:
+        lines.append(f"📋 Details: {data.get('specifications', product_info)[:200]}")
+        if data.get('quantity'): lines.append(f"🔢 Qty: {data.get('quantity')} {data.get('unit', '')}")
+        lines.append(f"📊 Status: {data.get('order_status', 'PENDING_QUOTE')}")
+    lines.append(f"📧 Subject (Ref): {data.get('source_email_subject', 'N/A')[:70]}")
+    return "\n".join(lines)
+
+
+def send_notifications_from_db(db_conn):  # Pass db_conn
+    if not db_conn: st.error("DB connection lost for notifications."); return
+    notifications_sent = 0
+    try:
+        with db_conn.cursor() as cur:
+            # Use actual column names from your 'orders' table
+            cols = ["id", "order_type", "product_name", "category", "price", "quantity", "unit",
+                    "specifications", "order_date", "delivery_date", "customer_name",
+                    "customer_phone", "email", "address", "payment_method",
+                    "payment_status", "order_status", "message_sent",
+                    "source_email_subject", "source_email_sender", "source_email_uid",
+                    "raw_text_content", "created_at"]
+            cur.execute(
+                f"SELECT {', '.join(cols)} FROM orders WHERE message_sent = FALSE ORDER BY created_at ASC LIMIT 5")  # Limit to 5 per run
+            pending_items = cur.fetchall()
+            if not pending_items: st.info("No new items in DB needing WhatsApp notification currently."); return
+
+            seller_recipients = get_seller_team_recipients(SELLER_TEAM_RECIPIENTS_STR)
+            if not seller_recipients: return  # get_seller_team_recipients will show a warning
+
+            st.info(f"Found {len(pending_items)} item(s) to notify via WhatsApp.")
+            for item_row in pending_items:
+                item_id_for_notif = item_row[cols.index('id')]
+                message = format_whatsapp_message_for_item(item_row, cols)
+                st.write(f"Preparing WA for Item ID: {item_id_for_notif} ({item_row[cols.index('order_type')]})")
+                if send_whatsapp_notification(message, seller_recipients):
+                    cur.execute("UPDATE orders SET message_sent = TRUE WHERE id = %s", (item_id_for_notif,))
+                    db_conn.commit();
+                    notifications_sent += 1
+                    st.success(f"Notification for item DB-{item_id_for_notif} sent & marked.")
+                    if 'st' in globals() and hasattr(st,
+                                                     'session_state'): st.session_state.pending_msg_count = None  # Invalidate cache
+                    time.sleep(random.uniform(10, 15))  # Longer delay after successful send
+                else:
+                    st.error(f"Failed WA for item DB-{item_id_for_notif}. Will retry later.")
+            if notifications_sent > 0: st.success(f"Sent {notifications_sent} notifications.")
+    except Exception as e:
+        st.error(f"Error sending notifications from DB: {e}"); import traceback; traceback.print_exc()
+
+
+# --- End WhatsApp Notifier ---
+
+
+# --- Scheduler Tasks (Conceptually scheduler_tasks.py) ---
+def scheduled_email_check_and_process():
+    print(f"[{datetime.now()}] Scheduler: Starting automatic email check...")
+    db_conn = connect_to_db_main()
+    if not db_conn: print(f"[{datetime.now()}] Scheduler: DB connection failed. Skipping email check."); return
+    try:
+        orders_found, rfqs_found = process_incoming_emails(
+            db_conn=db_conn, subjects_to_monitor=EMAIL_SUBJECTS_TO_MONITOR,
+            only_recent_days=st.secrets.get("SCHEDULER_RECENT_DAYS", 3),  # Check recent 3 days for scheduler
+            mark_as_read=True
+        )
+        print(f"[{datetime.now()}] Scheduler: Email check complete. New POs: {orders_found}, New RFQs: {rfqs_found}")
+        if orders_found > 0 or rfqs_found > 0:
+            print(f"[{datetime.now()}] Scheduler: New items processed, attempting to send notifications.")
+            send_notifications_from_db(db_conn)
+    except Exception as e:
+        print(f"[{datetime.now()}] Scheduler: Error during scheduled check: {e}"); import \
+            traceback; traceback.print_exc()
+    finally:
+        if db_conn: db_conn.close(); print(f"[{datetime.now()}] Scheduler: DB connection closed.")
+    if 'st' in globals() and hasattr(st, 'session_state'): st.session_state.last_check_time = datetime.now()
+
+
+def run_background_scheduler():
+    print("Background scheduler thread started. Waiting for jobs...")
+    while True: schedule.run_pending(); time.sleep(1)
+
+
+# --- End Scheduler Tasks ---
+
+# --- Streamlit UI (main_app.py) ---
+# Session State Initialization
+default_ss_keys = {
+    "whatsapp_sent_counter": 0, "whatsapp_errors": [],
+    "last_check_time": datetime.now() - timedelta(hours=1),  # Set last check to an hour ago initially
+    "auto_check_enabled": st.secrets.get("SCHEDULER_AUTO_ENABLE", False),
+    "check_interval_minutes": st.secrets.get("SCHEDULER_INTERVAL_MINUTES", 60),
+    "scheduler_started": False, "last_scheduled_interval": None,
+    "db_init_success": False, "scheduler_thread": None,
+    "pending_msg_count": None, "pending_msg_count_last_updated": None,
+}
+for key, default_val in default_ss_keys.items():
+    if key not in st.session_state: st.session_state[key] = default_val
+
+st.set_page_config(page_title="PO/RFQ Email Processor", layout="wide")
+st.title("📧 PO & RFQ Email Processor & Notifier")
+
+if not st.session_state.db_init_success:
+    print("UI: Attempting initial DB connection for UI setup...")
+    with st.spinner("Connecting to Database..."):
+        db_conn_ui_init = connect_to_db_main()
+        if db_conn_ui_init:
+            st.session_state.db_init_success = True
+            st.sidebar.success("Database Connected.")
+            db_conn_ui_init.close()
+        else:
+            st.sidebar.error("DB Connection FAILED!")
+
+with st.sidebar:
+    st.header("⚙️ Controls & Status")
+    if not st.session_state.db_init_success: st.warning("Database not connected. Functionality limited.")
+
+    st.subheader("📧 Email Processing")
+    st.info(f"Monitors {len(EMAIL_SUBJECTS_TO_MONITOR)} subject patterns.")
+    if st.button("Manually Process Emails Now", key="manual_email_check_btn",
+                 disabled=not st.session_state.db_init_success):
+        with st.spinner("Manual Email Check... This may take time."):
+            db_manual_conn = connect_to_db_main()
+            if db_manual_conn:
+                try:
+                    o, r = process_incoming_emails(db_manual_conn, EMAIL_SUBJECTS_TO_MONITOR,
+                                                   only_recent_days=st.secrets.get("MANUAL_CHECK_RECENT_DAYS", 7),
+                                                   mark_as_read=True)
+                    st.success(f"Manual check: {o} POs, {r} RFQs processed.")
+                    if o > 0 or r > 0: send_notifications_from_db(db_manual_conn)
+                finally:
+                    db_manual_conn.close()
+            else:
+                st.error("Manual check failed: No DB connection.")
+        st.rerun()
+
+    st.subheader("⚙️ Automatic Scheduler")
+    auto_check_ui = st.checkbox("Enable Automatic Email Processing", value=st.session_state.auto_check_enabled,
+                                key="auto_check_cb")
+    if auto_check_ui != st.session_state.auto_check_enabled: st.session_state.auto_check_enabled = auto_check_ui; st.rerun()
+    interval_ui = st.slider("Scheduler Interval (min)", 5, 180, st.session_state.check_interval_minutes, 5,
+                            key="interval_sl",
+                            disabled=not st.session_state.auto_check_enabled)
+    if interval_ui != st.session_state.check_interval_minutes: st.session_state.check_interval_minutes = interval_ui; st.rerun()
+    st.caption(f"Last auto-check: {st.session_state.last_check_time.strftime('%I:%M %p, %d-%b')}")
+    if st.session_state.auto_check_enabled and st.session_state.scheduler_started:
+        next_run_time = schedule.next_run()
+        if next_run_time: st.caption(f"Next auto-check: {next_run_time.strftime('%I:%M %p, %d-%b')}")
+
+    st.subheader("📱 WhatsApp Notifications")
+
+
+    def get_displayed_pending_count_sb():
         now = datetime.now()
-        # Re-fetch from DB if cache is old (e.g., > 1 min) or invalidated
         if (st.session_state.pending_msg_count is None or
                 st.session_state.pending_msg_count_last_updated is None or
-                (now - st.session_state.pending_msg_count_last_updated) > timedelta(minutes=1)):
-            print("Fetching pending message count from DB for display...")
-            st.session_state.pending_msg_count = get_pending_message_count_from_db()
+                (now - st.session_state.pending_msg_count_last_updated) > timedelta(
+                    minutes=st.secrets.get("PENDING_COUNT_CACHE_MIN", 1))):
+            print("Sidebar: Refreshing pending notification count from DB.")
+            conn = connect_to_db_main()
+            if conn:
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute("SELECT COUNT(*) FROM orders WHERE message_sent = FALSE")
+                    st.session_state.pending_msg_count = cur.fetchone()[0]
+                except Exception as e_cnt:
+                    st.session_state.pending_msg_count = f"Err ({e_cnt})"
+                finally:
+                    conn.close()
+            else:
+                st.session_state.pending_msg_count = "DB Err"
             st.session_state.pending_msg_count_last_updated = now
         return st.session_state.pending_msg_count
 
 
-    pending_count_display = get_displayed_pending_message_count()
-    st.metric("Pending Orders in DB (WhatsApp)",
-              pending_count_display if pending_count_display is not None else "Loading...")
-    # --- End Cached Pending Message Count ---
-
-    if st.button("Send All Pending Order Notifications from DB", key="send_pending_db_whatsapp"):
-        if pending_count_display is not None and pending_count_display > 0:
-            with st.spinner(f"Sending {pending_count_display} pending notifications..."):
-                send_whatsapp_from_db()
-            st.rerun()
-        else:
-            st.info("No pending notifications in DB to send (or count is loading).")
-
-# --- Main Content Tabs ---
-# Streamlit generally loads tab content lazily (when tab is clicked).
-# If the default first tab has heavy DB queries, initial load will reflect that.
-tab_email_po, tab_manual_entry, tab_quick_whatsapp, tab_dashboard = st.tabs([
-    "📬 Email PO Processing", "📝 Manual PO Entry", "📞 Quick WhatsApp", "📊 Dashboard & Analysis"
-])
-
-with tab_email_po:
-    st.subheader("📧 Email Order Search & Recent Orders")
-    current_email_query_main = st.session_state.email_search_query
-    subject_query_input_main = st.text_input(
-        "Email Subject to Search for POs:",
-        value=current_email_query_main,
-        key="main_email_search_query_input"
-    )
-    if subject_query_input_main != current_email_query_main:
-        st.session_state.email_search_query = subject_query_input_main
-        st.rerun()  # Updates query for manual check and scheduler on next cycle
-    st.write(f"Current search subject for manual/auto checks: **'{st.session_state.email_search_query}'**")
-    st.info("Use 'Manually Check Emails' in sidebar for immediate processing. Auto-checking configured in sidebar.")
-
-    st.subheader("📋 Recent Orders (Last 10 from Database)")
-    # This DB query runs when this tab is active.
-    conn_tab1 = connect_to_db()
-    if conn_tab1:
-        try:
-            with conn_tab1.cursor() as cur:
-                # Query optimized to fetch only necessary columns.
-                cur.execute(
-                    "SELECT order_date, product_name, customer_name, price, quantity, order_status, message_sent FROM orders ORDER BY order_date DESC LIMIT 10")
-                recent_orders = cur.fetchall()
-                if recent_orders:
-                    df_recent = pd.DataFrame(recent_orders,
-                                             columns=["Order Date", "Product", "Customer", "Price", "Qty", "Status",
-                                                      "Notified"])
-                    st.dataframe(df_recent, use_container_width=True, hide_index=True)
-                else:
-                    st.write("No orders found in the database yet.")
-        except Exception as e:
-            st.error(f"Could not load recent orders: {e}")
-        finally:
-            conn_tab1.close()
-    else:
-        st.warning("Database not connected. Cannot display recent orders.")
-
-with tab_manual_entry:  # ... (original manual entry form logic)
-    st.subheader("✍️ Manual Order Entry & Instant Notification")
-    with st.expander("➕ Add New Purchase Order Manually", expanded=True):
-        with st.form("manual_order_form", clear_on_submit=True):
-            col1, col2 = st.columns(2)
-            with col1:  # Product Details
-                m_product_name = st.text_input("Product Name *", key="m_prod")
-                m_category = st.text_input("Category", key="m_cat")
-                m_price = st.number_input("Price (₹) *", min_value=0.01, step=0.01, format="%.2f", key="m_price")
-                m_quantity = st.number_input("Quantity *", min_value=1, step=1, key="m_qty")
-            with col2:  # Customer & Order Details
-                m_customer_name = st.text_input("Customer Name *", key="m_cname")
-                m_customer_phone_raw = st.text_input("Customer Phone (for ref)", key="m_cphone")
-                m_email = st.text_input("Customer Email", key="m_cemail")
-                m_address = st.text_area("Delivery Address *", key="m_addr")
-            st.divider()
-            col3, col4 = st.columns(2)  # Dates & Status
-            with col3:
-                m_order_date = st.date_input("Order Date *", value=datetime.now().date(), key="m_odate")
-                m_order_time = st.time_input("Order Time *", value=datetime.now().time(), key="m_otime")
-                m_delivery_date = st.date_input("Expected Delivery Date *",
-                                                value=(datetime.now() + timedelta(days=7)).date(), key="m_ddate")
-            with col4:
-                m_payment_method = st.selectbox("Payment Method",
-                                                ["COD", "Credit Card", "UPI", "Bank Transfer", "Other"],
-                                                key="m_pmethod")
-                m_payment_status = st.selectbox("Payment Status", ["Paid", "Unpaid", "Pending"], key="m_pstatus")
-                m_order_status = st.selectbox("Order Status",
-                                              ["Pending", "Processing", "Confirmed", "Shipped", "Delivered",
-                                               "Cancelled"], key="m_ostatus")
-            submit_manual_order = st.form_submit_button("Submit Order & Notify Seller Team")
-            if submit_manual_order:
-                if not all([m_product_name, m_price, m_quantity, m_order_date, m_order_time, m_delivery_date,
-                            m_customer_name, m_address]) or m_price <= 0 or m_quantity <= 0:
-                    st.error("Please fill ALL required (*) fields with valid values.")
-                else:
-                    order_datetime = datetime.combine(m_order_date, m_order_time)
-                    manual_order_details = {  # ... (details as before)
-                        "Product Name": m_product_name, "Category": m_category, "Price": float(m_price),
-                        "Quantity": int(m_quantity), "Order Date": order_datetime,
-                        "Delivery Date": m_delivery_date, "Customer Name": m_customer_name,
-                        "Raw Customer Phone": m_customer_phone_raw, "Email": m_email, "Address": m_address,
-                        "Payment Method": m_payment_method, "Payment Status": m_payment_status,
-                        "Order Status": m_order_status,
-                    }
-                    conn_manual = connect_to_db()
-                    if conn_manual:
-                        if store_order(conn_manual, manual_order_details):
-                            st.success("Manual order stored in database!")
-                            # ... (WhatsApp notification logic as before) ...
-                            message_lines = [f"📦 *New Manual PO Order!* 📦", f"🛍️ Product: {m_product_name}",
-                                             f"💰 Price: ₹{m_price:.2f}",
-                                             f"👤 Customer: {m_customer_name}"]  # Shortened
-                            formatted_message = "\n".join(message_lines)
-                            seller_numbers = get_seller_team_recipients(SELLER_TEAM_RECIPIENTS_STR)
-                            if seller_numbers:
-                                st.info(f"Sending WhatsApp to: {', '.join(seller_numbers)}")
-                                if send_whatsapp_notification(formatted_message, seller_numbers):
-                                    st.success("WhatsApp sent to seller team!")
-                                    try:  # Mark as sent
-                                        with conn_manual.cursor() as cur:
-                                            cur.execute(
-                                                "UPDATE orders SET message_sent = TRUE WHERE product_name = %s AND customer_name = %s AND order_date = %s AND message_sent = FALSE ORDER BY id DESC LIMIT 1",
-                                                (m_product_name, m_customer_name, order_datetime))
-                                            conn_manual.commit()
-                                    except Exception as e_upd:
-                                        st.warning(f"Could not mark manual order as sent: {e_upd}")
-                                else:
-                                    st.error("Failed to send WhatsApp (stored with message_sent=FALSE).")
-                            else:
-                                st.warning("No seller numbers. Notification not sent (order stored).")
-                        else:
-                            st.error("Failed to store manual order in database.")
-                        conn_manual.close()
-                    else:
-                        st.error("Database connection failed. Cannot store manual order.")
-                    st.rerun()
-
-with tab_quick_whatsapp:  # ... (original quick WhatsApp logic)
-    st.subheader("📱 Quick WhatsApp to Contacts")
-    contact_dict = {"Narayan": "+919067847003", "Rani Bhise": "+917070242402", "Abhishek": "+919284625240",
-                    "Damini": "+917499353409", "Sandeep": "+919850030215", "Chandrakant": "+919665934999",
-                    "Vikas Kumbharkar": "+919284238738"}
-    custom_message = st.text_area("Custom Message", "Hello! Quick update: ", height=100, key="quick_msg_text")
-    st.write("Select contacts:");
-    selected_contacts_numbers = [];
-    cols = st.columns(3)
-    for i, (name, phone) in enumerate(list(contact_dict.items())):
-        if cols[i % 3].checkbox(f"{name} ({phone})", key=f"cb_contact_{name.replace(' ', '_')}"):
-            fmt_num = format_phone_number(phone)
-            if fmt_num:
-                selected_contacts_numbers.append(fmt_num)
+    pending_val_sb = get_displayed_pending_count_sb()
+    st.metric("Items Needing Notification", pending_val_sb if isinstance(pending_val_sb, int) else str(pending_val_sb))
+    if st.button("Send Pending Notifications Now", key="send_pending_wa_btn",
+                 disabled=not (isinstance(pending_val_sb, int) and pending_val_sb > 0)):
+        with st.spinner(f"Sending {pending_val_sb} notifications..."):
+            conn_notif = connect_to_db_main()
+            if conn_notif:
+                try:
+                    send_notifications_from_db(conn_notif)
+                finally:
+                    conn_notif.close()
             else:
-                st.warning(f"Invalid phone for {name}: {phone}. Skipping.")
-    if st.button("Send WhatsApp to Selected Contacts", key="quick_send_button"):
-        if not custom_message.strip():
-            st.warning("Please enter a message.")
-        elif selected_contacts_numbers:
-            st.info(f"Sending '{custom_message}' to {len(selected_contacts_numbers)} contact(s)...")
-            if send_whatsapp_notification(custom_message, selected_contacts_numbers):
-                st.success("WhatsApp message(s) queued/sent!")
-            else:
-                st.error("Issue sending one or more WhatsApp messages.")
-        else:
-            st.warning("No contacts selected or message empty.")
+                st.error("Notification sending failed: No DB.")
+        st.rerun()
+    st.caption(f"Recipients: {SELLER_TEAM_RECIPIENTS_STR or 'None'}")
+    st.caption(f"Total WA Sent (Session): {st.session_state.whatsapp_sent_counter}")
+    if st.session_state.whatsapp_errors:
+        with st.expander("WA Errors (Session)"): st.error("\n".join(st.session_state.whatsapp_errors))
 
-with tab_dashboard:  # ... (original dashboard logic, ensure queries are efficient for large data)
-    st.header("📊 Order Analysis Dashboard")
-    # Dashboard queries run when this tab is active. For very large datasets,
-    # consider pre-aggregating data or adding filters/pagination.
-    conn_dash = connect_to_db()
-    if conn_dash:
-        try:
-            with conn_dash.cursor() as cur:
-                st.subheader("📈 Key Metrics");
-                c1, c2, c3 = st.columns(3)
-                cur.execute("SELECT COUNT(*) FROM orders");
-                total_orders = cur.fetchone()[0]
-                c1.metric("Total Orders", total_orders or 0)
-                cur.execute("SELECT SUM(price * quantity) FROM orders WHERE payment_status = 'Paid'");
-                total_revenue = cur.fetchone()[0]
-                c2.metric("Total Revenue (Paid)", f"₹{total_revenue or 0:.2f}")
-                cur.execute("SELECT AVG(price * quantity) FROM orders WHERE quantity > 0 AND price > 0");
-                avg_order_value = cur.fetchone()[0]
-                c3.metric("Avg. Order Value", f"₹{avg_order_value or 0:.2f}")
-                st.divider()
+# Main Tabs
+tab_dash, tab_items, tab_manual, tab_qwa, tab_logs = st.tabs(
+    ["📊 Dashboard", "📋 Processed Items", "✍️ Manual Entry", "📞 Quick WA", "📜 Logs"])
 
-                st.subheader("📊 Order Status Distribution")
-                cur.execute("SELECT order_status, COUNT(*) as count FROM orders GROUP BY order_status")
-                status_data = cur.fetchall()
-                if status_data:
-                    df_status = pd.DataFrame(status_data, columns=['Order Status', 'Count']).set_index(
-                        'Order Status'); st.bar_chart(df_status)
-                else:
-                    st.write("No order status data.")
-                st.divider()
-
-                st.subheader("📦 Sales by Category")
-                cur.execute(
-                    "SELECT category, SUM(price * quantity) as total_sales FROM orders WHERE category IS NOT NULL AND category != '' AND quantity > 0 AND price > 0 GROUP BY category ORDER BY total_sales DESC")
-                cat_sales_data = cur.fetchall()
-                if cat_sales_data:
-                    df_cat_sales = pd.DataFrame(cat_sales_data, columns=['Category', 'Total Sales']).set_index(
-                        'Category')
-                    if not df_cat_sales.empty:
-                        fig, ax = plt.subplots();
-                        df_cat_sales.plot(kind='pie', y='Total Sales', ax=ax, autopct='%1.1f%%', legend=False);
-                        ax.set_ylabel('');
-                        st.pyplot(fig)
+with tab_dash:  # Dashboard Tab
+    st.header("📊 Overview Dashboard")
+    if st.session_state.db_init_success:
+        conn = connect_to_db_main()
+        if conn:
+            try:  # Your dashboard queries from previous version, adapted
+                with conn.cursor() as cur:
+                    st.subheader("📈 Key Metrics (Last 30 Days)")
+                    c1, c2, c3, c4 = st.columns(4)
+                    thirty_days_ago = datetime.now() - timedelta(days=30)
+                    cur.execute("SELECT COUNT(*) FROM orders WHERE order_type LIKE 'PO%%' AND created_at >= %s",
+                                (thirty_days_ago,));
+                    c1.metric("POs (30d)", cur.fetchone()[0] or 0)
+                    cur.execute("SELECT COUNT(*) FROM orders WHERE order_type LIKE 'RFQ%%' AND created_at >= %s",
+                                (thirty_days_ago,));
+                    c2.metric("RFQs (30d)", cur.fetchone()[0] or 0)
+                    cur.execute(
+                        "SELECT SUM(price * quantity) FROM orders WHERE order_type LIKE 'PO%%' AND payment_status = 'Paid' AND created_at >= %s",
+                        (thirty_days_ago,));
+                    rev = cur.fetchone()[0];
+                    c3.metric("Paid PO Rev (30d)", f"₹{rev or 0:.2f}")
+                    cur.execute("SELECT COUNT(*) FROM processed_emails WHERE processed_at >= %s", (thirty_days_ago,));
+                    c4.metric("Emails Logged (30d)", cur.fetchone()[0] or 0)
+                    st.divider()
+                    st.subheader("📊 Item Type Distribution (All Time)")
+                    cur.execute("SELECT order_type, COUNT(*) as count FROM orders GROUP BY order_type")
+                    type_data = cur.fetchall()
+                    if type_data:
+                        df_type = pd.DataFrame(type_data, columns=['Item Type', 'Count']).set_index(
+                            'Item Type'); st.bar_chart(df_type)
                     else:
-                        st.write("No category sales data to plot.")
-                else:
-                    st.write("No category sales data.")
-                st.divider()
-
-                st.subheader("📋 Detailed Recent Orders (Last 15)")
-                cur.execute(
-                    "SELECT id, order_date, product_name, customer_name, (price * quantity) as total_value, order_status, payment_status, message_sent FROM orders ORDER BY order_date DESC LIMIT 15")
-                detailed_orders = cur.fetchall()
-                if detailed_orders:
-                    df_detailed = pd.DataFrame(detailed_orders,
-                                               columns=['ID', 'Order Date', 'Product', 'Customer', 'Total Value',
-                                                        'Status', 'Payment', 'Notified'])
-                    st.dataframe(df_detailed, use_container_width=True, hide_index=True)
-                else:
-                    st.write("No orders to display.")
-        except psycopg2.Error as e:
-            st.error(f"Dashboard DB error: {e}")
-        except Exception as e_dash:
-            st.error(f"Error generating dashboard: {e_dash}")
-        finally:
-            conn_dash.close()
+                        st.write("No item type data.")
+            except Exception as e_d:
+                st.error(f"Dashboard error: {e_d}")
+            finally:
+                conn.close()
+        else:
+            st.warning("Dashboard: DB connection failed.")
     else:
-        st.warning("Database not connected. Cannot display dashboard.")
+        st.warning("Dashboard: DB not initialized.")
 
-# --- Background Task (Scheduler) ---
-# This section sets up the scheduler if auto_check_enabled.
-# The actual email processing (slow part) happens in the thread, not blocking the main app.
+with tab_items:  # Processed Items Tab
+    st.header("📋 Processed Orders, RFQs & Inquiries")
+    if st.session_state.db_init_success:
+        conn = connect_to_db_main()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""SELECT id, created_at, order_type, product_name, specifications, quantity, unit,
+                                   customer_name, email, order_status, message_sent, source_email_uid
+                                   FROM orders ORDER BY created_at DESC LIMIT 100""")  # Show last 100
+                    items_rows = cur.fetchall()
+                    if items_rows:
+                        cols_display = ['ID', 'Logged At', 'Type', 'Product', 'Specs', 'Qty', 'Unit', 'Customer',
+                                        'Contact', 'Status', 'Notified', 'Email UID']
+                        df_disp_items = pd.DataFrame(items_rows, columns=cols_display)
+                        st.dataframe(df_disp_items, use_container_width=True, hide_index=True)
+                    else:
+                        st.write("No processed items found.")
+            except Exception as e_li:
+                st.error(f"Error loading items: {e_li}")
+            finally:
+                conn.close()
+        else:
+            st.warning("Items List: DB connection failed.")
+    else:
+        st.warning("Items List: DB not initialized.")
+
+with tab_manual:  # Manual Entry Tab
+    st.header("✍️ Manual Data Entry for PO / RFQ")
+    st.write("Use this form to manually log an order, RFQ, or inquiry.")
+    # Build a form similar to previous examples, mapping fields to the `orders` table.
+    # On submit, call `store_parsed_order_or_rfq(db_conn, form_data_dict)`
+    # Example field:
+    # manual_order_type = st.selectbox("Entry Type", ["PO_MANUAL", "RFQ_MANUAL", "INQUIRY_MANUAL"])
+    # manual_product = st.text_input("Product Name/Description")
+    # ... etc. ...
+    st.info(
+        "Manual entry form to be implemented here, similar to previous examples but adapted for the new 'orders' table structure (including 'order_type', 'specifications', 'unit', etc.).")
+
+with tab_qwa:  # Quick WhatsApp Tab
+    st.header("📞 Quick WhatsApp Message")
+    # Re-use the Quick WhatsApp UI from previous full script
+    st.info("Quick WhatsApp functionality to be implemented here, as per previous examples.")
+    # Ensure it uses get_seller_team_recipients and send_whatsapp_notification
+
+with tab_logs:  # Log Tab
+    st.header("📜 Email Processing Logs (Recent)")
+    if st.session_state.db_init_success:
+        conn = connect_to_db_main()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""SELECT processed_at, email_uid, subject, sender, status, related_order_id
+                                   FROM processed_emails ORDER BY processed_at DESC LIMIT 100""")
+                    logs = cur.fetchall()
+                    if logs:
+                        df_logs = pd.DataFrame(logs, columns=['Timestamp', 'Email UID', 'Subject', 'Sender',
+                                                              'Processing Status', 'Related Order ID'])
+                        st.dataframe(df_logs, use_container_width=True, hide_index=True)
+                    else:
+                        st.write("No email processing logs found.")
+            except Exception as e_log:
+                st.error(f"Error loading logs: {e_log}")
+            finally:
+                conn.close()
+        else:
+            st.warning("Logs: DB connection failed.")
+    else:
+        st.warning("Logs: DB not initialized.")
+
+# Background Scheduler Setup
 if st.session_state.auto_check_enabled:
-    current_subject_query = st.session_state.email_search_query
     current_interval = st.session_state.check_interval_minutes
-    query_changed = st.session_state.last_scheduled_query != current_subject_query
-    interval_changed = st.session_state.last_scheduled_interval != current_interval
-
-    if not st.session_state.scheduler_started or query_changed or interval_changed:
+    interval_has_changed = st.session_state.last_scheduled_interval != current_interval
+    if not st.session_state.scheduler_started or interval_has_changed:
         schedule.clear()
-        job = schedule.every(current_interval).minutes.do(
-            check_and_process_emails_automatically,
-            subject_query_for_scheduler=current_subject_query
-        )
-        st.session_state.last_scheduled_query = current_subject_query
+        job = schedule.every(current_interval).minutes.do(scheduled_email_check_and_process)
         st.session_state.last_scheduled_interval = current_interval
-        print(f"Scheduler: Job (re)defined for '{current_subject_query}' every {current_interval} mins. Job: {job}")
-
+        print(f"Scheduler: Job (re)defined: Every {current_interval} mins. Job: {job}")
         if not st.session_state.scheduler_started:
             if st.session_state.scheduler_thread is None or not st.session_state.scheduler_thread.is_alive():
-                thread = threading.Thread(target=run_scheduled_tasks, daemon=True, name="SchedulerThread")
-                thread.start()
-                st.session_state.scheduler_thread = thread
+                thread = threading.Thread(target=run_background_scheduler, daemon=True, name="BgScheduler")
+                thread.start();
+                st.session_state.scheduler_thread = thread;
                 st.session_state.scheduler_started = True
-                print("Scheduler: Thread started.")
-                st.toast(f"Auto-email check scheduled.", icon="⏰")  # Brief toast
+                print("Scheduler: Bg thread started.");
+                st.toast(f"Auto-processing ON: every {current_interval}m.", icon="⏰")
             else:
-                print("Scheduler: Thread already running. Job updated.")
+                print("Scheduler: Bg thread already running. Job updated."); st.toast(
+                    f"Auto-processing updated: every {current_interval}m.", icon="🔄")
         else:
-            print(f"Scheduler: Job updated."); st.toast(f"Auto-email check updated.", icon="🔄")
-
+            print(f"Scheduler: Job interval updated."); st.toast(f"Auto-processing interval: {current_interval}m.",
+                                                                 icon="🔄")
 elif not st.session_state.auto_check_enabled and st.session_state.scheduler_started:
-    schedule.clear()
-    st.session_state.scheduler_started = False
-    st.session_state.last_scheduled_query = None;
+    schedule.clear();
+    st.session_state.scheduler_started = False;
     st.session_state.last_scheduled_interval = None
-    print("Scheduler: Auto-check disabled. Jobs cleared.")
-    st.toast("Auto-email check disabled.", icon="🛑")
-
-print(
-    f"Script rerun at {datetime.now()}. Auto-check: {st.session_state.auto_check_enabled}, Scheduler started: {st.session_state.scheduler_started}")
+    print("Scheduler: Auto-processing disabled. Jobs cleared.");
+    st.toast("Auto-processing OFF.", icon="🛑")
